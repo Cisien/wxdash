@@ -10,12 +10,6 @@ Item {
     // Maximum sample count across all bins (for normalization)
     property int windRoseMaxCount: 0
 
-    function directionLabel(deg) {
-        var dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE",
-                    "S","SSW","SW","WSW","W","WNW","NW","NNW"]
-        return dirs[Math.round(deg / 22.5) % 16]
-    }
-
     function windSpeedColor(mph) {
         if (mph < 5)   return "#5CA85C"
         if (mph < 15)  return "#C8A000"
