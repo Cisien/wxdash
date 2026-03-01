@@ -17,6 +17,7 @@ qt_add_executable(wxdash main.cpp)
 
 qt_add_qml_module(wxdash
     URI wxdash
+    RESOURCE_PREFIX /qt/qml
     OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/qml/wxdash
     QML_FILES
         qml/Main.qml
