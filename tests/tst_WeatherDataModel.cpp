@@ -433,6 +433,66 @@ private slots:
         model.checkStaleness();
         QCOMPARE(spy.count(), 0);
     }
+
+    // -----------------------------------------------------------------------
+    // Sparkline ring buffer tests
+    // -----------------------------------------------------------------------
+
+    void sparklineInitiallyEmpty()
+    {
+        WeatherDataModel model;
+        QVERIFY(model.temperatureHistory().isEmpty());
+        QVERIFY(model.pressureHistory().isEmpty());
+    }
+
+    void sparklineRecordsSamples()
+    {
+        WeatherDataModel model;
+        IssReading r = makeIss(/*temp=*/72.0);
+        model.applyIssUpdate(r);
+        r = makeIss(/*temp=*/73.0);
+        model.applyIssUpdate(r);
+        r = makeIss(/*temp=*/74.0);
+        model.applyIssUpdate(r);
+
+        QVariantList hist = model.temperatureHistory();
+        QCOMPARE(hist.size(), 3);
+        QCOMPARE(hist[0].toDouble(), 72.0);
+        QCOMPARE(hist[1].toDouble(), 73.0);
+        QCOMPARE(hist[2].toDouble(), 74.0);
+    }
+
+    void sparklineWrapsAtCapacity()
+    {
+        WeatherDataModel model;
+        // Fill to capacity + 10
+        for (int i = 0; i < WeatherDataModel::kSparklineCapacity + 10; i++) {
+            IssReading r = makeIss(/*temp=*/static_cast<double>(i));
+            model.applyIssUpdate(r);
+        }
+        QVariantList hist = model.temperatureHistory();
+        QCOMPARE(hist.size(), WeatherDataModel::kSparklineCapacity);
+        // First element should be sample 10 (first 10 evicted)
+        QCOMPARE(hist[0].toDouble(), 10.0);
+        // Last element should be the most recent
+        QCOMPARE(hist[hist.size() - 1].toDouble(),
+                 static_cast<double>(WeatherDataModel::kSparklineCapacity + 9));
+    }
+
+    void pressureSparklineFromBarUpdate()
+    {
+        WeatherDataModel model;
+        BarReading br;
+        br.pressureSeaLevel = 30.10;
+        model.applyBarUpdate(br);
+        br.pressureSeaLevel = 30.15;
+        model.applyBarUpdate(br);
+
+        QVariantList hist = model.pressureHistory();
+        QCOMPARE(hist.size(), 2);
+        QCOMPARE(hist[0].toDouble(), 30.10);
+        QCOMPARE(hist[1].toDouble(), 30.15);
+    }
 };
 
 QTEST_MAIN(TstWeatherDataModel)

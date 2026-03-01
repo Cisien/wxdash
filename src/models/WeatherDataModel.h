@@ -46,7 +46,20 @@ class WeatherDataModel : public QObject {
     Q_PROPERTY(QVariantList windRoseData READ windRoseData NOTIFY windRoseDataChanged)
     Q_PROPERTY(int windRoseMaxCount READ windRoseMaxCount NOTIFY windRoseDataChanged)
 
+    Q_PROPERTY(QVariantList temperatureHistory READ temperatureHistory NOTIFY temperatureHistoryChanged)
+    Q_PROPERTY(QVariantList feelsLikeHistory READ feelsLikeHistory NOTIFY feelsLikeHistoryChanged)
+    Q_PROPERTY(QVariantList humidityHistory READ humidityHistory NOTIFY humidityHistoryChanged)
+    Q_PROPERTY(QVariantList dewPointHistory READ dewPointHistory NOTIFY dewPointHistoryChanged)
+    Q_PROPERTY(QVariantList windSpeedHistory READ windSpeedHistory NOTIFY windSpeedHistoryChanged)
+    Q_PROPERTY(QVariantList rainRateHistory READ rainRateHistory NOTIFY rainRateHistoryChanged)
+    Q_PROPERTY(QVariantList pressureHistory READ pressureHistory NOTIFY pressureHistoryChanged)
+    Q_PROPERTY(QVariantList uvIndexHistory READ uvIndexHistory NOTIFY uvIndexHistoryChanged)
+    Q_PROPERTY(QVariantList solarRadHistory READ solarRadHistory NOTIFY solarRadHistoryChanged)
+
 public:
+    // Sparkline capacity: 24h at 10s cadence
+    static constexpr int kSparklineCapacity = 8640;
+
     explicit WeatherDataModel(QObject* parent = nullptr,
                               std::function<qint64()> elapsedProvider = {});
 
@@ -71,6 +84,17 @@ public:
     bool sourceStale() const { return m_sourceStale; }
     QVariantList windRoseData() const;
     int windRoseMaxCount() const;
+
+    // Sparkline history accessors (chronological, oldest first)
+    QVariantList temperatureHistory() const;
+    QVariantList feelsLikeHistory() const;
+    QVariantList humidityHistory() const;
+    QVariantList dewPointHistory() const;
+    QVariantList windSpeedHistory() const;
+    QVariantList rainRateHistory() const;
+    QVariantList pressureHistory() const;
+    QVariantList uvIndexHistory() const;
+    QVariantList solarRadHistory() const;
 
 public slots:
     void applyIssUpdate(const IssReading& r);
@@ -100,10 +124,23 @@ signals:
     void sourceStaleChanged(bool stale);
     void windRoseDataChanged();
 
+    // Sparkline history signals
+    void temperatureHistoryChanged();
+    void feelsLikeHistoryChanged();
+    void humidityHistoryChanged();
+    void dewPointHistoryChanged();
+    void windSpeedHistoryChanged();
+    void rainRateHistoryChanged();
+    void pressureHistoryChanged();
+    void uvIndexHistoryChanged();
+    void solarRadHistoryChanged();
+
 private:
     void clearAllValues();
     void markUpdated();
     void recordWindSample(int dir, double speed);
+    void recordSparklineSample(double* ring, int& head, int& count, double value);
+    QVariantList sparklineToList(const double* ring, int head, int count) const;
 
     // Weather fields
     double m_temperature = 0.0;
@@ -124,6 +161,43 @@ private:
     double m_humIn = 0.0;
     double m_dewPointIn = 0.0;
     bool m_sourceStale = false;
+
+    // Sparkline ring buffers — one per outdoor sensor
+    double m_tempSparkline[kSparklineCapacity] = {};
+    int m_tempSparklineHead = 0;
+    int m_tempSparklineCount = 0;
+
+    double m_feelsLikeSparkline[kSparklineCapacity] = {};
+    int m_feelsLikeSparklineHead = 0;
+    int m_feelsLikeSparklineCount = 0;
+
+    double m_humSparkline[kSparklineCapacity] = {};
+    int m_humSparklineHead = 0;
+    int m_humSparklineCount = 0;
+
+    double m_dewPointSparkline[kSparklineCapacity] = {};
+    int m_dewPointSparklineHead = 0;
+    int m_dewPointSparklineCount = 0;
+
+    double m_windSparkline[kSparklineCapacity] = {};
+    int m_windSparklineHead = 0;
+    int m_windSparklineCount = 0;
+
+    double m_rainRateSparkline[kSparklineCapacity] = {};
+    int m_rainRateSparklineHead = 0;
+    int m_rainRateSparklineCount = 0;
+
+    double m_pressureSparkline[kSparklineCapacity] = {};
+    int m_pressureSparklineHead = 0;
+    int m_pressureSparklineCount = 0;
+
+    double m_uvSparkline[kSparklineCapacity] = {};
+    int m_uvSparklineHead = 0;
+    int m_uvSparklineCount = 0;
+
+    double m_solarRadSparkline[kSparklineCapacity] = {};
+    int m_solarRadSparklineHead = 0;
+    int m_solarRadSparklineCount = 0;
 
     // Wind rose histogram (16 compass bins, each 22.5°) with rolling window
     static constexpr int kWindBins = 16;

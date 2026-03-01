@@ -78,6 +78,58 @@ int WeatherDataModel::windRoseMaxCount() const {
     return max;
 }
 
+void WeatherDataModel::recordSparklineSample(double* ring, int& head, int& count, double value) {
+    ring[head] = value;
+    head = (head + 1) % kSparklineCapacity;
+    if (count < kSparklineCapacity) count++;
+}
+
+QVariantList WeatherDataModel::sparklineToList(const double* ring, int head, int count) const {
+    QVariantList list;
+    list.reserve(count);
+    for (int i = 0; i < count; i++) {
+        int idx = (head - count + i + kSparklineCapacity) % kSparklineCapacity;
+        list.append(ring[idx]);
+    }
+    return list;
+}
+
+QVariantList WeatherDataModel::temperatureHistory() const {
+    return sparklineToList(m_tempSparkline, m_tempSparklineHead, m_tempSparklineCount);
+}
+
+QVariantList WeatherDataModel::feelsLikeHistory() const {
+    return sparklineToList(m_feelsLikeSparkline, m_feelsLikeSparklineHead, m_feelsLikeSparklineCount);
+}
+
+QVariantList WeatherDataModel::humidityHistory() const {
+    return sparklineToList(m_humSparkline, m_humSparklineHead, m_humSparklineCount);
+}
+
+QVariantList WeatherDataModel::dewPointHistory() const {
+    return sparklineToList(m_dewPointSparkline, m_dewPointSparklineHead, m_dewPointSparklineCount);
+}
+
+QVariantList WeatherDataModel::windSpeedHistory() const {
+    return sparklineToList(m_windSparkline, m_windSparklineHead, m_windSparklineCount);
+}
+
+QVariantList WeatherDataModel::rainRateHistory() const {
+    return sparklineToList(m_rainRateSparkline, m_rainRateSparklineHead, m_rainRateSparklineCount);
+}
+
+QVariantList WeatherDataModel::pressureHistory() const {
+    return sparklineToList(m_pressureSparkline, m_pressureSparklineHead, m_pressureSparklineCount);
+}
+
+QVariantList WeatherDataModel::uvIndexHistory() const {
+    return sparklineToList(m_uvSparkline, m_uvSparklineHead, m_uvSparklineCount);
+}
+
+QVariantList WeatherDataModel::solarRadHistory() const {
+    return sparklineToList(m_solarRadSparkline, m_solarRadSparklineHead, m_solarRadSparklineCount);
+}
+
 void WeatherDataModel::clearAllValues() {
     // Clear each field to zero, emitting changed signals only for non-zero fields.
     // Uses qFuzzyCompare with offset to handle the zero-comparison edge case correctly.
@@ -180,6 +232,35 @@ void WeatherDataModel::applyIssUpdate(const IssReading& r) {
     }
 
     recordWindSample(r.windDirLast, r.windSpeedLast);
+
+    // Record sparkline samples (at 10s ISS cadence — adequate resolution for 24h trends)
+    recordSparklineSample(m_tempSparkline, m_tempSparklineHead, m_tempSparklineCount, m_temperature);
+    emit temperatureHistoryChanged();
+
+    // Feels-like: use the same logic as DashboardGrid.qml
+    double feelsLike = m_temperature;
+    if (m_temperature >= 80.0 && m_humidity >= 40.0) feelsLike = m_heatIndex;
+    else if (m_temperature <= 50.0 && m_windSpeed >= 3.0) feelsLike = m_windChill;
+    recordSparklineSample(m_feelsLikeSparkline, m_feelsLikeSparklineHead, m_feelsLikeSparklineCount, feelsLike);
+    emit feelsLikeHistoryChanged();
+
+    recordSparklineSample(m_humSparkline, m_humSparklineHead, m_humSparklineCount, m_humidity);
+    emit humidityHistoryChanged();
+
+    recordSparklineSample(m_dewPointSparkline, m_dewPointSparklineHead, m_dewPointSparklineCount, m_dewPoint);
+    emit dewPointHistoryChanged();
+
+    recordSparklineSample(m_windSparkline, m_windSparklineHead, m_windSparklineCount, m_windSpeed);
+    emit windSpeedHistoryChanged();
+
+    recordSparklineSample(m_rainRateSparkline, m_rainRateSparklineHead, m_rainRateSparklineCount, m_rainRate);
+    emit rainRateHistoryChanged();
+
+    recordSparklineSample(m_uvSparkline, m_uvSparklineHead, m_uvSparklineCount, m_uvIndex);
+    emit uvIndexHistoryChanged();
+
+    recordSparklineSample(m_solarRadSparkline, m_solarRadSparklineHead, m_solarRadSparklineCount, m_solarRad);
+    emit solarRadHistoryChanged();
 }
 
 void WeatherDataModel::applyBarUpdate(const BarReading& r) {
@@ -193,6 +274,9 @@ void WeatherDataModel::applyBarUpdate(const BarReading& r) {
         m_pressureTrend = r.pressureTrend;
         emit pressureTrendChanged(m_pressureTrend);
     }
+
+    recordSparklineSample(m_pressureSparkline, m_pressureSparklineHead, m_pressureSparklineCount, m_pressure);
+    emit pressureHistoryChanged();
 }
 
 void WeatherDataModel::applyIndoorUpdate(const IndoorReading& r) {
