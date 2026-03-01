@@ -47,7 +47,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **KIOSK-02**: Responsive layout targeting 720p, scales to larger displays without code changes
 - [ ] **KIOSK-03**: ~~Last-updated timestamp visible on dashboard~~ (Dropped per user decision)
 - [ ] **KIOSK-04**: Connection/staleness status indicator per data source
-- [ ] **KIOSK-05**: systemd watchdog with auto-restart on crash
+- [x] **KIOSK-05**: systemd watchdog with auto-restart on crash
 
 ## v2 Requirements
 
@@ -111,7 +111,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | KIOSK-02 | Phase 2 | Complete |
 | KIOSK-03 | Phase 2 | Dropped |
 | KIOSK-04 | Phase 4 | Pending |
-| KIOSK-05 | Phase 4 | Pending |
+| KIOSK-05 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 30 total

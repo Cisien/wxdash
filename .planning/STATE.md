@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T22:34:55.860Z"
+last_updated: "2026-03-01T23:00:17Z"
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 9
+  completed_plans: 9
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Display live weather conditions from the WeatherLink Live with real-time updates — always-on, always-current, at a glance.
-**Current focus:** Phase 3 complete — awaiting checkpoint:human-verify of complete Phase 3 dashboard
+**Current focus:** Phase 5 Plan 01 complete — CMake kiosk install infrastructure delivered
 
 ## Current Position
 
-Phase: 3 of 4 (Trends, Secondary Data, and Air Quality) — CHECKPOINT
-Plan: 3 of 3 in phase (03-03 implementation complete, awaiting human visual verification)
-Status: Plan 03-03 implementation complete — AqiGauge in Cell 11, awaiting checkpoint:human-verify approval
-Last activity: 2026-03-01 — Completed Plan 03-03: AQI multi-ring gauge component and Cell 11 integration
+Phase: 5 of 5 (CMake Install and Kiosk Target for Raspberry Pi Deployment) — COMPLETE
+Plan: 1 of 1 in phase (05-01 complete)
+Status: Plan 05-01 complete — cmake --install build --component kiosk deploys binary, QML module, systemd service, eglfs.json, desktop entries, and icon
+Last activity: 2026-03-01 — Completed Plan 05-01: CMake install rules and kiosk deployment assets
 
-Progress: [██████████] 100% of Phase 3 plans complete (3 of 3, pending checkpoint approval)
+Progress: [██████████] 100% of Phase 5 plans complete (1 of 1)
 
 ## Performance Metrics
 
@@ -45,11 +45,12 @@ Progress: [██████████] 100% of Phase 3 plans complete (3 of 
 | Phase 3: Trends, Secondary Data, Air Quality | 3 | 14 min | 4.7 min |
 
 **Recent Trend:**
-- Last 5 plans: 5 min, 5 min, 4 min, 5 min, 6 min
-- Trend: Phase 3 plans all fast and well-scoped
+- Last 5 plans: 5 min, 5 min, 4 min, 5 min, 3 min
+- Trend: All plans fast and well-scoped
 
 *Updated after each plan completion*
 | Phase 03 P03 | 4 | 1 tasks | 3 files |
+| Phase 05 P01 | 3 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,9 @@ Recent decisions affecting current work:
 - [Phase 03-03]: Single Shape with 6 ShapePaths for multi-ring AQI gauge — Qt recommended pattern for best GPU performance
 - [Phase 03-03]: AQI ring gets 1/2 stroke width (outer prominence), PM2.5 and PM10 each get 1/4 (visual hierarchy)
 - [Phase 03-03]: GAUG-13 (indoor panel) deferred — not implemented in Phase 3 per user decision
+- [Phase 05-01]: Manual install(DIRECTORY) for QML module replaces qt_generate_deploy_qml_app_script — Qt's generic deploy tool RPATH-patches system plugins (kimg_ani.so) that have no ELF RPATH entry, causing fatal install error on Linux desktop; Pi uses system Qt so only user QML module needs shipping
+- [Phase 05-01]: QML_IMPORT_PATH=@CMAKE_INSTALL_PREFIX@/qml in systemd service — QML module installs to prefix/qml/wxdash/, one level up from bin/, requiring explicit import path for runtime resolution
+- [Phase 05-01]: COMPONENT kiosk on all install() rules — enables selective `cmake --install build --component kiosk` without Qt system library bundling
 
 ### Pending Todos
 
@@ -105,5 +109,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Checkpoint:human-verify at end of 03-03-PLAN.md — AqiGauge implementation complete, awaiting human visual verification of complete Phase 3 dashboard
+Stopped at: Completed 05-01-PLAN.md — CMake install rules and kiosk deployment assets complete
 Resume file: None
