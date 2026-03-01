@@ -76,13 +76,21 @@ sudo cmake --build build --target install-kiosk
 
 ### User Permissions
 
-The systemd service runs as user `pi`. That user must be in the `render`, `video`, and `input` groups for DRM and input device access:
+The systemd service runs as the user who configured the build (the value of `SERVICE_USER`, which defaults to `$USER` at `cmake` configure time). That user must be in the `render`, `video`, and `input` groups for DRM and input device access:
 
 ```bash
-sudo usermod -aG render,video,input pi
+sudo usermod -aG render,video,input $USER
 ```
 
 Log out and back in (or reboot) for the group changes to take effect.
+
+To override the service user explicitly, pass `-DSERVICE_USER=<username>` when running CMake:
+
+```bash
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DSERVICE_USER=myuser
+```
 
 ### EGLFS Configuration
 
@@ -145,7 +153,7 @@ curl -s http://10.1.255.41/json | head -c 200
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
 | Black screen at boot | Wrong DRM device node in eglfs.json | Check `journalctl -u wxdash -b` for EGLFS errors; update `device` in eglfs.json |
-| Permission denied on /dev/dri | User not in render/video groups | Run `groups pi`; add missing groups with `usermod -aG` |
+| Permission denied on /dev/dri | User not in render/video groups | Run `groups $USER`; add missing groups with `usermod -aG` |
 | QML module not found | QML_IMPORT_PATH not set or wrong path | Verify `QML_IMPORT_PATH` in service matches install prefix; check `ls /usr/local/qml/wxdash/` |
 | No weather data | Hostname resolution or network failure | Run `nslookup weatherlinklive.local.cisien.com` and `curl http://10.1.255.41/json` from the Pi |
 | High CPU / thermal throttle | Debug build in use | Rebuild with `-DCMAKE_BUILD_TYPE=Release` |

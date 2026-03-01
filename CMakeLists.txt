@@ -19,7 +19,19 @@ add_subdirectory(tests)
 # --- Install rules (kiosk deployment) ---
 include(GNUInstallDirs)
 
-# Configure systemd service file (substitutes @CMAKE_INSTALL_PREFIX@)
+# Service user — defaults to the user running CMake (typically the Pi login user).
+# Override at configure time: cmake -DSERVICE_USER=myuser ...
+if(NOT DEFINED SERVICE_USER OR SERVICE_USER STREQUAL "")
+    set(SERVICE_USER "$ENV{USER}")
+endif()
+if(SERVICE_USER STREQUAL "")
+    set(SERVICE_USER "nobody")
+    message(WARNING "SERVICE_USER not set and \$ENV{USER} is empty; defaulting to 'nobody'. "
+                    "Set -DSERVICE_USER=<username> at configure time.")
+endif()
+message(STATUS "wxdash service will run as user: ${SERVICE_USER}")
+
+# Configure systemd service file (substitutes @CMAKE_INSTALL_PREFIX@ and @SERVICE_USER@)
 configure_file(
     ${CMAKE_SOURCE_DIR}/assets/wxdash.service.in
     ${CMAKE_BINARY_DIR}/wxdash.service
