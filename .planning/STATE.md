@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T23:00:17Z"
+last_updated: "2026-03-01T23:13:22.867Z"
 progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_phases: 4
+  completed_phases: 4
+  total_plans: 10
+  completed_plans: 10
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Display live weather conditions from the WeatherLink Live with real-time updates — always-on, always-current, at a glance.
-**Current focus:** Phase 5 Plan 01 complete — CMake kiosk install infrastructure delivered
+**Current focus:** Phase 5 complete — CMake kiosk install infrastructure and Pi deployment documentation delivered
 
 ## Current Position
 
 Phase: 5 of 5 (CMake Install and Kiosk Target for Raspberry Pi Deployment) — COMPLETE
-Plan: 1 of 1 in phase (05-01 complete)
-Status: Plan 05-01 complete — cmake --install build --component kiosk deploys binary, QML module, systemd service, eglfs.json, desktop entries, and icon
-Last activity: 2026-03-01 — Completed Plan 05-01: CMake install rules and kiosk deployment assets
+Plan: 2 of 2 in phase (05-01 and 05-02 complete)
+Status: Plan 05-02 complete — README.md with full Pi deployment guide; SERVICE_USER CMake variable replacing hardcoded 'pi' in service template
+Last activity: 2026-03-01 — Completed Plan 05-02: README and Pi deployment documentation
 
-Progress: [██████████] 100% of Phase 5 plans complete (1 of 1)
+Progress: [██████████] 100% of Phase 5 plans complete (2 of 2)
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [██████████] 100% of Phase 5 plans complete (1 of 
 *Updated after each plan completion*
 | Phase 03 P03 | 4 | 1 tasks | 3 files |
 | Phase 05 P01 | 3 | 2 tasks | 5 files |
+| Phase 05 P02 | 12 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -97,10 +98,12 @@ Recent decisions affecting current work:
 - [Phase 05-01]: Manual install(DIRECTORY) for QML module replaces qt_generate_deploy_qml_app_script — Qt's generic deploy tool RPATH-patches system plugins (kimg_ani.so) that have no ELF RPATH entry, causing fatal install error on Linux desktop; Pi uses system Qt so only user QML module needs shipping
 - [Phase 05-01]: QML_IMPORT_PATH=@CMAKE_INSTALL_PREFIX@/qml in systemd service — QML module installs to prefix/qml/wxdash/, one level up from bin/, requiring explicit import path for runtime resolution
 - [Phase 05-01]: COMPONENT kiosk on all install() rules — enables selective `cmake --install build --component kiosk` without Qt system library bundling
+- [Phase 05]: SERVICE_USER defaults to $ENV{USER} at CMake configure time — correct for any Pi deployment user, not hardcoded to pi; overridable with -DSERVICE_USER=<name>
+- [Phase 05]: Dropped Group= from systemd service template — SupplementaryGroups covers all required DRM/input group memberships; explicit Group= is redundant and potentially confusing
 
 ### Pending Todos
 
-- Add a README section documenting Pi-specific deployment steps: EGLFS backend selection (eglfs_kms for Pi 4/5), Mesa V3D, gpu_mem setting, mDNS hostname resolution for `weatherlinklive.local.cisien.com` (unusual `.local.cisien.com` pattern — verify Avahi resolves on Pi OS Bookworm, may need fallback to IP).
+None — all planned work complete. Pi deployment README section delivered in Phase 5 Plan 02.
 
 ### Blockers/Concerns
 
@@ -109,5 +112,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 05-01-PLAN.md — CMake install rules and kiosk deployment assets complete
+Stopped at: Completed 05-02-PLAN.md — README and Pi deployment documentation complete; all Phase 5 plans done
 Resume file: None
