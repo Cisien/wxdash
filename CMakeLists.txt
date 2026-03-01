@@ -8,7 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Enable compile warnings
 add_compile_options(-Wall -Wextra -Wpedantic)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Network Test)
+find_package(Qt6 REQUIRED COMPONENTS Core Network Test Quick Qml)
 qt_standard_project_setup()
 
 enable_testing()

@@ -14,4 +14,13 @@ target_link_libraries(wxdash_lib PUBLIC Qt6::Core Qt6::Network)
 target_include_directories(wxdash_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 qt_add_executable(wxdash main.cpp)
-target_link_libraries(wxdash PRIVATE wxdash_lib)
+
+qt_add_qml_module(wxdash
+    URI wxdash
+    OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/qml/wxdash
+    QML_FILES
+        qml/Main.qml
+        qml/ArcGauge.qml
+)
+
+target_link_libraries(wxdash PRIVATE wxdash_lib Qt6::Quick)

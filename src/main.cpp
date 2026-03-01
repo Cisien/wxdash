@@ -3,15 +3,25 @@
 #include "network/HttpPoller.h"
 #include "network/UdpReceiver.h"
 
-#include <QCoreApplication>
-#include <QDebug>
+#include <QCommandLineOption>
+#include <QCommandLineParser>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QThread>
 #include <QUrl>
 #include <QUrlQuery>
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
+
+    QCommandLineParser parser;
+    parser.addHelpOption();
+    QCommandLineOption kioskOption("kiosk", "Launch fullscreen frameless");
+    parser.addOption(kioskOption);
+    parser.process(app);
+    bool kioskMode = parser.isSet(kioskOption);
 
     // Register cross-thread data types so Qt queued connections can copy them.
     qRegisterMetaType<IssReading>();
@@ -20,7 +30,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<UdpReading>();
 
     // WeatherDataModel lives on the main thread.
-    // Phase 2 GUI widgets will bind to its Q_PROPERTY NOTIFY signals from the same thread.
+    // QML gauges bind to its Q_PROPERTY NOTIFY signals from the same thread.
     auto *model = new WeatherDataModel(&app);
 
     // HTTP polling endpoint.
@@ -59,23 +69,20 @@ int main(int argc, char *argv[])
     QObject::connect(networkThread, &QThread::finished, httpPoller, &QObject::deleteLater);
     QObject::connect(networkThread, &QThread::finished, udpReceiver, &QObject::deleteLater);
 
-    // Diagnostic connections for Phase 1 end-to-end validation.
-    // These prove data actually flows from the WeatherLink Live all the way into the model.
-    QObject::connect(model, &WeatherDataModel::temperatureChanged, [](double value) {
-        qDebug() << "Temperature:" << value;
-    });
-    QObject::connect(model, &WeatherDataModel::sourceStaleChanged, [](bool stale) {
-        qDebug() << "Source stale:" << stale;
-    });
-
     // Start the network thread — fires QThread::started, which triggers start() on both workers.
     networkThread->start();
 
     // Clean shutdown: stop the network thread gracefully when the application quits.
-    QObject::connect(&app, &QCoreApplication::aboutToQuit, [networkThread]() {
+    QObject::connect(&app, &QGuiApplication::aboutToQuit, [networkThread]() {
         networkThread->quit();
         networkThread->wait();
     });
+
+    // QML engine setup — context properties MUST be set before loadFromModule.
+    QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty("weatherModel", model);
+    engine.rootContext()->setContextProperty("kioskMode", kioskMode);
+    engine.loadFromModule("wxdash", "Main");
 
     return app.exec();
 }
