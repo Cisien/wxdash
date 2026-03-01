@@ -21,6 +21,9 @@ qt_add_qml_module(wxdash
     QML_FILES
         qml/Main.qml
         qml/ArcGauge.qml
+        qml/DashboardGrid.qml
+        qml/CompassRose.qml
+        qml/ReservedCell.qml
 )
 
 target_link_libraries(wxdash PRIVATE wxdash_lib Qt6::Quick)

@@ -30,17 +30,7 @@ Window {
         }
     }
 
-    // Placeholder content — Plan 02-02 replaces with DashboardGrid
-    // Show a single test ArcGauge centered to verify rendering works
-    ArcGauge {
-        anchors.centerIn: parent
-        width: Math.min(parent.width, parent.height) * 0.4
-        height: width
-        value: 72.5
-        minValue: -20
-        maxValue: 120
-        label: "Temperature"
-        unit: "\u00B0F"
-        decimals: 1
+    DashboardGrid {
+        anchors.fill: parent
     }
 }
