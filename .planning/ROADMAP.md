@@ -15,7 +15,7 @@ Pi-specific deployment notes (EGLFS, Mesa V3D, gpu_mem, eglfs_kms, native vs. cr
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Data Model and Network Layer** - HTTP polling, UDP real-time feed, JSON parsing, and central WeatherDataModel
-- [ ] **Phase 2: Core Gauges and Dashboard Layout** - All outdoor weather gauges, compass rose, fullscreen frameless window, and responsive layout
+- [x] **Phase 2: Core Gauges and Dashboard Layout** - All outdoor weather gauges, compass rose, fullscreen frameless window, and responsive layout (completed 2026-03-01)
 - [ ] **Phase 3: Trends, Secondary Data, and Air Quality** - Sparklines, indoor panel, PurpleAir AQI gauges, and animated needles
 - [ ] **Phase 4: Kiosk Hardening and Deployment** - systemd watchdog, staleness indicators, and 24-hour stability validation
 
@@ -79,6 +79,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Data Model and Network Layer | 3/3 | Complete | 2026-03-01 |
-| 2. Core Gauges and Dashboard Layout | 1/2 | In Progress|  |
+| 2. Core Gauges and Dashboard Layout | 2/2 | Complete   | 2026-03-01 |
 | 3. Trends, Secondary Data, and Air Quality | 0/TBD | Not started | - |
 | 4. Kiosk Hardening and Deployment | 0/TBD | Not started | - |

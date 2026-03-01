@@ -21,16 +21,16 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Gauges & Display
 
-- [ ] **GAUG-01**: Temperature gauge with color thresholds
-- [ ] **GAUG-02**: Humidity gauge
-- [ ] **GAUG-03**: Barometric pressure gauge with trend arrow (rising/falling/steady)
-- [ ] **GAUG-04**: Wind speed gauge with gust readout
-- [ ] **GAUG-05**: Compass rose for wind direction
-- [ ] **GAUG-06**: Rain rate gauge + daily accumulation display
-- [ ] **GAUG-07**: UV Index gauge with EPA 5-zone color coding (Green 0-2, Yellow 3-5, Orange 6-7, Red 8-10, Violet 11+)
-- [ ] **GAUG-08**: Solar radiation numeric display
-- [ ] **GAUG-09**: Feels-like display (heat index when temp>=80F+RH>=40%; wind chill when temp<=50F+wind>=3mph)
-- [ ] **GAUG-10**: Dew point display
+- [x] **GAUG-01**: Temperature gauge with color thresholds
+- [x] **GAUG-02**: Humidity gauge
+- [x] **GAUG-03**: Barometric pressure gauge with trend arrow (rising/falling/steady)
+- [x] **GAUG-04**: Wind speed gauge with gust readout
+- [x] **GAUG-05**: Compass rose for wind direction
+- [x] **GAUG-06**: Rain rate gauge + daily accumulation display
+- [x] **GAUG-07**: UV Index gauge with EPA 5-zone color coding (Green 0-2, Yellow 3-5, Orange 6-7, Red 8-10, Violet 11+)
+- [x] **GAUG-08**: Solar radiation numeric display
+- [x] **GAUG-09**: Feels-like display (heat index when temp>=80F+RH>=40%; wind chill when temp<=50F+wind>=3mph)
+- [x] **GAUG-10**: Dew point display
 - [ ] **GAUG-11**: AQI gauge with EPA 6-zone color coding (Green 0-50, Yellow 51-100, Orange 101-150, Red 151-200, Purple 201-300, Maroon 301+)
 - [ ] **GAUG-12**: PM2.5 gauge showing averaged A+B sensor value
 - [ ] **GAUG-13**: Indoor temperature and humidity panel (WeatherLink type 4 data)
@@ -91,16 +91,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-07 | Phase 3 | Pending |
 | DATA-08 | Phase 1 | Complete |
 | DATA-09 | Phase 1 | Complete |
-| GAUG-01 | Phase 2 | Pending |
-| GAUG-02 | Phase 2 | Pending |
-| GAUG-03 | Phase 2 | Pending |
-| GAUG-04 | Phase 2 | Pending |
-| GAUG-05 | Phase 2 | Pending |
-| GAUG-06 | Phase 2 | Pending |
-| GAUG-07 | Phase 2 | Pending |
-| GAUG-08 | Phase 2 | Pending |
-| GAUG-09 | Phase 2 | Pending |
-| GAUG-10 | Phase 2 | Pending |
+| GAUG-01 | Phase 2 | Complete |
+| GAUG-02 | Phase 2 | Complete |
+| GAUG-03 | Phase 2 | Complete |
+| GAUG-04 | Phase 2 | Complete |
+| GAUG-05 | Phase 2 | Complete |
+| GAUG-06 | Phase 2 | Complete |
+| GAUG-07 | Phase 2 | Complete |
+| GAUG-08 | Phase 2 | Complete |
+| GAUG-09 | Phase 2 | Complete |
+| GAUG-10 | Phase 2 | Complete |
 | GAUG-11 | Phase 3 | Pending |
 | GAUG-12 | Phase 3 | Pending |
 | GAUG-13 | Phase 3 | Pending |
