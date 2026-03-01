@@ -88,6 +88,7 @@ Item {
             label: "Temperature"
             unit: "\u00B0F"
             arcColor: temperatureColor(weatherModel.temperature)
+            sparklineData: weatherModel.temperatureHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -99,6 +100,7 @@ Item {
             maxValue: 120
             label: feelsLikeLabel
             unit: "\u00B0F"
+            sparklineData: weatherModel.feelsLikeHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -112,6 +114,7 @@ Item {
             unit: "%"
             decimals: 0
             arcColor: humidityColor(weatherModel.humidity)
+            sparklineData: weatherModel.humidityHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -123,6 +126,7 @@ Item {
             maxValue: 80
             label: "Dew Point"
             unit: "\u00B0F"
+            sparklineData: weatherModel.dewPointHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -139,6 +143,7 @@ Item {
             arcColor: windSpeedColor(weatherModel.windSpeed)
             secondaryLabel: "Gust"
             secondaryText: weatherModel.windGust.toFixed(1) + " mph"
+            sparklineData: weatherModel.windSpeedHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -162,6 +167,7 @@ Item {
             decimals: 2
             secondaryLabel: "Daily"
             secondaryText: weatherModel.rainfallDaily.toFixed(2) + " in"
+            sparklineData: weatherModel.rainRateHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -175,6 +181,7 @@ Item {
             unit: "mbar"
             decimals: 1
             secondaryText: pressureTrendArrow(weatherModel.pressureTrend)
+            sparklineData: weatherModel.pressureHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -190,6 +197,7 @@ Item {
             unit: ""
             decimals: 1
             arcColor: uvColor(weatherModel.uvIndex)
+            sparklineData: weatherModel.uvIndexHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -202,6 +210,7 @@ Item {
             label: "Solar Rad"
             unit: "W/m\u00B2"
             decimals: 0
+            sparklineData: weatherModel.solarRadHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
