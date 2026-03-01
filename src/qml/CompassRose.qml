@@ -25,139 +25,210 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
-    // Canvas for the rotating compass rose
-    // anchors.bottomMargin leaves room for the direction label text
-    Canvas {
-        id: roseCanvas
+    Item {
+        id: roseArea
         anchors.top: titleText.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: dirLabel.top
         anchors.margins: 4
 
-        // Rotate the canvas so the matching compass point faces up.
-        // When windDir=0 (North), rotation=0 (N at top).
-        // When windDir=90 (East), rotation=-90 (E rotates to top).
-        rotation: -windDir
+        // Static background: concentric circles, crosshairs, tick marks, labels
+        Canvas {
+            id: bgCanvas
+            anchors.fill: parent
 
-        Behavior on rotation {
-            RotationAnimation {
-                duration: 400
-                direction: RotationAnimation.Shortest
+            onWidthChanged: requestPaint()
+            onHeightChanged: requestPaint()
+
+            onPaint: {
+                var ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+
+                var cx = width / 2
+                var cy = height / 2
+                var outerR = Math.min(width, height) * 0.5 * 0.82
+
+                var gold = "#C8A000"
+                var dimGold = "#5A4A00"
+                var faintGold = "#3A2E00"
+                var ringColor = "#3A3A3A"
+                var darkBg = "#222222"
+
+                // --- Filled dark circle background ---
+                ctx.beginPath()
+                ctx.arc(cx, cy, outerR, 0, 2 * Math.PI)
+                ctx.fillStyle = darkBg
+                ctx.fill()
+
+                // --- Three concentric reference circles ---
+                var rings = [0.33, 0.66, 1.0]
+                for (var r = 0; r < rings.length; r++) {
+                    ctx.beginPath()
+                    ctx.arc(cx, cy, outerR * rings[r], 0, 2 * Math.PI)
+                    ctx.strokeStyle = (r === 2) ? "#4A4A4A" : ringColor
+                    ctx.lineWidth = (r === 2) ? 1.5 : 0.7
+                    ctx.stroke()
+                }
+
+                // --- Crosshair lines (N-S and E-W axes) ---
+                ctx.beginPath()
+                ctx.moveTo(cx, cy - outerR)
+                ctx.lineTo(cx, cy + outerR)
+                ctx.moveTo(cx - outerR, cy)
+                ctx.lineTo(cx + outerR, cy)
+                ctx.strokeStyle = ringColor
+                ctx.lineWidth = 0.7
+                ctx.stroke()
+
+                // --- Tick marks at all 16 compass points ---
+                for (var t = 0; t < 16; t++) {
+                    var tickAngle = t * 22.5
+                    var tickRad = tickAngle * Math.PI / 180
+                    var isCardinal = (t % 4 === 0)
+                    var isIntercardinal = (t % 2 === 0 && !isCardinal)
+                    var innerR = isCardinal ? outerR * 0.88
+                               : isIntercardinal ? outerR * 0.91
+                               : outerR * 0.94
+                    var lw = isCardinal ? 2.0 : isIntercardinal ? 1.2 : 0.8
+                    ctx.beginPath()
+                    ctx.moveTo(cx + innerR * Math.sin(tickRad),
+                               cy - innerR * Math.cos(tickRad))
+                    ctx.lineTo(cx + outerR * Math.sin(tickRad),
+                               cy - outerR * Math.cos(tickRad))
+                    ctx.strokeStyle = isCardinal ? gold : dimGold
+                    ctx.lineWidth = lw
+                    ctx.stroke()
+                }
+
+                // --- 16-point compass labels outside the circle ---
+                ctx.textAlign = "center"
+                ctx.textBaseline = "middle"
+
+                var points = [
+                    { a: 0,     t: "N",   s: 0.15, b: true  },
+                    { a: 22.5,  t: "NNE", s: 0.065, b: false },
+                    { a: 45,    t: "NE",  s: 0.10, b: false },
+                    { a: 67.5,  t: "ENE", s: 0.065, b: false },
+                    { a: 90,    t: "E",   s: 0.15, b: true  },
+                    { a: 112.5, t: "ESE", s: 0.065, b: false },
+                    { a: 135,   t: "SE",  s: 0.10, b: false },
+                    { a: 157.5, t: "SSE", s: 0.065, b: false },
+                    { a: 180,   t: "S",   s: 0.15, b: true  },
+                    { a: 202.5, t: "SSW", s: 0.065, b: false },
+                    { a: 225,   t: "SW",  s: 0.10, b: false },
+                    { a: 247.5, t: "WSW", s: 0.065, b: false },
+                    { a: 270,   t: "W",   s: 0.15, b: true  },
+                    { a: 292.5, t: "WNW", s: 0.065, b: false },
+                    { a: 315,   t: "NW",  s: 0.10, b: false },
+                    { a: 337.5, t: "NNW", s: 0.065, b: false }
+                ]
+
+                for (var i = 0; i < points.length; i++) {
+                    var p = points[i]
+                    var fontSize = Math.max(8, Math.round(outerR * p.s))
+                    ctx.font = (p.b ? "bold " : "") + fontSize + "px sans-serif"
+                    ctx.fillStyle = p.b ? gold : dimGold
+                    var labelR = outerR * (p.b ? 1.14 : (p.t.length === 2 ? 1.14 : 1.16))
+                    var lRad = p.a * Math.PI / 180
+                    ctx.fillText(p.t,
+                                 cx + labelR * Math.sin(lRad),
+                                 cy - labelR * Math.cos(lRad))
+                }
             }
         }
 
-        // Repaint only on resize — rotation is handled by scene-graph transform
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
+        // Rotating pointer — only this element rotates
+        Item {
+            id: pointerWrapper
+            anchors.fill: parent
+            rotation: root.windDir
 
-        onPaint: {
-            var ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-
-            var cx = width / 2
-            var cy = height / 2
-            var radius = Math.min(width, height) * 0.5 * 0.92
-
-            var yellow = "#C8A000"
-            var darkBg = "#2A2A2A"
-
-            // --- Outer circle fill ---
-            ctx.beginPath()
-            ctx.arc(cx, cy, radius * 0.95, 0, 2 * Math.PI)
-            ctx.fillStyle = darkBg
-            ctx.fill()
-
-            // --- Outer circle stroke ---
-            ctx.beginPath()
-            ctx.arc(cx, cy, radius * 0.95, 0, 2 * Math.PI)
-            ctx.strokeStyle = yellow
-            ctx.lineWidth = 1.5
-            ctx.stroke()
-
-            // Helper: draw a tick mark at angle 'angleDeg' from inner to outer radius
-            function drawTick(angleDeg, innerR, outerR, lineWidth) {
-                var rad = angleDeg * Math.PI / 180
-                ctx.beginPath()
-                ctx.moveTo(cx + innerR * Math.sin(rad), cy - innerR * Math.cos(rad))
-                ctx.lineTo(cx + outerR * Math.sin(rad), cy - outerR * Math.cos(rad))
-                ctx.strokeStyle = yellow
-                ctx.lineWidth = lineWidth
-                ctx.stroke()
+            Behavior on rotation {
+                RotationAnimation {
+                    duration: 400
+                    direction: RotationAnimation.Shortest
+                }
             }
 
-            // --- Cardinal tick marks (N, E, S, W) — thicker ---
-            var cardinals = [0, 90, 180, 270]
-            for (var i = 0; i < cardinals.length; i++) {
-                drawTick(cardinals[i], radius * 0.80, radius * 0.95, 2.5)
+            Canvas {
+                id: pointerCanvas
+                anchors.fill: parent
+
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.clearRect(0, 0, width, height)
+
+                    var cx = width / 2
+                    var cy = height / 2
+                    var outerR = Math.min(width, height) * 0.5 * 0.82
+
+                    var gold = "#C8A000"
+                    var dimGold = "#5A4A00"
+
+                    // --- Direction pointer (drawn at 0°, parent rotation handles wind dir) ---
+                    // Tapered arrow pointing north from center to near outer ring
+
+                    var tipY = cy - outerR * 0.85
+                    var baseY = cy - outerR * 0.10
+                    var shoulderY = cy - outerR * 0.55
+                    var halfBase = outerR * 0.09
+                    var halfShoulder = outerR * 0.04
+
+                    // Main pointer body — tapered wedge
+                    ctx.beginPath()
+                    ctx.moveTo(cx, tipY)                        // tip
+                    ctx.lineTo(cx - halfShoulder, shoulderY)    // left shoulder
+                    ctx.lineTo(cx - halfBase, baseY)            // left base
+                    ctx.lineTo(cx + halfBase, baseY)            // right base
+                    ctx.lineTo(cx + halfShoulder, shoulderY)    // right shoulder
+                    ctx.closePath()
+                    ctx.fillStyle = gold
+                    ctx.globalAlpha = 0.9
+                    ctx.fill()
+
+                    // Pointer outline for definition
+                    ctx.strokeStyle = "#E8C800"
+                    ctx.lineWidth = 1
+                    ctx.globalAlpha = 0.5
+                    ctx.stroke()
+
+                    // --- Tail stub (opposite side, subdued) ---
+                    var tailTipY = cy + outerR * 0.40
+                    var tailBaseY = cy + outerR * 0.10
+                    var tailHalf = outerR * 0.06
+
+                    ctx.beginPath()
+                    ctx.moveTo(cx, tailTipY)
+                    ctx.lineTo(cx - tailHalf, tailBaseY)
+                    ctx.lineTo(cx + tailHalf, tailBaseY)
+                    ctx.closePath()
+                    ctx.fillStyle = dimGold
+                    ctx.globalAlpha = 0.6
+                    ctx.fill()
+
+                    ctx.globalAlpha = 1.0
+
+                    // --- Center hub ---
+                    ctx.beginPath()
+                    ctx.arc(cx, cy, outerR * 0.06, 0, 2 * Math.PI)
+                    ctx.fillStyle = "#333333"
+                    ctx.fill()
+                    ctx.strokeStyle = gold
+                    ctx.lineWidth = 1.5
+                    ctx.stroke()
+                }
             }
-
-            // --- Intercardinal tick marks (NE, SE, SW, NW) ---
-            var intercardinals = [45, 135, 225, 315]
-            for (var j = 0; j < intercardinals.length; j++) {
-                drawTick(intercardinals[j], radius * 0.85, radius * 0.95, 1.5)
-            }
-
-            // --- Secondary intercardinal ticks (NNE, ENE, ESE, SSE, SSW, WSW, WNW, NNW) ---
-            var secondary = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5]
-            for (var k = 0; k < secondary.length; k++) {
-                drawTick(secondary[k], radius * 0.88, radius * 0.95, 1.0)
-            }
-
-            // --- Cardinal direction labels (N, E, S, W) ---
-            // Each label is drawn at radius * 0.65 in the appropriate direction.
-            // We use save/translate/rotate/fillText/restore so each label appears
-            // upright relative to the canvas (rotates with the rose — traditional style).
-            var labelRadius = radius * 0.65
-            var fontSize = Math.round(radius * 0.16)
-            ctx.font = "bold " + fontSize + "px sans-serif"
-            ctx.fillStyle = yellow
-            ctx.textAlign = "center"
-            ctx.textBaseline = "middle"
-
-            var cardinalLabels = [
-                { angle: 0,   text: "N" },
-                { angle: 90,  text: "E" },
-                { angle: 180, text: "S" },
-                { angle: 270, text: "W" }
-            ]
-
-            for (var l = 0; l < cardinalLabels.length; l++) {
-                var lRad = cardinalLabels[l].angle * Math.PI / 180
-                var lx = cx + labelRadius * Math.sin(lRad)
-                var ly = cy - labelRadius * Math.cos(lRad)
-                ctx.save()
-                ctx.translate(lx, ly)
-                ctx.fillText(cardinalLabels[l].text, 0, 0)
-                ctx.restore()
-            }
-
-            // --- North pointer (elongated triangle pointing toward North/top) ---
-            var pointerLen = radius * 0.75
-            var pointerBaseHalf = radius * 0.06
-            ctx.beginPath()
-            ctx.moveTo(cx, cy - pointerLen)           // tip (pointing North/up)
-            ctx.lineTo(cx - pointerBaseHalf, cy)       // left base
-            ctx.lineTo(cx + pointerBaseHalf, cy)       // right base
-            ctx.closePath()
-            ctx.fillStyle = yellow
-            ctx.fill()
-
-            // Center dot
-            ctx.beginPath()
-            ctx.arc(cx, cy, radius * 0.04, 0, 2 * Math.PI)
-            ctx.fillStyle = darkBg
-            ctx.fill()
-            ctx.strokeStyle = yellow
-            ctx.lineWidth = 1.5
-            ctx.stroke()
         }
     }
 
-    // Direction text label below the compass rose (static — does not rotate)
+    // Direction text label below the compass rose
     Text {
         id: dirLabel
-        text: directionLabel(windDir)
+        text: directionLabel(windDir) + "  " + windDir + "\u00B0"
         color: "#C8A000"
         font.pixelSize: parent.height * 0.08
         font.bold: true
