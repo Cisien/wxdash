@@ -42,7 +42,7 @@ Item {
 
                 var cx = width / 2
                 var cy = height / 2
-                var outerR = Math.min(width, height) * 0.5 * 0.88
+                var outerR = Math.min(width, height) * 0.5 * 0.95
 
                 var gold = "#C8A000"
                 var dimGold = "#5A4A00"
@@ -75,39 +75,20 @@ Item {
                 ctx.lineWidth = 0.7
                 ctx.stroke()
 
-                // 16-point compass labels outside the circle
-                ctx.textAlign = "center"
-                ctx.textBaseline = "middle"
-
-                var points = [
-                    { a: 0,     t: "N",   s: 0.15, b: true  },
-                    { a: 22.5,  t: "NNE", s: 0.065, b: false },
-                    { a: 45,    t: "NE",  s: 0.10, b: false },
-                    { a: 67.5,  t: "ENE", s: 0.065, b: false },
-                    { a: 90,    t: "E",   s: 0.15, b: true  },
-                    { a: 112.5, t: "ESE", s: 0.065, b: false },
-                    { a: 135,   t: "SE",  s: 0.10, b: false },
-                    { a: 157.5, t: "SSE", s: 0.065, b: false },
-                    { a: 180,   t: "S",   s: 0.15, b: true  },
-                    { a: 202.5, t: "SSW", s: 0.065, b: false },
-                    { a: 225,   t: "SW",  s: 0.10, b: false },
-                    { a: 247.5, t: "WSW", s: 0.065, b: false },
-                    { a: 270,   t: "W",   s: 0.15, b: true  },
-                    { a: 292.5, t: "WNW", s: 0.065, b: false },
-                    { a: 315,   t: "NW",  s: 0.10, b: false },
-                    { a: 337.5, t: "NNW", s: 0.065, b: false }
-                ]
-
-                for (var i = 0; i < points.length; i++) {
-                    var p = points[i]
-                    var fontSize = Math.max(8, Math.round(outerR * p.s))
-                    ctx.font = (p.b ? "bold " : "") + fontSize + "px sans-serif"
-                    ctx.fillStyle = p.b ? gold : dimGold
-                    var labelR = outerR * (p.b ? 1.14 : (p.t.length === 2 ? 1.14 : 1.16))
-                    var lRad = p.a * Math.PI / 180
-                    ctx.fillText(p.t,
-                                 cx + labelR * Math.sin(lRad),
-                                 cy - labelR * Math.cos(lRad))
+                // Tick marks at cardinal and intercardinal points
+                for (var t = 0; t < 16; t++) {
+                    var tickAngle = t * 22.5
+                    var tickRad = tickAngle * Math.PI / 180
+                    var isCardinal = (t % 4 === 0)
+                    var innerTick = isCardinal ? outerR * 0.92 : outerR * 0.95
+                    ctx.beginPath()
+                    ctx.moveTo(cx + innerTick * Math.sin(tickRad),
+                               cy - innerTick * Math.cos(tickRad))
+                    ctx.lineTo(cx + outerR * Math.sin(tickRad),
+                               cy - outerR * Math.cos(tickRad))
+                    ctx.strokeStyle = isCardinal ? "#4A4A4A" : ringColor
+                    ctx.lineWidth = isCardinal ? 1.5 : 0.7
+                    ctx.stroke()
                 }
             }
         }
@@ -135,7 +116,7 @@ Item {
 
                 var cx = width / 2
                 var cy = height / 2
-                var outerR = Math.min(width, height) * 0.5 * 0.88
+                var outerR = Math.min(width, height) * 0.5 * 0.95
 
                 var minBarR = outerR * 0.08  // minimum bar length for any non-zero bin
                 var maxBarR = outerR * 0.88  // maximum bar reaches near the outer ring
@@ -199,7 +180,7 @@ Item {
 
                     var cx = width / 2
                     var cy = height / 2
-                    var outerR = Math.min(width, height) * 0.5 * 0.88
+                    var outerR = Math.min(width, height) * 0.5 * 0.95
 
                     // Needle line from center to near edge
                     var needleLen = outerR * 0.92
