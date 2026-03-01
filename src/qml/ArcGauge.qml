@@ -57,9 +57,9 @@ Item {
             // Lean toward high resolution per user decision
             var stride = Math.max(1, Math.floor(count / width))
 
-            // Find min/max for Y-axis normalization
-            var minV = data[0], maxV = data[0]
-            for (var i = 1; i < count; i++) {
+            // Use gauge min/max as baseline, expand if data exceeds
+            var minV = root.minValue, maxV = root.maxValue
+            for (var i = 0; i < count; i++) {
                 if (data[i] < minV) minV = data[i]
                 if (data[i] > maxV) maxV = data[i]
             }
@@ -67,7 +67,7 @@ Item {
             if (range === 0) range = 1  // flat line — avoid div by zero
 
             ctx.beginPath()
-            ctx.strokeStyle = "#181818"   // darker than #2A2A2A gauge track
+            ctx.strokeStyle = "#5A4500"   // dim yellow, subdued against #1A1A1A background
             ctx.lineWidth = 1
             ctx.lineJoin = "round"
 

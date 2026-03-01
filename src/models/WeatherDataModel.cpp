@@ -1,5 +1,7 @@
 #include "models/WeatherDataModel.h"
 
+#include <QDir>
+#include <QFile>
 #include <QTimer>
 
 WeatherDataModel::WeatherDataModel(QObject* parent, std::function<qint64()> elapsedProvider)
@@ -128,6 +130,104 @@ QVariantList WeatherDataModel::uvIndexHistory() const {
 
 QVariantList WeatherDataModel::solarRadHistory() const {
     return sparklineToList(m_solarRadSparkline, m_solarRadSparklineHead, m_solarRadSparklineCount);
+}
+
+// ---------------------------------------------------------------------------
+// Sparkline persistence
+// ---------------------------------------------------------------------------
+
+static constexpr quint32 kSparklineMagic = 0x57584448; // "WXDH"
+static constexpr quint32 kSparklineVersion = 1;
+
+void WeatherDataModel::saveSparklineData(const QString& path) const {
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly))
+        return;
+
+    QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_6_0);
+    out << kSparklineMagic << kSparklineVersion;
+
+    // Helper: save ring buffer as chronological sequence
+    auto saveRing = [&](const double* ring, int head, int count, int capacity) {
+        out << qint32(count);
+        for (int i = 0; i < count; i++) {
+            int idx = (head - count + i + capacity) % capacity;
+            out << ring[idx];
+        }
+    };
+
+    // 9 weather sparklines (kSparklineCapacity each)
+    saveRing(m_tempSparkline,      m_tempSparklineHead,      m_tempSparklineCount,      kSparklineCapacity);
+    saveRing(m_feelsLikeSparkline, m_feelsLikeSparklineHead, m_feelsLikeSparklineCount, kSparklineCapacity);
+    saveRing(m_humSparkline,       m_humSparklineHead,       m_humSparklineCount,       kSparklineCapacity);
+    saveRing(m_dewPointSparkline,  m_dewPointSparklineHead,  m_dewPointSparklineCount,  kSparklineCapacity);
+    saveRing(m_windSparkline,      m_windSparklineHead,      m_windSparklineCount,      kSparklineCapacity);
+    saveRing(m_rainRateSparkline,  m_rainRateSparklineHead,  m_rainRateSparklineCount,  kSparklineCapacity);
+    saveRing(m_pressureSparkline,  m_pressureSparklineHead,  m_pressureSparklineCount,  kSparklineCapacity);
+    saveRing(m_uvSparkline,        m_uvSparklineHead,        m_uvSparklineCount,        kSparklineCapacity);
+    saveRing(m_solarRadSparkline,  m_solarRadSparklineHead,  m_solarRadSparklineCount,  kSparklineCapacity);
+
+    // AQI sparkline (kAqiSparklineCapacity)
+    saveRing(m_aqiSparkline, m_aqiSparklineHead, m_aqiSparklineCount, kAqiSparklineCapacity);
+}
+
+void WeatherDataModel::loadSparklineData(const QString& path) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly))
+        return;
+
+    QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_6_0);
+
+    quint32 magic, version;
+    in >> magic >> version;
+    if (magic != kSparklineMagic || version != kSparklineVersion)
+        return;
+
+    // Helper: load chronological sequence into ring buffer
+    auto loadRing = [&](double* ring, int& head, int& count, int capacity) {
+        qint32 savedCount;
+        in >> savedCount;
+        if (in.status() != QDataStream::Ok || savedCount < 0)
+            return;
+        savedCount = qMin(savedCount, qint32(capacity));
+        for (int i = 0; i < savedCount; i++) {
+            double val;
+            in >> val;
+            if (in.status() != QDataStream::Ok)
+                return;
+            ring[i] = val;
+        }
+        head = savedCount % capacity;
+        count = savedCount;
+    };
+
+    // 9 weather sparklines
+    loadRing(m_tempSparkline,      m_tempSparklineHead,      m_tempSparklineCount,      kSparklineCapacity);
+    loadRing(m_feelsLikeSparkline, m_feelsLikeSparklineHead, m_feelsLikeSparklineCount, kSparklineCapacity);
+    loadRing(m_humSparkline,       m_humSparklineHead,       m_humSparklineCount,       kSparklineCapacity);
+    loadRing(m_dewPointSparkline,  m_dewPointSparklineHead,  m_dewPointSparklineCount,  kSparklineCapacity);
+    loadRing(m_windSparkline,      m_windSparklineHead,      m_windSparklineCount,      kSparklineCapacity);
+    loadRing(m_rainRateSparkline,  m_rainRateSparklineHead,  m_rainRateSparklineCount,  kSparklineCapacity);
+    loadRing(m_pressureSparkline,  m_pressureSparklineHead,  m_pressureSparklineCount,  kSparklineCapacity);
+    loadRing(m_uvSparkline,        m_uvSparklineHead,        m_uvSparklineCount,        kSparklineCapacity);
+    loadRing(m_solarRadSparkline,  m_solarRadSparklineHead,  m_solarRadSparklineCount,  kSparklineCapacity);
+
+    // AQI sparkline
+    loadRing(m_aqiSparkline, m_aqiSparklineHead, m_aqiSparklineCount, kAqiSparklineCapacity);
+
+    // Notify QML that all histories are available
+    emit temperatureHistoryChanged();
+    emit feelsLikeHistoryChanged();
+    emit humidityHistoryChanged();
+    emit dewPointHistoryChanged();
+    emit windSpeedHistoryChanged();
+    emit rainRateHistoryChanged();
+    emit pressureHistoryChanged();
+    emit uvIndexHistoryChanged();
+    emit solarRadHistoryChanged();
+    emit aqiHistoryChanged();
 }
 
 void WeatherDataModel::clearAllValues() {

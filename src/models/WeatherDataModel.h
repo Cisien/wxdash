@@ -2,6 +2,7 @@
 
 #include "models/WeatherReadings.h"
 
+#include <QDataStream>
 #include <QElapsedTimer>
 #include <QObject>
 #include <QTimer>
@@ -108,6 +109,9 @@ public:
     double pm10() const { return m_pm10; }
     bool purpleAirStale() const { return m_purpleAirStale; }
     QVariantList aqiHistory() const;
+
+    void saveSparklineData(const QString& path) const;
+    void loadSparklineData(const QString& path);
 
 public slots:
     void applyIssUpdate(const IssReading& r);

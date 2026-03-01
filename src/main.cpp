@@ -6,9 +6,11 @@
 
 #include <QCommandLineOption>
 #include <QCommandLineParser>
+#include <QDir>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QStandardPaths>
 #include <QThread>
 #include <QIcon>
 #include <QUrl>
@@ -36,6 +38,12 @@ int main(int argc, char *argv[])
     // WeatherDataModel lives on the main thread.
     // QML gauges bind to its Q_PROPERTY NOTIFY signals from the same thread.
     auto *model = new WeatherDataModel(&app);
+
+    // Load persisted sparkline history so graphs show data immediately on startup.
+    const QString dataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir().mkpath(dataDir);
+    const QString sparklinePath = dataDir + QStringLiteral("/sparklines.bin");
+    model->loadSparklineData(sparklinePath);
 
     // HTTP polling endpoint.
     const QUrl httpUrl(QStringLiteral("http://weatherlinklive.local.cisien.com/v1/current_conditions"));
@@ -88,8 +96,16 @@ int main(int argc, char *argv[])
     // Start the network thread — fires QThread::started, which triggers start() on all workers.
     networkThread->start();
 
-    // Clean shutdown: stop the network thread gracefully when the application quits.
-    QObject::connect(&app, &QGuiApplication::aboutToQuit, [networkThread]() {
+    // Periodic sparkline save every 60 seconds.
+    auto *saveTimer = new QTimer(model);
+    QObject::connect(saveTimer, &QTimer::timeout, model, [model, sparklinePath]() {
+        model->saveSparklineData(sparklinePath);
+    });
+    saveTimer->start(60000);
+
+    // Clean shutdown: save sparklines and stop the network thread.
+    QObject::connect(&app, &QGuiApplication::aboutToQuit, [model, sparklinePath, networkThread]() {
+        model->saveSparklineData(sparklinePath);
         networkThread->quit();
         networkThread->wait();
     });

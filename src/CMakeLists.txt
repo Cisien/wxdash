@@ -15,7 +15,13 @@ qt_add_library(wxdash_lib STATIC
 target_link_libraries(wxdash_lib PUBLIC Qt6::Core Qt6::Network)
 target_include_directories(wxdash_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-qt_add_executable(wxdash main.cpp icons.qrc)
+qt_add_executable(wxdash main.cpp)
+
+qt_add_resources(wxdash "icons"
+    PREFIX "/icons"
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/../assets"
+    FILES "${CMAKE_CURRENT_SOURCE_DIR}/../assets/wxdash.svg"
+)
 
 qt_add_qml_module(wxdash
     URI wxdash

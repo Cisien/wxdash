@@ -64,9 +64,9 @@ Item {
             // Decimation: stride through data to fit pixel width
             var stride = Math.max(1, Math.floor(count / width))
 
-            // Find min/max for Y-axis normalization
-            var minV = data[0], maxV = data[0]
-            for (var i = 1; i < count; i++) {
+            // Use AQI 0-500 range as baseline, expand if data exceeds
+            var minV = 0, maxV = 500
+            for (var i = 0; i < count; i++) {
                 if (data[i] < minV) minV = data[i]
                 if (data[i] > maxV) maxV = data[i]
             }
@@ -74,7 +74,7 @@ Item {
             if (range === 0) range = 1  // flat line — avoid div by zero
 
             ctx.beginPath()
-            ctx.strokeStyle = "#181818"   // darker than #2A2A2A gauge track
+            ctx.strokeStyle = "#5A4500"   // dim yellow, subdued against #1A1A1A background
             ctx.lineWidth = 1
             ctx.lineJoin = "round"
 
@@ -140,10 +140,10 @@ Item {
             }
         }
 
-        // 4. PM2.5 fill (middle, neutral color, animated)
+        // 4. PM2.5 fill (middle, neutral yellow, animated)
         ShapePath {
             id: pm25FillPath
-            strokeColor: "#555555"
+            strokeColor: "#C8A000"
             fillColor: "transparent"
             strokeWidth: root.pm25Stroke
             capStyle: ShapePath.RoundCap
@@ -173,10 +173,10 @@ Item {
             }
         }
 
-        // 6. PM10 fill (innermost, neutral color, animated)
+        // 6. PM10 fill (innermost, neutral yellow, animated)
         ShapePath {
             id: pm10FillPath
-            strokeColor: "#555555"
+            strokeColor: "#C8A000"
             fillColor: "transparent"
             strokeWidth: root.pm10Stroke
             capStyle: ShapePath.RoundCap
@@ -234,7 +234,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: parent.height * 0.05
         anchors.left: parent.left
-        anchors.leftMargin: parent.width * 0.1
+        anchors.leftMargin: parent.width * 0.02
         text: "PM2.5: " + root.pm25Value.toFixed(1)
         color: "#8A7A00"
         font.pixelSize: Math.min(root.width, root.height) * 0.06
@@ -245,7 +245,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: parent.height * 0.05
         anchors.right: parent.right
-        anchors.rightMargin: parent.width * 0.1
+        anchors.rightMargin: parent.width * 0.02
         text: "PM10: " + root.pm10Value.toFixed(1)
         color: "#8A7A00"
         font.pixelSize: Math.min(root.width, root.height) * 0.06

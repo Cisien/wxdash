@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 
 Item {
+    id: dashboard
     anchors.fill: parent
 
     // --- Threshold color functions ---
@@ -229,7 +230,7 @@ Item {
             aqiValue: weatherModel.aqi
             pm25Value: weatherModel.pm25
             pm10Value: weatherModel.pm10
-            aqiColor: aqiColor(weatherModel.aqi)
+            aqiColor: dashboard.aqiColor(weatherModel.aqi)
             sparklineData: weatherModel.aqiHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
