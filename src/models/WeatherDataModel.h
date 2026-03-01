@@ -43,7 +43,7 @@ class WeatherDataModel : public QObject {
     Q_PROPERTY(bool sourceStale READ sourceStale NOTIFY sourceStaleChanged)
 
 public:
-    explicit WeatherDataModel(QObject *parent = nullptr,
+    explicit WeatherDataModel(QObject* parent = nullptr,
                               std::function<qint64()> elapsedProvider = {});
 
     // READ accessors
@@ -67,10 +67,10 @@ public:
     bool sourceStale() const { return m_sourceStale; }
 
 public slots:
-    void applyIssUpdate(const IssReading &r);
-    void applyBarUpdate(const BarReading &r);
-    void applyIndoorUpdate(const IndoorReading &r);
-    void applyUdpUpdate(const UdpReading &r);
+    void applyIssUpdate(const IssReading& r);
+    void applyBarUpdate(const BarReading& r);
+    void applyIndoorUpdate(const IndoorReading& r);
+    void applyUdpUpdate(const UdpReading& r);
     void checkStaleness();
 
 signals:
@@ -121,7 +121,7 @@ private:
     static constexpr int kStalenessMs = 30000;
     bool m_hasReceivedUpdate = false;
     qint64 m_lastUpdateElapsed = 0; // Value from elapsed provider at time of last update
-    QTimer *m_stalenessTimer = nullptr;
+    QTimer* m_stalenessTimer = nullptr;
     std::function<qint64()> m_elapsedProvider;
     QElapsedTimer m_wallClock; // Used when no provider is injected
 };

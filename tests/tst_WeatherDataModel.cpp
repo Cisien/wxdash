@@ -13,8 +13,7 @@ private:
                               double heatIndex = 0.0, double windChill = 0.0,
                               double windSpeed = 0.0, int windDir = 0, double windGust = 0.0,
                               double solarRad = 0.0, double uvIndex = 0.0, double rainRate = 0.0,
-                              double rainfallDaily = 0.0, int rainSize = 1)
-    {
+                              double rainfallDaily = 0.0, int rainSize = 1) {
         IssReading r;
         r.temperature = temp;
         r.humidity = hum;
@@ -33,8 +32,7 @@ private:
     }
 
     // Helper: make a fake clock that returns a controllable value
-    static std::function<qint64()> makeClock(qint64 *msPtr)
-    {
+    static std::function<qint64()> makeClock(qint64* msPtr) {
         return [msPtr]() -> qint64 { return *msPtr; };
     }
 
@@ -43,8 +41,7 @@ private slots:
     // applyIssUpdate tests
     // -----------------------------------------------------------------------
 
-    void applyIssUpdate_emitsTemperatureChanged()
-    {
+    void applyIssUpdate_emitsTemperatureChanged() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
         QSignalSpy spy(&model, &WeatherDataModel::temperatureChanged);
@@ -57,8 +54,7 @@ private slots:
         QCOMPARE(model.temperature(), 72.5);
     }
 
-    void applyIssUpdate_sameValue_noSignal()
-    {
+    void applyIssUpdate_sameValue_noSignal() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
 
@@ -72,8 +68,7 @@ private slots:
         QCOMPARE(spy.count(), 0);
     }
 
-    void applyIssUpdate_setsAllIssFields()
-    {
+    void applyIssUpdate_setsAllIssFields() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
 
@@ -111,8 +106,7 @@ private slots:
     // applyBarUpdate tests
     // -----------------------------------------------------------------------
 
-    void applyBarUpdate_emitsPressureChanged()
-    {
+    void applyBarUpdate_emitsPressureChanged() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
         QSignalSpy spyPressure(&model, &WeatherDataModel::pressureChanged);
@@ -131,8 +125,7 @@ private slots:
         QCOMPARE(model.pressureTrend(), 1);
     }
 
-    void applyBarUpdate_sameValue_noSignal()
-    {
+    void applyBarUpdate_sameValue_noSignal() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
 
@@ -150,8 +143,7 @@ private slots:
     // applyIndoorUpdate tests
     // -----------------------------------------------------------------------
 
-    void applyIndoorUpdate_emitsTempInChanged()
-    {
+    void applyIndoorUpdate_emitsTempInChanged() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
         QSignalSpy spy(&model, &WeatherDataModel::tempInChanged);
@@ -169,8 +161,7 @@ private slots:
         QCOMPARE(model.dewPointIn(), 44.5);
     }
 
-    void applyIndoorUpdate_sameValue_noSignal()
-    {
+    void applyIndoorUpdate_sameValue_noSignal() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
 
@@ -189,8 +180,7 @@ private slots:
     // applyUdpUpdate tests
     // -----------------------------------------------------------------------
 
-    void applyUdpUpdate_overwritesWindSpeed()
-    {
+    void applyUdpUpdate_overwritesWindSpeed() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
 
@@ -214,8 +204,7 @@ private slots:
         QCOMPARE(model.windSpeed(), 8.0);
     }
 
-    void applyUdpUpdate_setsAllUdpFields()
-    {
+    void applyUdpUpdate_setsAllUdpFields() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
 
@@ -239,8 +228,7 @@ private slots:
     // Staleness tests (injectable clock — no real 30s wait)
     // -----------------------------------------------------------------------
 
-    void staleness_emitsSignalAfter30s()
-    {
+    void staleness_emitsSignalAfter30s() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
         QSignalSpy spy(&model, &WeatherDataModel::sourceStaleChanged);
@@ -257,8 +245,7 @@ private slots:
         QVERIFY(model.sourceStale());
     }
 
-    void staleness_clearsAllValues()
-    {
+    void staleness_clearsAllValues() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
 
@@ -313,8 +300,7 @@ private slots:
         QCOMPARE(model.dewPointIn(), 0.0);
     }
 
-    void staleness_clearsEmitsSignals()
-    {
+    void staleness_clearsEmitsSignals() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
 
@@ -350,8 +336,7 @@ private slots:
         QVERIFY(spySolar.count() >= 1);
     }
 
-    void recovery_afterStaleness()
-    {
+    void recovery_afterStaleness() {
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
 
@@ -374,8 +359,7 @@ private slots:
         QVERIFY(!model.sourceStale());
     }
 
-    void noFalsePositiveAtStartup()
-    {
+    void noFalsePositiveAtStartup() {
         // Create model, call checkStaleness immediately — no update has been received
         // Should NOT emit sourceStaleChanged because the timer was never started
         qint64 fakeMs = 0;
@@ -388,8 +372,7 @@ private slots:
         QVERIFY(!model.sourceStale());
     }
 
-    void udpUpdate_resetsStalenessClock()
-    {
+    void udpUpdate_resetsStalenessClock() {
         // Apply ISS update, advance clock to 20s (not yet stale),
         // then apply UDP update (clock reset), advance to 20s more,
         // verify no staleness (would have been stale after 30s total without reset)
@@ -416,7 +399,8 @@ private slots:
         // The model internally records the current clock value as the last-update time
         // So we reset fakeMs to simulate 20s since the UDP update
         // (total 40s since ISS, but only 20s since UDP — should NOT be stale)
-        fakeMs = 20000; // 20s since UDP update (clock is now at 40s total, but last update was at 20s)
+        fakeMs =
+            20000; // 20s since UDP update (clock is now at 40s total, but last update was at 20s)
 
         // Need to think about this differently:
         // The model stores the elapsed value at time of last update.
@@ -434,8 +418,7 @@ private slots:
         QVERIFY(spy.at(0).at(0).toBool() == true);
     }
 
-    void staleness_noDoubleEmit()
-    {
+    void staleness_noDoubleEmit() {
         // Once stale, calling checkStaleness again should NOT re-emit
         qint64 fakeMs = 0;
         WeatherDataModel model(nullptr, makeClock(&fakeMs));
