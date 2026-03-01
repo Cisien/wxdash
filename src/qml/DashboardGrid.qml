@@ -146,6 +146,8 @@ Item {
         // Cell 6: Compass Rose (GAUG-05)
         CompassRose {
             windDir: weatherModel.windDir
+            windRoseData: weatherModel.windRoseData
+            windRoseMaxCount: weatherModel.windRoseMaxCount
             Layout.fillWidth: true
             Layout.fillHeight: true
         }

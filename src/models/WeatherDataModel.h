@@ -5,6 +5,8 @@
 #include <QElapsedTimer>
 #include <QObject>
 #include <QTimer>
+#include <QVariantList>
+#include <QVariantMap>
 #include <functional>
 
 /**
@@ -41,6 +43,8 @@ class WeatherDataModel : public QObject {
     Q_PROPERTY(double humIn READ humIn NOTIFY humInChanged)
     Q_PROPERTY(double dewPointIn READ dewPointIn NOTIFY dewPointInChanged)
     Q_PROPERTY(bool sourceStale READ sourceStale NOTIFY sourceStaleChanged)
+    Q_PROPERTY(QVariantList windRoseData READ windRoseData NOTIFY windRoseDataChanged)
+    Q_PROPERTY(int windRoseMaxCount READ windRoseMaxCount NOTIFY windRoseDataChanged)
 
 public:
     explicit WeatherDataModel(QObject* parent = nullptr,
@@ -65,6 +69,8 @@ public:
     double humIn() const { return m_humIn; }
     double dewPointIn() const { return m_dewPointIn; }
     bool sourceStale() const { return m_sourceStale; }
+    QVariantList windRoseData() const;
+    int windRoseMaxCount() const;
 
 public slots:
     void applyIssUpdate(const IssReading& r);
@@ -92,10 +98,12 @@ signals:
     void humInChanged(double value);
     void dewPointInChanged(double value);
     void sourceStaleChanged(bool stale);
+    void windRoseDataChanged();
 
 private:
     void clearAllValues();
     void markUpdated();
+    void recordWindSample(int dir, double speed);
 
     // Weather fields
     double m_temperature = 0.0;
@@ -116,6 +124,11 @@ private:
     double m_humIn = 0.0;
     double m_dewPointIn = 0.0;
     bool m_sourceStale = false;
+
+    // Wind rose histogram (16 compass bins, each 22.5°)
+    static constexpr int kWindBins = 16;
+    int m_windBinCount[kWindBins] = {};
+    double m_windBinTotalSpeed[kWindBins] = {};
 
     // Staleness tracking
     static constexpr int kStalenessMs = 30000;

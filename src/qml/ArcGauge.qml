@@ -93,62 +93,57 @@ Item {
     // Inner radius boundary for text sizing
     readonly property real innerRadius: (Math.min(width, height) / 2) - strokeWidth
 
-    // Label text (gauge title, positioned in upper third)
-    Text {
-        id: labelText
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: parent.height * 0.32
-        width: root.innerRadius * 1.2
-        text: root.label
-        color: "#C8A000"
-        font.pixelSize: Math.min(root.width, root.height) * 0.09
-        font.bold: false
-        horizontalAlignment: Text.AlignHCenter
-        fontSizeMode: Text.HorizontalFit
-        minimumPixelSize: 8
-    }
+    // Vertical layout: all text stacked in a column, centered in the gauge
+    Column {
+        anchors.centerIn: parent
+        width: root.innerRadius * 1.4
+        spacing: 0
 
-    // Value text (number only, centered)
-    Text {
-        id: valueText
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: root.unit !== "" ? -root.height * 0.03 : 0
-        width: root.innerRadius * 1.3
-        text: root.value.toFixed(root.decimals)
-        color: "#C8A000"
-        font.pixelSize: Math.min(root.width, root.height) * 0.20
-        font.bold: true
-        horizontalAlignment: Text.AlignHCenter
-        fontSizeMode: Text.HorizontalFit
-        minimumPixelSize: 10
-    }
+        // Label text (gauge title)
+        Text {
+            width: parent.width
+            text: root.label
+            color: "#C8A000"
+            font.pixelSize: Math.min(root.width, root.height) * 0.09
+            font.bold: false
+            horizontalAlignment: Text.AlignHCenter
+            fontSizeMode: Text.HorizontalFit
+            minimumPixelSize: 8
+        }
 
-    // Unit text (small, below value)
-    Text {
-        id: unitText
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: valueText.bottom
-        visible: root.unit !== ""
-        text: root.unit
-        color: "#8A7A00"
-        font.pixelSize: Math.min(root.width, root.height) * 0.08
-        horizontalAlignment: Text.AlignHCenter
-    }
+        // Value text (number only)
+        Text {
+            id: valueText
+            width: parent.width
+            text: root.value.toFixed(root.decimals)
+            color: "#C8A000"
+            font.pixelSize: Math.min(root.width, root.height) * 0.18
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+            fontSizeMode: Text.HorizontalFit
+            minimumPixelSize: 10
+        }
 
-    // Secondary text (optional, below unit)
-    Text {
-        id: secondaryTextItem
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: root.unit !== "" ? unitText.bottom : valueText.bottom
-        anchors.topMargin: root.height * 0.01
-        width: root.innerRadius * 1.3
-        visible: root.secondaryText !== ""
-        text: root.secondaryLabel !== "" ? root.secondaryLabel + ": " + root.secondaryText : root.secondaryText
-        color: "#C8A000"
-        font.pixelSize: Math.min(root.width, root.height) * 0.07
-        horizontalAlignment: Text.AlignHCenter
-        fontSizeMode: Text.HorizontalFit
-        minimumPixelSize: 8
+        // Unit text (small, dimmer)
+        Text {
+            width: parent.width
+            visible: root.unit !== ""
+            text: root.unit
+            color: "#8A7A00"
+            font.pixelSize: Math.min(root.width, root.height) * 0.075
+            horizontalAlignment: Text.AlignHCenter
+        }
+
+        // Secondary text (optional)
+        Text {
+            width: parent.width
+            visible: root.secondaryText !== ""
+            text: root.secondaryLabel !== "" ? root.secondaryLabel + ": " + root.secondaryText : root.secondaryText
+            color: "#C8A000"
+            font.pixelSize: Math.min(root.width, root.height) * 0.065
+            horizontalAlignment: Text.AlignHCenter
+            fontSizeMode: Text.HorizontalFit
+            minimumPixelSize: 8
+        }
     }
 }

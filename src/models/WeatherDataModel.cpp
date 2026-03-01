@@ -32,6 +32,33 @@ void WeatherDataModel::markUpdated() {
     }
 }
 
+void WeatherDataModel::recordWindSample(int dir, double speed) {
+    int bin = qBound(0, qRound(dir / 22.5) % kWindBins, kWindBins - 1);
+    m_windBinCount[bin]++;
+    m_windBinTotalSpeed[bin] += speed;
+    emit windRoseDataChanged();
+}
+
+QVariantList WeatherDataModel::windRoseData() const {
+    QVariantList list;
+    list.reserve(kWindBins);
+    for (int i = 0; i < kWindBins; i++) {
+        QVariantMap bin;
+        bin[QStringLiteral("count")] = m_windBinCount[i];
+        bin[QStringLiteral("avgSpeed")] =
+            m_windBinCount[i] > 0 ? m_windBinTotalSpeed[i] / m_windBinCount[i] : 0.0;
+        list.append(bin);
+    }
+    return list;
+}
+
+int WeatherDataModel::windRoseMaxCount() const {
+    int max = 0;
+    for (int i = 0; i < kWindBins; i++)
+        max = qMax(max, m_windBinCount[i]);
+    return max;
+}
+
 void WeatherDataModel::clearAllValues() {
     // Clear each field to zero, emitting changed signals only for non-zero fields.
     // Uses qFuzzyCompare with offset to handle the zero-comparison edge case correctly.
@@ -130,6 +157,8 @@ void WeatherDataModel::applyIssUpdate(const IssReading& r) {
         m_rainfallDaily = r.rainfallDaily;
         emit rainfallDailyChanged(m_rainfallDaily);
     }
+
+    recordWindSample(r.windDirLast, r.windSpeedLast);
 }
 
 void WeatherDataModel::applyBarUpdate(const BarReading& r) {
@@ -192,6 +221,8 @@ void WeatherDataModel::applyUdpUpdate(const UdpReading& r) {
         m_rainfallDaily = r.rainfallDaily;
         emit rainfallDailyChanged(m_rainfallDaily);
     }
+
+    recordWindSample(r.windDirLast, r.windSpeedLast);
 }
 
 void WeatherDataModel::checkStaleness() {
