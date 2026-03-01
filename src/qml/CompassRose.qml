@@ -23,24 +23,9 @@ Item {
         return "#C84040"
     }
 
-    // Title label
-    Text {
-        id: titleText
-        text: "Wind Dir"
-        color: "#C8A000"
-        font.pixelSize: parent.height * 0.07
-        font.bold: false
-        anchors.top: parent.top
-        anchors.topMargin: parent.height * 0.02
-        anchors.horizontalCenter: parent.horizontalCenter
-    }
-
     Item {
         id: roseArea
-        anchors.top: titleText.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: dirLabel.top
+        anchors.fill: parent
         anchors.margins: 4
 
         // Static background: concentric circles, crosshairs, compass labels
@@ -57,7 +42,7 @@ Item {
 
                 var cx = width / 2
                 var cy = height / 2
-                var outerR = Math.min(width, height) * 0.5 * 0.82
+                var outerR = Math.min(width, height) * 0.5 * 0.88
 
                 var gold = "#C8A000"
                 var dimGold = "#5A4A00"
@@ -150,7 +135,7 @@ Item {
 
                 var cx = width / 2
                 var cy = height / 2
-                var outerR = Math.min(width, height) * 0.5 * 0.82
+                var outerR = Math.min(width, height) * 0.5 * 0.88
 
                 var minBarR = outerR * 0.08  // minimum bar length for any non-zero bin
                 var maxBarR = outerR * 0.88  // maximum bar reaches near the outer ring
@@ -214,7 +199,7 @@ Item {
 
                     var cx = width / 2
                     var cy = height / 2
-                    var outerR = Math.min(width, height) * 0.5 * 0.82
+                    var outerR = Math.min(width, height) * 0.5 * 0.88
 
                     // Needle line from center to near edge
                     var needleLen = outerR * 0.92
@@ -255,14 +240,4 @@ Item {
         }
     }
 
-    // Direction label with degrees
-    Text {
-        id: dirLabel
-        text: directionLabel(windDir) + "  " + windDir + "\u00B0"
-        color: "#C8A000"
-        font.pixelSize: parent.height * 0.08
-        font.bold: true
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-    }
 }
