@@ -38,6 +38,15 @@ Item {
         return "#8B5CA8"                    // subdued violet
     }
 
+    function aqiColor(aqi) {
+        if (aqi <= 50)  return "#5CA85C"    // Green (Good)
+        if (aqi <= 100) return "#C8A000"    // Yellow (Moderate)
+        if (aqi <= 150) return "#C87C2A"    // Orange (USG)
+        if (aqi <= 200) return "#C84040"    // Red (Unhealthy)
+        if (aqi <= 300) return "#8B5CA8"    // Purple (Very Unhealthy)
+        return "#7B2828"                     // Maroon (Hazardous)
+    }
+
     function pressureTrendArrow(trend) {
         if (trend === 1)  return "\u2191"   // rising
         if (trend === -1) return "\u2193"   // falling
@@ -215,8 +224,13 @@ Item {
             Layout.fillHeight: true
         }
 
-        // Cell 11: Reserved (AQI — Phase 3)
-        ReservedCell {
+        // Cell 11: AQI Multi-Ring Gauge (GAUG-11, GAUG-12)
+        AqiGauge {
+            aqiValue: weatherModel.aqi
+            pm25Value: weatherModel.pm25
+            pm10Value: weatherModel.pm10
+            aqiColor: aqiColor(weatherModel.aqi)
+            sparklineData: weatherModel.aqiHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
