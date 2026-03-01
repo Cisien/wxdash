@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 1 of 4 (Data Model and Network Layer)
-Plan: 2 of TBD in current phase
-Status: In progress
-Last activity: 2026-03-01 — Completed Plan 01-02: WeatherDataModel with staleness detection (18 tests pass in 1ms)
+Plan: 3 of 3 in current phase
+Status: Phase 1 complete
+Last activity: 2026-03-01 — Completed Plan 01-03: HttpPoller, UdpReceiver, and main.cpp wiring
 
-Progress: [██░░░░░░░░] 10%
+Progress: [███░░░░░░░] 25%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 4.5 min
-- Total execution time: 9 min
+- Total plans completed: 3
+- Average duration: 3.7 min
+- Total execution time: 11 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| Phase 1: Data Model and Network Layer | 2 | 9 min | 4.5 min |
+| Phase 1: Data Model and Network Layer | 3 | 11 min | 3.7 min |
 
 **Recent Trend:**
-- Last 5 plans: 6 min, 3 min
+- Last 5 plans: 6 min, 3 min, 2 min
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -53,6 +53,11 @@ Recent decisions affecting current work:
 - [01-02]: Injectable std::function<qint64()> clock in WeatherDataModel constructor — enables deterministic staleness tests without real-time waits
 - [01-02]: clearAllValues emits changed signals only for non-zero fields — avoids spurious signals when clearing an already-cleared model
 - [01-02]: Staleness timer starts on first received update (m_hasReceivedUpdate guard) — no false positive at startup
+- [01-03]: HttpPoller creates QNAM in start() slot (not constructor) — QNAM must be owned by network thread after moveToThread
+- [01-03]: UdpReceiver creates its own QNAM — simpler than sharing across thread boundary for fire-and-forget broadcast requests
+- [01-03]: No connection type specified in cross-thread connects — Qt auto-detects QueuedConnection
+- [01-03]: DATA-09 — no retry in HttpPoller; 10s poll cadence is the retry mechanism
+- [01-03]: DATA-03 — renewal timer fires every 3600s (belt and suspenders, even though 86400s requested)
 
 ### Pending Todos
 
@@ -65,5 +70,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 01-02-PLAN.md — WeatherDataModel with staleness detection (18 tests pass in 1ms)
+Stopped at: Completed 01-03-PLAN.md — HttpPoller, UdpReceiver, and main.cpp wiring (Phase 1 complete)
 Resume file: None

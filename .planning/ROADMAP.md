@@ -14,7 +14,7 @@ Pi-specific deployment notes (EGLFS, Mesa V3D, gpu_mem, eglfs_kms, native vs. cr
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Data Model and Network Layer** - HTTP polling, UDP real-time feed, JSON parsing, and central WeatherDataModel
+- [x] **Phase 1: Data Model and Network Layer** - HTTP polling, UDP real-time feed, JSON parsing, and central WeatherDataModel
 - [ ] **Phase 2: Core Gauges and Dashboard Layout** - All outdoor weather gauges, compass rose, fullscreen frameless window, and responsive layout
 - [ ] **Phase 3: Trends, Secondary Data, and Air Quality** - Sparklines, indoor panel, PurpleAir AQI gauges, and animated needles
 - [ ] **Phase 4: Kiosk Hardening and Deployment** - systemd watchdog, staleness indicators, and 24-hour stability validation
@@ -33,8 +33,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. After a network disconnect, the app reconnects automatically without requiring a restart
 **Plans**: 3 plans
   - [x] 01-01-PLAN.md — Project scaffolding, WeatherReadings structs, and JsonParser (TDD)
-  - [ ] 01-02-PLAN.md — WeatherDataModel with staleness detection (TDD)
-  - [ ] 01-03-PLAN.md — HttpPoller, UdpReceiver, and main.cpp integration wiring
+  - [x] 01-02-PLAN.md — WeatherDataModel with staleness detection (TDD)
+  - [x] 01-03-PLAN.md — HttpPoller, UdpReceiver, and main.cpp integration wiring
 
 ### Phase 2: Core Gauges and Dashboard Layout
 **Goal**: Users see all outdoor weather conditions at a glance on a full-screen, frameless, responsive dashboard with color-coded thresholds and real-time updates — running on any Linux system
@@ -78,7 +78,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Model and Network Layer | 2/3 | In Progress|  |
+| 1. Data Model and Network Layer | 3/3 | Complete | 2026-03-01 |
 | 2. Core Gauges and Dashboard Layout | 0/TBD | Not started | - |
 | 3. Trends, Secondary Data, and Air Quality | 0/TBD | Not started | - |
 | 4. Kiosk Hardening and Deployment | 0/TBD | Not started | - |

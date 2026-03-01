@@ -9,15 +9,15 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Data Acquisition
 
-- [ ] **DATA-01**: App polls WeatherLink Live HTTP API (`/v1/current_conditions`) every 10s for all sensor data
-- [ ] **DATA-02**: App starts UDP real-time broadcast (`/v1/real_time?duration=86400`) and listens on port 22222 for 2.5s wind/rain updates
-- [ ] **DATA-03**: App automatically renews UDP broadcast session before expiry
+- [x] **DATA-01**: App polls WeatherLink Live HTTP API (`/v1/current_conditions`) every 10s for all sensor data
+- [x] **DATA-02**: App starts UDP real-time broadcast (`/v1/real_time?duration=86400`) and listens on port 22222 for 2.5s wind/rain updates
+- [x] **DATA-03**: App automatically renews UDP broadcast session before expiry
 - [x] **DATA-04**: JSON parser routes by `data_structure_type` (1=ISS outdoor, 3=barometer, 4=indoor temp/hum)
 - [x] **DATA-05**: Rain counts converted to inches using `rain_size` field (1=0.01in, 2=0.2mm, 3=0.1mm, 4=0.001in)
 - [ ] **DATA-06**: App polls PurpleAir sensor (`http://10.1.255.41/json?live=false`) for PM2.5 data
 - [ ] **DATA-07**: PurpleAir channels A and B are averaged (PM2.5 averaged, then AQI calculated from average via EPA breakpoint table)
 - [x] **DATA-08**: Data staleness detected and signaled when no update received for >30s (per source)
-- [ ] **DATA-09**: App handles network disconnect/reconnect gracefully with automatic retry
+- [x] **DATA-09**: App handles network disconnect/reconnect gracefully with automatic retry
 
 ### Gauges & Display
 
@@ -82,15 +82,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
 | DATA-04 | Phase 1 | Complete (01-01) |
 | DATA-05 | Phase 1 | Complete (01-01) |
 | DATA-06 | Phase 3 | Pending |
 | DATA-07 | Phase 3 | Pending |
 | DATA-08 | Phase 1 | Complete |
-| DATA-09 | Phase 1 | Pending |
+| DATA-09 | Phase 1 | Complete |
 | GAUG-01 | Phase 2 | Pending |
 | GAUG-02 | Phase 2 | Pending |
 | GAUG-03 | Phase 2 | Pending |
