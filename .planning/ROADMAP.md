@@ -74,7 +74,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -82,13 +82,20 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 2. Core Gauges and Dashboard Layout | 2/2 | Complete   | 2026-03-01 |
 | 3. Trends, Secondary Data, and Air Quality | 3/3 | Complete   | 2026-03-01 |
 | 4. Kiosk Hardening and Deployment | 0/TBD | Not started | - |
+| 5. CMake install-kiosk target | 0/2 | Not started | - |
 
 ### Phase 5: CMake install-kiosk target for Raspberry Pi deployment
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** `cmake --install build --component kiosk` deploys the wxdash binary, QML module, systemd service, EGLFS config, and desktop files to FHS-compliant paths, enabling one-command Pi kiosk deployment with auto-start at boot
+**Requirements**: KIOSK-05
 **Depends on:** Phase 4
-**Plans:** 3/3 plans complete
+**Success Criteria** (what must be TRUE):
+  1. `cmake --install build --component kiosk` places the binary, QML module, systemd service, eglfs.json, desktop files, and icon at correct FHS paths
+  2. The installed systemd service file has correct ExecStart path and EGLFS environment variables
+  3. A README documents the complete Pi deployment workflow from build through systemctl enable
+  4. The install-kiosk convenience target exists for one-command deploy + enable
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 5 to break down)
+- [ ] 05-01-PLAN.md — CMake install() rules, systemd service template, eglfs.json, desktop entry template
+- [ ] 05-02-PLAN.md — README deployment documentation and human verification
