@@ -332,6 +332,73 @@ void WeatherDataModel::applyUdpUpdate(const UdpReading& r) {
     recordWindSample(r.windDirLast, r.windSpeedLast);
 }
 
+// ---------------------------------------------------------------------------
+// PurpleAir methods
+// ---------------------------------------------------------------------------
+
+void WeatherDataModel::applyPurpleAirUpdate(const PurpleAirReading& r) {
+    // Silent recovery from staleness
+    if (m_purpleAirStale) {
+        m_purpleAirStale = false;
+        emit purpleAirStaleChanged(false);
+    }
+
+    // Mark PurpleAir as updated (for staleness tracking)
+    if (m_elapsedProvider) {
+        m_lastPurpleAirElapsed = m_elapsedProvider();
+    } else {
+        if (!m_wallClock.isValid()) m_wallClock.start();
+        m_lastPurpleAirElapsed = m_wallClock.elapsed();
+    }
+    if (!m_hasPurpleAirUpdate) {
+        m_hasPurpleAirUpdate = true;
+    }
+
+    if (!qFuzzyCompare(m_aqi + 1.0, r.aqi + 1.0)) {
+        m_aqi = r.aqi;
+        emit aqiChanged(m_aqi);
+    }
+    if (!qFuzzyCompare(m_pm25 + 1.0, r.pm25avg + 1.0)) {
+        m_pm25 = r.pm25avg;
+        emit pm25Changed(m_pm25);
+    }
+    if (!qFuzzyCompare(m_pm10 + 1.0, r.pm10 + 1.0)) {
+        m_pm10 = r.pm10;
+        emit pm10Changed(m_pm10);
+    }
+
+    // Record AQI sparkline sample
+    m_aqiSparkline[m_aqiSparklineHead] = m_aqi;
+    m_aqiSparklineHead = (m_aqiSparklineHead + 1) % kAqiSparklineCapacity;
+    if (m_aqiSparklineCount < kAqiSparklineCapacity) m_aqiSparklineCount++;
+    emit aqiHistoryChanged();
+}
+
+QVariantList WeatherDataModel::aqiHistory() const {
+    QVariantList list;
+    list.reserve(m_aqiSparklineCount);
+    for (int i = 0; i < m_aqiSparklineCount; i++) {
+        int idx = (m_aqiSparklineHead - m_aqiSparklineCount + i + kAqiSparklineCapacity) % kAqiSparklineCapacity;
+        list.append(m_aqiSparkline[idx]);
+    }
+    return list;
+}
+
+void WeatherDataModel::clearPurpleAirValues() {
+    if (!qFuzzyCompare(m_aqi + 1.0, 1.0)) {
+        m_aqi = 0.0;
+        emit aqiChanged(0.0);
+    }
+    if (!qFuzzyCompare(m_pm25 + 1.0, 1.0)) {
+        m_pm25 = 0.0;
+        emit pm25Changed(0.0);
+    }
+    if (!qFuzzyCompare(m_pm10 + 1.0, 1.0)) {
+        m_pm10 = 0.0;
+        emit pm10Changed(0.0);
+    }
+}
+
 void WeatherDataModel::checkStaleness() {
     // No false positive: never stale before the first update
     if (!m_hasReceivedUpdate) {
@@ -347,5 +414,15 @@ void WeatherDataModel::checkStaleness() {
         clearAllValues();
         emit sourceStaleChanged(true);
         // Note: recovery happens in applyIssUpdate/applyUdpUpdate when new data arrives
+    }
+
+    // PurpleAir staleness check — independent of weather station
+    if (m_hasPurpleAirUpdate) {
+        const qint64 paSinceUpdate = currentElapsed - m_lastPurpleAirElapsed;
+        if (paSinceUpdate > kStalenessMs && !m_purpleAirStale) {
+            m_purpleAirStale = true;
+            clearPurpleAirValues();
+            emit purpleAirStaleChanged(true);
+        }
     }
 }

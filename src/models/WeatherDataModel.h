@@ -56,6 +56,12 @@ class WeatherDataModel : public QObject {
     Q_PROPERTY(QVariantList uvIndexHistory READ uvIndexHistory NOTIFY uvIndexHistoryChanged)
     Q_PROPERTY(QVariantList solarRadHistory READ solarRadHistory NOTIFY solarRadHistoryChanged)
 
+    Q_PROPERTY(double aqi READ aqi NOTIFY aqiChanged)
+    Q_PROPERTY(double pm25 READ pm25 NOTIFY pm25Changed)
+    Q_PROPERTY(double pm10 READ pm10 NOTIFY pm10Changed)
+    Q_PROPERTY(bool purpleAirStale READ purpleAirStale NOTIFY purpleAirStaleChanged)
+    Q_PROPERTY(QVariantList aqiHistory READ aqiHistory NOTIFY aqiHistoryChanged)
+
 public:
     // Sparkline capacity: 24h at 10s cadence
     static constexpr int kSparklineCapacity = 8640;
@@ -96,11 +102,19 @@ public:
     QVariantList uvIndexHistory() const;
     QVariantList solarRadHistory() const;
 
+    // PurpleAir accessors
+    double aqi() const { return m_aqi; }
+    double pm25() const { return m_pm25; }
+    double pm10() const { return m_pm10; }
+    bool purpleAirStale() const { return m_purpleAirStale; }
+    QVariantList aqiHistory() const;
+
 public slots:
     void applyIssUpdate(const IssReading& r);
     void applyBarUpdate(const BarReading& r);
     void applyIndoorUpdate(const IndoorReading& r);
     void applyUdpUpdate(const UdpReading& r);
+    void applyPurpleAirUpdate(const PurpleAirReading& r);
     void checkStaleness();
 
 signals:
@@ -135,8 +149,16 @@ signals:
     void uvIndexHistoryChanged();
     void solarRadHistoryChanged();
 
+    // PurpleAir signals
+    void aqiChanged(double value);
+    void pm25Changed(double value);
+    void pm10Changed(double value);
+    void purpleAirStaleChanged(bool stale);
+    void aqiHistoryChanged();
+
 private:
     void clearAllValues();
+    void clearPurpleAirValues();
     void markUpdated();
     void recordWindSample(int dir, double speed);
     void recordSparklineSample(double* ring, int& head, int& count, double value);
@@ -210,6 +232,22 @@ private:
     WindSample m_windRing[kMaxWindSamples] = {};
     int m_windRingHead = 0;  // next write position
     int m_windRingCount = 0; // number of samples stored
+
+    // PurpleAir fields
+    double m_aqi = 0.0;
+    double m_pm25 = 0.0;
+    double m_pm10 = 0.0;
+
+    // PurpleAir staleness — independent from weather station staleness
+    bool m_purpleAirStale = false;
+    bool m_hasPurpleAirUpdate = false;
+    qint64 m_lastPurpleAirElapsed = 0;
+
+    // AQI sparkline ring buffer (24h at 30s PurpleAir cadence)
+    static constexpr int kAqiSparklineCapacity = 2880;
+    double m_aqiSparkline[kAqiSparklineCapacity] = {};
+    int m_aqiSparklineHead = 0;
+    int m_aqiSparklineCount = 0;
 
     // Staleness tracking
     static constexpr int kStalenessMs = 30000;

@@ -1,6 +1,7 @@
 #include "models/WeatherDataModel.h"
 #include "models/WeatherReadings.h"
 #include "network/HttpPoller.h"
+#include "network/PurpleAirPoller.h"
 #include "network/UdpReceiver.h"
 
 #include <QCommandLineOption>
@@ -30,6 +31,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<BarReading>();
     qRegisterMetaType<IndoorReading>();
     qRegisterMetaType<UdpReading>();
+    qRegisterMetaType<PurpleAirReading>();
 
     // WeatherDataModel lives on the main thread.
     // QML gauges bind to its Q_PROPERTY NOTIFY signals from the same thread.
@@ -65,13 +67,25 @@ int main(int argc, char *argv[])
     QObject::connect(httpPoller, &HttpPoller::indoorReceived, model, &WeatherDataModel::applyIndoorUpdate);
     QObject::connect(udpReceiver, &UdpReceiver::realtimeReceived, model, &WeatherDataModel::applyUdpUpdate);
 
+    // PurpleAir local sensor polling — shares the network thread with HttpPoller and UdpReceiver
+    const QUrl purpleAirUrl(QStringLiteral("http://10.1.255.41/json?live=false"));
+    auto *purpleAirPoller = new PurpleAirPoller(purpleAirUrl);
+    purpleAirPoller->moveToThread(networkThread);
+
+    QObject::connect(purpleAirPoller, &PurpleAirPoller::purpleAirReceived,
+                     model, &WeatherDataModel::applyPurpleAirUpdate);
+    QObject::connect(networkThread, &QThread::started,
+                     purpleAirPoller, &PurpleAirPoller::start);
+    QObject::connect(networkThread, &QThread::finished,
+                     purpleAirPoller, &QObject::deleteLater);
+
     // Thread lifecycle: start workers when thread starts, delete them when thread finishes.
     QObject::connect(networkThread, &QThread::started, httpPoller, &HttpPoller::start);
     QObject::connect(networkThread, &QThread::started, udpReceiver, &UdpReceiver::start);
     QObject::connect(networkThread, &QThread::finished, httpPoller, &QObject::deleteLater);
     QObject::connect(networkThread, &QThread::finished, udpReceiver, &QObject::deleteLater);
 
-    // Start the network thread — fires QThread::started, which triggers start() on both workers.
+    // Start the network thread — fires QThread::started, which triggers start() on all workers.
     networkThread->start();
 
     // Clean shutdown: stop the network thread gracefully when the application quits.
