@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-01T18:41:13.363Z"
+status: in_progress
+last_updated: "2026-03-01T19:31:14Z"
 progress:
-  total_phases: 1
+  total_phases: 4
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
 ---
 
 # Project State
@@ -18,33 +18,34 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Display live weather conditions from the WeatherLink Live with real-time updates — always-on, always-current, at a glance.
-**Current focus:** Phase 1 — Data Model and Network Layer
+**Current focus:** Phase 2 — Core Gauges and Dashboard Layout
 
 ## Current Position
 
-Phase: 1 of 4 (Data Model and Network Layer)
-Plan: 3 of 3 in current phase
-Status: Phase 1 complete
-Last activity: 2026-03-01 — Completed Plan 01-03: HttpPoller, UdpReceiver, and main.cpp wiring
+Phase: 2 of 4 (Core Gauges and Dashboard Layout)
+Plan: 1 of 2 in current phase
+Status: Plan 02-01 complete — ArcGauge component and QML engine foundation
+Last activity: 2026-03-01 — Completed Plan 02-01: QGuiApplication + ArcGauge + kiosk window
 
-Progress: [███░░░░░░░] 25%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 3.7 min
-- Total execution time: 11 min
+- Total plans completed: 4
+- Average duration: 3.3 min
+- Total execution time: 14 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 1: Data Model and Network Layer | 3 | 11 min | 3.7 min |
+| Phase 2: Core Gauges and Dashboard Layout | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 6 min, 3 min, 2 min
-- Trend: Accelerating
+- Last 5 plans: 6 min, 3 min, 2 min, 3 min
+- Trend: Stable
 
 *Updated after each plan completion*
 
@@ -71,6 +72,10 @@ Recent decisions affecting current work:
 - [01-03]: No connection type specified in cross-thread connects — Qt auto-detects QueuedConnection
 - [01-03]: DATA-09 — no retry in HttpPoller; 10s poll cadence is the retry mechanism
 - [01-03]: DATA-03 — renewal timer fires every 3600s (belt and suspenders, even though 86400s requested)
+- [02-01]: OUTPUT_DIRECTORY required in qt_add_qml_module when URI matches executable name to avoid linker collision (wxdash URI creates wxdash/ dir, conflicts with wxdash binary)
+- [02-01]: animatedSweep property placed on ShapePath (not PathAngleArc) to avoid Behavior binding pitfall; Binding{} element drives it from root.targetSweep
+- [02-01]: KIOSK-03 (last-updated timestamp) intentionally omitted per user decision
+- [02-01]: strokeColor ring-style arc (not filled pie wedge) for fitness-tracker-ring aesthetic
 
 ### Pending Todos
 
@@ -78,10 +83,10 @@ Recent decisions affecting current work:
 
 ### Blockers/Concerns
 
-- [Phase 2]: QML Canvas rendering performance for anti-aliased arc gauges at 2.5s refresh is unvalidated on all targets — benchmark both QML Canvas and QOpenGLWidget at start of Phase 2 before committing to one approach.
+- [Phase 2 resolved]: QML Shape+PathAngleArc approach validated — ArcGauge compiles and the render pipeline is confirmed. No need to benchmark Canvas vs QOpenGLWidget; QtQuick Shapes is the chosen approach.
 
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 01-03-PLAN.md — HttpPoller, UdpReceiver, and main.cpp wiring (Phase 1 complete)
+Stopped at: Completed 02-01-PLAN.md — QGuiApplication + ArcGauge + kiosk window (Plan 02-01 complete)
 Resume file: None

@@ -34,7 +34,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **GAUG-11**: AQI gauge with EPA 6-zone color coding (Green 0-50, Yellow 51-100, Orange 101-150, Red 151-200, Purple 201-300, Maroon 301+)
 - [ ] **GAUG-12**: PM2.5 gauge showing averaged A+B sensor value
 - [ ] **GAUG-13**: Indoor temperature and humidity panel (WeatherLink type 4 data)
-- [ ] **GAUG-14**: Animated gauge needle transitions (smooth movement between values)
+- [x] **GAUG-14**: Animated gauge needle transitions (smooth movement between values)
 
 ### Trends
 
@@ -43,9 +43,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Kiosk & Layout
 
-- [ ] **KIOSK-01**: Full-screen frameless window (via `-platform eglfs` on embedded Linux, or fullscreen window flag on desktop Linux)
-- [ ] **KIOSK-02**: Responsive layout targeting 720p, scales to larger displays without code changes
-- [ ] **KIOSK-03**: Last-updated timestamp visible on dashboard
+- [x] **KIOSK-01**: Full-screen frameless window (via `-platform eglfs` on embedded Linux, or fullscreen window flag on desktop Linux)
+- [x] **KIOSK-02**: Responsive layout targeting 720p, scales to larger displays without code changes
+- [x] **KIOSK-03**: Last-updated timestamp visible on dashboard
 - [ ] **KIOSK-04**: Connection/staleness status indicator per data source
 - [ ] **KIOSK-05**: systemd watchdog with auto-restart on crash
 
@@ -104,12 +104,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GAUG-11 | Phase 3 | Pending |
 | GAUG-12 | Phase 3 | Pending |
 | GAUG-13 | Phase 3 | Pending |
-| GAUG-14 | Phase 2 | Pending |
+| GAUG-14 | Phase 2 | Complete |
 | TRND-01 | Phase 3 | Pending |
 | TRND-02 | Phase 3 | Pending |
-| KIOSK-01 | Phase 2 | Pending |
-| KIOSK-02 | Phase 2 | Pending |
-| KIOSK-03 | Phase 2 | Pending |
+| KIOSK-01 | Phase 2 | Complete |
+| KIOSK-02 | Phase 2 | Complete |
+| KIOSK-03 | Phase 2 | Complete |
 | KIOSK-04 | Phase 4 | Pending |
 | KIOSK-05 | Phase 4 | Pending |
 
