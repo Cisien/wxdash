@@ -90,38 +90,65 @@ Item {
         value: root.targetSweep
     }
 
+    // Inner radius boundary for text sizing
+    readonly property real innerRadius: (Math.min(width, height) / 2) - strokeWidth
+
     // Label text (gauge title, positioned in upper third)
     Text {
         id: labelText
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height * 0.32
+        width: root.innerRadius * 1.2
         text: root.label
         color: "#C8A000"
         font.pixelSize: Math.min(root.width, root.height) * 0.09
         font.bold: false
         horizontalAlignment: Text.AlignHCenter
+        fontSizeMode: Text.HorizontalFit
+        minimumPixelSize: 8
     }
 
-    // Value + unit text (centered)
+    // Value text (number only, centered)
     Text {
         id: valueText
-        anchors.centerIn: parent
-        text: root.value.toFixed(root.decimals) + (root.unit !== "" ? " " + root.unit : "")
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: root.unit !== "" ? -root.height * 0.03 : 0
+        width: root.innerRadius * 1.3
+        text: root.value.toFixed(root.decimals)
         color: "#C8A000"
-        font.pixelSize: Math.min(root.width, root.height) * 0.18
+        font.pixelSize: Math.min(root.width, root.height) * 0.20
         font.bold: true
+        horizontalAlignment: Text.AlignHCenter
+        fontSizeMode: Text.HorizontalFit
+        minimumPixelSize: 10
+    }
+
+    // Unit text (small, below value)
+    Text {
+        id: unitText
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: valueText.bottom
+        visible: root.unit !== ""
+        text: root.unit
+        color: "#8A7A00"
+        font.pixelSize: Math.min(root.width, root.height) * 0.08
         horizontalAlignment: Text.AlignHCenter
     }
 
-    // Secondary text (optional, below value)
+    // Secondary text (optional, below unit)
     Text {
         id: secondaryTextItem
         anchors.horizontalCenter: parent.horizontalCenter
-        y: valueText.y + valueText.height + (root.height * 0.02)
+        anchors.top: root.unit !== "" ? unitText.bottom : valueText.bottom
+        anchors.topMargin: root.height * 0.01
+        width: root.innerRadius * 1.3
         visible: root.secondaryText !== ""
         text: root.secondaryLabel !== "" ? root.secondaryLabel + ": " + root.secondaryText : root.secondaryText
         color: "#C8A000"
-        font.pixelSize: Math.min(root.width, root.height) * 0.08
+        font.pixelSize: Math.min(root.width, root.height) * 0.07
         horizontalAlignment: Text.AlignHCenter
+        fontSizeMode: Text.HorizontalFit
+        minimumPixelSize: 8
     }
 }
