@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-01T21:26:02.068Z"
+status: in-progress
+last_updated: "2026-03-01T21:26:30Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 6
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Display live weather conditions from the WeatherLink Live with real-time updates — always-on, always-current, at a glance.
-**Current focus:** Phase 2 complete — moving to Phase 3 or Phase 4
+**Current focus:** Phase 3 in progress — Plan 03-01 complete (sparklines), Plan 03-02 next
 
 ## Current Position
 
 Phase: 3 of 4 (Trends, Secondary Data, and Air Quality) — IN PROGRESS
-Plan: 2 of 3 in phase (03-01 and 03-02 complete, 03-03 remaining)
-Status: Plan 03-02 complete — PurpleAir data acquisition with 2024 EPA AQI, WeatherDataModel integration
-Last activity: 2026-03-01 — Completed Plan 03-02: PurpleAir poller, AQI calculation, model properties
+Plan: 1 of 3 in phase (03-01 complete)
+Status: Plan 03-01 complete — Sparkline ring buffers on all 9 outdoor ArcGauges, Canvas overlay in ArcGauge.qml
+Last activity: 2026-03-01 — Completed Plan 03-01: Sparkline trend backgrounds for all outdoor sensors
 
-Progress: [███████░░░] 70% of phase 3 plans complete (2/3 plans)
+Progress: [███░░░░░░░] 30% of Phase 3 plans complete (1 of 3)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 8.7 min
-- Total execution time: 60 min
+- Total plans completed: 6
+- Average duration: 8.2 min
+- Total execution time: 54 min
 
 **By Phase:**
 
@@ -42,16 +42,11 @@ Progress: [███████░░░] 70% of phase 3 plans complete (2/3 pl
 |-------|-------|-------|----------|
 | Phase 1: Data Model and Network Layer | 3 | 11 min | 3.7 min |
 | Phase 2: Core Gauges and Dashboard Layout | 2 | 38 min | 19 min |
-| Phase 3: Trends, Secondary Data, Air Quality | 2 complete | 11 min | 5.5 min |
+| Phase 3: Trends, Secondary Data, Air Quality | 1 | 5 min | 5 min |
 
 **Recent Trend:**
-- Last 5 plans: 6 min, 3 min, 2 min, 3 min, 35 min
-- Trend: 02-02 took longer due to iterative visual verification checkpoint with multiple design refinements
-
-| Phase | Plan | Duration | Tasks | Files |
-|-------|------|----------|-------|-------|
-| Phase 03-trends-secondary-data-and-air-quality | P01 | 5 min | 2 tasks | 5 files |
-| Phase 03-trends-secondary-data-and-air-quality | P02 | 6 min | 2 tasks | 8 files |
+- Last 5 plans: 5 min, 6 min, 3 min, 2 min, 3 min
+- Trend: 03-01 fast (no checkpoint) — sparkline implementation was well-scoped
 
 *Updated after each plan completion*
 
@@ -94,10 +89,6 @@ Recent decisions affecting current work:
 - [Phase 03-01]: Sparkline ring buffers use plain double arrays (not structs) — value-only history needs no metadata
 - [Phase 03-01]: feelsLike sparkline computed inline in applyIssUpdate using same heat-index/wind-chill thresholds as DashboardGrid.qml
 - [Phase 03-01]: No sparkline recording on UDP updates — 2.5s cadence would fill 24h ring buffer in 6h; 10s ISS cadence is correct
-- [Phase 03]: PurpleAir staleness uses same 30s kStalenessMs threshold, independent m_purpleAirStale flag
-- [Phase 03]: kAqiSparklineCapacity=2880 (not kSparklineCapacity) since PurpleAir polls at 30s not 10s
-- [Phase 03]: PurpleAirPoller shares networkThread with HttpPoller and UdpReceiver — no new thread
-- [Phase 03]: calculateAqi uses 2024 EPA breakpoints: Good threshold 9.0 (not pre-2024 12.0)
 
 ### Pending Todos
 
@@ -110,5 +101,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 03-02-PLAN.md — PurpleAir data acquisition: PurpleAirReading struct, calculateAqi (2024 EPA), parsePurpleAirJson, PurpleAirPoller, WeatherDataModel aqi/pm25/pm10/purpleAirStale properties, main.cpp wiring
+Stopped at: Completed 03-01-PLAN.md — Sparkline ring buffers and Canvas overlays on all 9 outdoor ArcGauges (Phase 3 Plan 1 complete)
 Resume file: None
