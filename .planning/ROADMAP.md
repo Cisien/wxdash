@@ -31,7 +31,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Rain counts are converted to inches correctly for all four rain_size values (verified by unit test against known counts)
   4. Staleness is detected within 30s of a data source going silent and a stale signal is emitted
   5. After a network disconnect, the app reconnects automatically without requiring a restart
-**Plans**: TBD
+**Plans**: 3 plans
+  - [ ] 01-01-PLAN.md — Project scaffolding, WeatherReadings structs, and JsonParser (TDD)
+  - [ ] 01-02-PLAN.md — WeatherDataModel with staleness detection (TDD)
+  - [ ] 01-03-PLAN.md — HttpPoller, UdpReceiver, and main.cpp integration wiring
 
 ### Phase 2: Core Gauges and Dashboard Layout
 **Goal**: Users see all outdoor weather conditions at a glance on a full-screen, frameless, responsive dashboard with color-coded thresholds and real-time updates — running on any Linux system
@@ -75,7 +78,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Model and Network Layer | 0/TBD | Not started | - |
+| 1. Data Model and Network Layer | 0/3 | Planning complete | - |
 | 2. Core Gauges and Dashboard Layout | 0/TBD | Not started | - |
 | 3. Trends, Secondary Data, and Air Quality | 0/TBD | Not started | - |
 | 4. Kiosk Hardening and Deployment | 0/TBD | Not started | - |
