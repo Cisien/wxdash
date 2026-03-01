@@ -1,5 +1,7 @@
 qt_add_library(wxdash_lib STATIC
     models/WeatherReadings.h
+    models/WeatherDataModel.h
+    models/WeatherDataModel.cpp
     network/JsonParser.h
     network/JsonParser.cpp
 )
