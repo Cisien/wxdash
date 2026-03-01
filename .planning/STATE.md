@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 1 of 4 (Data Model and Network Layer)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-03-01 — Roadmap revised: Phase 0 removed, phases renumbered 1-4, KIOSK-01/KIOSK-02 folded into Phase 2, scope broadened from Pi-only to Linux broadly
+Plan: 1 of TBD in current phase
+Status: In progress
+Last activity: 2026-03-01 — Completed Plan 01-01: CMake scaffold + JsonParser with TDD (24 tests pass)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 5%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 1
+- Average duration: 6 min
+- Total execution time: 6 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| — | — | — | — |
+| Phase 1: Data Model and Network Layer | 1 | 6 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: —
-- Trend: —
+- Last 5 plans: 6 min
+- Trend: Baseline established
 
 *Updated after each plan completion*
 
@@ -47,6 +47,9 @@ Recent decisions affecting current work:
 - [Init]: EGLFS eglfs_kms backend required for Pi 4/5 on embedded deployments (eglfs_brcm is Pi 1-3 only — black screen on Pi 4/5)
 - [Revise-2026-03-01]: Development and testing happens on local Linux machine, not the Pi. Pi is a deployment target. Pi-specific deployment notes go in README, not a build validation phase.
 - [Revise-2026-03-01]: App targets Linux broadly. Pi-specific requirements (EGLFS, Mesa V3D, gpu_mem) are README documentation items, not v1 requirements.
+- [01-01]: JsonParser implemented as stateless namespace — pure functions, trivially testable, no shared state
+- [01-01]: WeatherReadings.h has zero Qt dependency in struct definitions — plain C++17 structs, Q_DECLARE_METATYPE added at bottom
+- [01-01]: wxdash_lib STATIC library allows both executable and test targets to link the same implementation
 
 ### Pending Todos
 
@@ -59,5 +62,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Roadmap revised per user feedback — ready to plan Phase 1
+Stopped at: Completed 01-01-PLAN.md — CMake scaffold + JsonParser with TDD (24 tests pass)
 Resume file: None

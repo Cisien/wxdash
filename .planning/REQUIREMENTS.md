@@ -12,8 +12,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **DATA-01**: App polls WeatherLink Live HTTP API (`/v1/current_conditions`) every 10s for all sensor data
 - [ ] **DATA-02**: App starts UDP real-time broadcast (`/v1/real_time?duration=86400`) and listens on port 22222 for 2.5s wind/rain updates
 - [ ] **DATA-03**: App automatically renews UDP broadcast session before expiry
-- [ ] **DATA-04**: JSON parser routes by `data_structure_type` (1=ISS outdoor, 3=barometer, 4=indoor temp/hum)
-- [ ] **DATA-05**: Rain counts converted to inches using `rain_size` field (1=0.01in, 2=0.2mm, 3=0.1mm, 4=0.001in)
+- [x] **DATA-04**: JSON parser routes by `data_structure_type` (1=ISS outdoor, 3=barometer, 4=indoor temp/hum)
+- [x] **DATA-05**: Rain counts converted to inches using `rain_size` field (1=0.01in, 2=0.2mm, 3=0.1mm, 4=0.001in)
 - [ ] **DATA-06**: App polls PurpleAir sensor (`http://10.1.255.41/json?live=false`) for PM2.5 data
 - [ ] **DATA-07**: PurpleAir channels A and B are averaged (PM2.5 averaged, then AQI calculated from average via EPA breakpoint table)
 - [ ] **DATA-08**: Data staleness detected and signaled when no update received for >30s (per source)
@@ -85,8 +85,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-01 | Phase 1 | Pending |
 | DATA-02 | Phase 1 | Pending |
 | DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
-| DATA-05 | Phase 1 | Pending |
+| DATA-04 | Phase 1 | Complete (01-01) |
+| DATA-05 | Phase 1 | Complete (01-01) |
 | DATA-06 | Phase 3 | Pending |
 | DATA-07 | Phase 3 | Pending |
 | DATA-08 | Phase 1 | Pending |
