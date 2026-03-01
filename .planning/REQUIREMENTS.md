@@ -16,7 +16,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DATA-05**: Rain counts converted to inches using `rain_size` field (1=0.01in, 2=0.2mm, 3=0.1mm, 4=0.001in)
 - [ ] **DATA-06**: App polls PurpleAir sensor (`http://10.1.255.41/json?live=false`) for PM2.5 data
 - [ ] **DATA-07**: PurpleAir channels A and B are averaged (PM2.5 averaged, then AQI calculated from average via EPA breakpoint table)
-- [ ] **DATA-08**: Data staleness detected and signaled when no update received for >30s (per source)
+- [x] **DATA-08**: Data staleness detected and signaled when no update received for >30s (per source)
 - [ ] **DATA-09**: App handles network disconnect/reconnect gracefully with automatic retry
 
 ### Gauges & Display
@@ -89,7 +89,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-05 | Phase 1 | Complete (01-01) |
 | DATA-06 | Phase 3 | Pending |
 | DATA-07 | Phase 3 | Pending |
-| DATA-08 | Phase 1 | Pending |
+| DATA-08 | Phase 1 | Complete |
 | DATA-09 | Phase 1 | Pending |
 | GAUG-01 | Phase 2 | Pending |
 | GAUG-02 | Phase 2 | Pending |

@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 1 of 4 (Data Model and Network Layer)
-Plan: 1 of TBD in current phase
+Plan: 2 of TBD in current phase
 Status: In progress
-Last activity: 2026-03-01 — Completed Plan 01-01: CMake scaffold + JsonParser with TDD (24 tests pass)
+Last activity: 2026-03-01 — Completed Plan 01-02: WeatherDataModel with staleness detection (18 tests pass in 1ms)
 
-Progress: [█░░░░░░░░░] 5%
+Progress: [██░░░░░░░░] 10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 6 min
-- Total execution time: 6 min
+- Total plans completed: 2
+- Average duration: 4.5 min
+- Total execution time: 9 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| Phase 1: Data Model and Network Layer | 1 | 6 min | 6 min |
+| Phase 1: Data Model and Network Layer | 2 | 9 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 6 min
-- Trend: Baseline established
+- Last 5 plans: 6 min, 3 min
+- Trend: Accelerating
 
 *Updated after each plan completion*
 
@@ -50,6 +50,9 @@ Recent decisions affecting current work:
 - [01-01]: JsonParser implemented as stateless namespace — pure functions, trivially testable, no shared state
 - [01-01]: WeatherReadings.h has zero Qt dependency in struct definitions — plain C++17 structs, Q_DECLARE_METATYPE added at bottom
 - [01-01]: wxdash_lib STATIC library allows both executable and test targets to link the same implementation
+- [01-02]: Injectable std::function<qint64()> clock in WeatherDataModel constructor — enables deterministic staleness tests without real-time waits
+- [01-02]: clearAllValues emits changed signals only for non-zero fields — avoids spurious signals when clearing an already-cleared model
+- [01-02]: Staleness timer starts on first received update (m_hasReceivedUpdate guard) — no false positive at startup
 
 ### Pending Todos
 
@@ -62,5 +65,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 01-01-PLAN.md — CMake scaffold + JsonParser with TDD (24 tests pass)
+Stopped at: Completed 01-02-PLAN.md — WeatherDataModel with staleness detection (18 tests pass in 1ms)
 Resume file: None

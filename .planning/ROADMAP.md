@@ -78,7 +78,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Model and Network Layer | 1/3 | In progress | - |
+| 1. Data Model and Network Layer | 2/3 | In Progress|  |
 | 2. Core Gauges and Dashboard Layout | 0/TBD | Not started | - |
 | 3. Trends, Secondary Data, and Air Quality | 0/TBD | Not started | - |
 | 4. Kiosk Hardening and Deployment | 0/TBD | Not started | - |
