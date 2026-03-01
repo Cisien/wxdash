@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Data Model and Network Layer** - HTTP polling, UDP real-time feed, JSON parsing, and central WeatherDataModel
 - [x] **Phase 2: Core Gauges and Dashboard Layout** - All outdoor weather gauges, compass rose, fullscreen frameless window, and responsive layout (completed 2026-03-01)
-- [ ] **Phase 3: Trends, Secondary Data, and Air Quality** - Sparklines, indoor panel, PurpleAir AQI gauges, and animated needles
+- [x] **Phase 3: Trends, Secondary Data, and Air Quality** - Sparklines, indoor panel, PurpleAir AQI gauges, and animated needles (completed 2026-03-01)
 - [ ] **Phase 4: Kiosk Hardening and Deployment** - systemd watchdog, staleness indicators, and 24-hour stability validation
 
 ## Phase Details
@@ -80,7 +80,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Data Model and Network Layer | 3/3 | Complete | 2026-03-01 |
 | 2. Core Gauges and Dashboard Layout | 2/2 | Complete   | 2026-03-01 |
-| 3. Trends, Secondary Data, and Air Quality | 2/3 | In Progress|  |
+| 3. Trends, Secondary Data, and Air Quality | 3/3 | Complete   | 2026-03-01 |
 | 4. Kiosk Hardening and Deployment | 0/TBD | Not started | - |
 
 ### Phase 5: CMake install-kiosk target for Raspberry Pi deployment
@@ -88,7 +88,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 **Goal:** [To be planned]
 **Requirements**: TBD
 **Depends on:** Phase 4
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 5 to break down)

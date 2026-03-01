@@ -31,8 +31,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **GAUG-08**: Solar radiation numeric display
 - [x] **GAUG-09**: Feels-like display (heat index when temp>=80F+RH>=40%; wind chill when temp<=50F+wind>=3mph)
 - [x] **GAUG-10**: Dew point display
-- [ ] **GAUG-11**: AQI gauge with EPA 6-zone color coding (Green 0-50, Yellow 51-100, Orange 101-150, Red 151-200, Purple 201-300, Maroon 301+)
-- [ ] **GAUG-12**: PM2.5 gauge showing averaged A+B sensor value
+- [x] **GAUG-11**: AQI gauge with EPA 6-zone color coding (Green 0-50, Yellow 51-100, Orange 101-150, Red 151-200, Purple 201-300, Maroon 301+)
+- [x] **GAUG-12**: PM2.5 gauge showing averaged A+B sensor value
 - [ ] **GAUG-13**: Indoor temperature and humidity panel (WeatherLink type 4 data)
 - [x] **GAUG-14**: Animated gauge needle transitions (smooth movement between values)
 
@@ -101,8 +101,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GAUG-08 | Phase 2 | Complete |
 | GAUG-09 | Phase 2 | Complete |
 | GAUG-10 | Phase 2 | Complete |
-| GAUG-11 | Phase 3 | Pending |
-| GAUG-12 | Phase 3 | Pending |
+| GAUG-11 | Phase 3 | Complete |
+| GAUG-12 | Phase 3 | Complete |
 | GAUG-13 | Phase 3 | Pending |
 | GAUG-14 | Phase 2 | Complete |
 | TRND-01 | Phase 3 | Complete |
