@@ -125,10 +125,17 @@ private:
     double m_dewPointIn = 0.0;
     bool m_sourceStale = false;
 
-    // Wind rose histogram (16 compass bins, each 22.5°)
+    // Wind rose histogram (16 compass bins, each 22.5°) with rolling window
     static constexpr int kWindBins = 16;
+    static constexpr int kMaxWindSamples = 720; // ~30 min at 2.5s UDP rate
     int m_windBinCount[kWindBins] = {};
     double m_windBinTotalSpeed[kWindBins] = {};
+
+    // Ring buffer for rolling window eviction
+    struct WindSample { int bin; double speed; };
+    WindSample m_windRing[kMaxWindSamples] = {};
+    int m_windRingHead = 0;  // next write position
+    int m_windRingCount = 0; // number of samples stored
 
     // Staleness tracking
     static constexpr int kStalenessMs = 30000;

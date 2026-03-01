@@ -33,7 +33,26 @@ void WeatherDataModel::markUpdated() {
 }
 
 void WeatherDataModel::recordWindSample(int dir, double speed) {
+    // WeatherLink API reports dir=0, speed=0 when calm — not a real north reading
+    if (dir == 0 && qFuzzyCompare(speed + 1.0, 1.0))
+        return;
+
     int bin = qBound(0, qRound(dir / 22.5) % kWindBins, kWindBins - 1);
+
+    // Evict oldest sample if ring buffer is full
+    if (m_windRingCount >= kMaxWindSamples) {
+        const auto& old = m_windRing[m_windRingHead];
+        m_windBinCount[old.bin]--;
+        m_windBinTotalSpeed[old.bin] -= old.speed;
+    }
+
+    // Write new sample into ring buffer
+    m_windRing[m_windRingHead] = {bin, speed};
+    m_windRingHead = (m_windRingHead + 1) % kMaxWindSamples;
+    if (m_windRingCount < kMaxWindSamples)
+        m_windRingCount++;
+
+    // Update bin totals
     m_windBinCount[bin]++;
     m_windBinTotalSpeed[bin] += speed;
     emit windRoseDataChanged();
@@ -133,7 +152,9 @@ void WeatherDataModel::applyIssUpdate(const IssReading& r) {
         m_windSpeed = r.windSpeedLast;
         emit windSpeedChanged(m_windSpeed);
     }
-    if (m_windDir != r.windDirLast) {
+    // Skip bogus dir=0 when speed=0 (WeatherLink calm convention)
+    if (m_windDir != r.windDirLast
+        && !(r.windDirLast == 0 && qFuzzyCompare(r.windSpeedLast + 1.0, 1.0))) {
         m_windDir = r.windDirLast;
         emit windDirChanged(m_windDir);
     }
@@ -205,7 +226,9 @@ void WeatherDataModel::applyUdpUpdate(const UdpReading& r) {
         m_windSpeed = r.windSpeedLast;
         emit windSpeedChanged(m_windSpeed);
     }
-    if (m_windDir != r.windDirLast) {
+    // Skip bogus dir=0 when speed=0 (WeatherLink calm convention)
+    if (m_windDir != r.windDirLast
+        && !(r.windDirLast == 0 && qFuzzyCompare(r.windSpeedLast + 1.0, 1.0))) {
         m_windDir = r.windDirLast;
         emit windDirChanged(m_windDir);
     }
