@@ -14,8 +14,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DATA-03**: App automatically renews UDP broadcast session before expiry
 - [x] **DATA-04**: JSON parser routes by `data_structure_type` (1=ISS outdoor, 3=barometer, 4=indoor temp/hum)
 - [x] **DATA-05**: Rain counts converted to inches using `rain_size` field (1=0.01in, 2=0.2mm, 3=0.1mm, 4=0.001in)
-- [ ] **DATA-06**: App polls PurpleAir sensor (`http://10.1.255.41/json?live=false`) for PM2.5 data
-- [ ] **DATA-07**: PurpleAir channels A and B are averaged (PM2.5 averaged, then AQI calculated from average via EPA breakpoint table)
+- [x] **DATA-06**: App polls PurpleAir sensor (`http://10.1.255.41/json?live=false`) for PM2.5 data
+- [x] **DATA-07**: PurpleAir channels A and B are averaged (PM2.5 averaged, then AQI calculated from average via EPA breakpoint table)
 - [x] **DATA-08**: Data staleness detected and signaled when no update received for >30s (per source)
 - [x] **DATA-09**: App handles network disconnect/reconnect gracefully with automatic retry
 
@@ -38,8 +38,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Trends
 
-- [ ] **TRND-01**: Sparkline mini-graphs showing last few hours of data for key sensors
-- [ ] **TRND-02**: In-memory ring buffer storage for sparkline history (10s cadence)
+- [x] **TRND-01**: Sparkline mini-graphs showing last few hours of data for key sensors
+- [x] **TRND-02**: In-memory ring buffer storage for sparkline history (10s cadence)
 
 ### Kiosk & Layout
 
@@ -87,8 +87,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-03 | Phase 1 | Complete |
 | DATA-04 | Phase 1 | Complete (01-01) |
 | DATA-05 | Phase 1 | Complete (01-01) |
-| DATA-06 | Phase 3 | Pending |
-| DATA-07 | Phase 3 | Pending |
+| DATA-06 | Phase 3 | Complete |
+| DATA-07 | Phase 3 | Complete |
 | DATA-08 | Phase 1 | Complete |
 | DATA-09 | Phase 1 | Complete |
 | GAUG-01 | Phase 2 | Complete |
@@ -105,8 +105,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GAUG-12 | Phase 3 | Pending |
 | GAUG-13 | Phase 3 | Pending |
 | GAUG-14 | Phase 2 | Complete |
-| TRND-01 | Phase 3 | Pending |
-| TRND-02 | Phase 3 | Pending |
+| TRND-01 | Phase 3 | Complete |
+| TRND-02 | Phase 3 | Complete |
 | KIOSK-01 | Phase 2 | Complete |
 | KIOSK-02 | Phase 2 | Complete |
 | KIOSK-03 | Phase 2 | Dropped |

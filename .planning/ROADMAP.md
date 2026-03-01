@@ -80,7 +80,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Data Model and Network Layer | 3/3 | Complete | 2026-03-01 |
 | 2. Core Gauges and Dashboard Layout | 2/2 | Complete   | 2026-03-01 |
-| 3. Trends, Secondary Data, and Air Quality | 0/TBD | Not started | - |
+| 3. Trends, Secondary Data, and Air Quality | 2/3 | In Progress|  |
 | 4. Kiosk Hardening and Deployment | 0/TBD | Not started | - |
 
 ### Phase 5: CMake install-kiosk target for Raspberry Pi deployment
@@ -88,7 +88,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 **Goal:** [To be planned]
 **Requirements**: TBD
 **Depends on:** Phase 4
-**Plans:** 0 plans
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 5 to break down)
