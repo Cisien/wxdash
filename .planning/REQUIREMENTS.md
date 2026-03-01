@@ -43,8 +43,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Kiosk & Layout
 
-- [ ] **KIOSK-01**: Full-screen frameless window via EGLFS
-- [ ] **KIOSK-02**: Responsive layout targeting 720p, scales to larger displays
+- [ ] **KIOSK-01**: Full-screen frameless window (via `-platform eglfs` on embedded Linux, or fullscreen window flag on desktop Linux)
+- [ ] **KIOSK-02**: Responsive layout targeting 720p, scales to larger displays without code changes
 - [ ] **KIOSK-03**: Last-updated timestamp visible on dashboard
 - [ ] **KIOSK-04**: Connection/staleness status indicator per data source
 - [ ] **KIOSK-05**: systemd watchdog with auto-restart on crash
@@ -82,42 +82,42 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| DATA-04 | — | Pending |
-| DATA-05 | — | Pending |
-| DATA-06 | — | Pending |
-| DATA-07 | — | Pending |
-| DATA-08 | — | Pending |
-| DATA-09 | — | Pending |
-| GAUG-01 | — | Pending |
-| GAUG-02 | — | Pending |
-| GAUG-03 | — | Pending |
-| GAUG-04 | — | Pending |
-| GAUG-05 | — | Pending |
-| GAUG-06 | — | Pending |
-| GAUG-07 | — | Pending |
-| GAUG-08 | — | Pending |
-| GAUG-09 | — | Pending |
-| GAUG-10 | — | Pending |
-| GAUG-11 | — | Pending |
-| GAUG-12 | — | Pending |
-| GAUG-13 | — | Pending |
-| GAUG-14 | — | Pending |
-| TRND-01 | — | Pending |
-| TRND-02 | — | Pending |
-| KIOSK-01 | — | Pending |
-| KIOSK-02 | — | Pending |
-| KIOSK-03 | — | Pending |
-| KIOSK-04 | — | Pending |
-| KIOSK-05 | — | Pending |
+| DATA-01 | Phase 1 | Pending |
+| DATA-02 | Phase 1 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| DATA-04 | Phase 1 | Pending |
+| DATA-05 | Phase 1 | Pending |
+| DATA-06 | Phase 3 | Pending |
+| DATA-07 | Phase 3 | Pending |
+| DATA-08 | Phase 1 | Pending |
+| DATA-09 | Phase 1 | Pending |
+| GAUG-01 | Phase 2 | Pending |
+| GAUG-02 | Phase 2 | Pending |
+| GAUG-03 | Phase 2 | Pending |
+| GAUG-04 | Phase 2 | Pending |
+| GAUG-05 | Phase 2 | Pending |
+| GAUG-06 | Phase 2 | Pending |
+| GAUG-07 | Phase 2 | Pending |
+| GAUG-08 | Phase 2 | Pending |
+| GAUG-09 | Phase 2 | Pending |
+| GAUG-10 | Phase 2 | Pending |
+| GAUG-11 | Phase 3 | Pending |
+| GAUG-12 | Phase 3 | Pending |
+| GAUG-13 | Phase 3 | Pending |
+| GAUG-14 | Phase 2 | Pending |
+| TRND-01 | Phase 3 | Pending |
+| TRND-02 | Phase 3 | Pending |
+| KIOSK-01 | Phase 2 | Pending |
+| KIOSK-02 | Phase 2 | Pending |
+| KIOSK-03 | Phase 2 | Pending |
+| KIOSK-04 | Phase 4 | Pending |
+| KIOSK-05 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 30 total
-- Mapped to phases: 0
-- Unmapped: 30
+- Mapped to phases: 30
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 after initial definition*
+*Last updated: 2026-03-01 — Phase 0 removed; KIOSK-01 and KIOSK-02 moved to Phase 2; Pi-specific wording broadened to Linux*

@@ -1,0 +1,63 @@
+# Project State
+
+## Project Reference
+
+See: .planning/PROJECT.md (updated 2026-03-01)
+
+**Core value:** Display live weather conditions from the WeatherLink Live with real-time updates — always-on, always-current, at a glance.
+**Current focus:** Phase 1 — Data Model and Network Layer
+
+## Current Position
+
+Phase: 1 of 4 (Data Model and Network Layer)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-03-01 — Roadmap revised: Phase 0 removed, phases renumbered 1-4, KIOSK-01/KIOSK-02 folded into Phase 2, scope broadened from Pi-only to Linux broadly
+
+Progress: [░░░░░░░░░░] 0%
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 0
+- Average duration: —
+- Total execution time: —
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| — | — | — | — |
+
+**Recent Trend:**
+- Last 5 plans: —
+- Trend: —
+
+*Updated after each plan completion*
+
+## Accumulated Context
+
+### Decisions
+
+Decisions are logged in PROJECT.md Key Decisions table.
+Recent decisions affecting current work:
+
+- [Init]: Use Qt 6 C++ with QML/Canvas for GPU-accelerated gauge rendering (Qt Widgets rejected — CPU software rasterization on Pi causes thermal throttle)
+- [Init]: Native compilation on Pi recommended over cross-compilation (sysroot symlink issues documented as time sink)
+- [Init]: EGLFS eglfs_kms backend required for Pi 4/5 on embedded deployments (eglfs_brcm is Pi 1-3 only — black screen on Pi 4/5)
+- [Revise-2026-03-01]: Development and testing happens on local Linux machine, not the Pi. Pi is a deployment target. Pi-specific deployment notes go in README, not a build validation phase.
+- [Revise-2026-03-01]: App targets Linux broadly. Pi-specific requirements (EGLFS, Mesa V3D, gpu_mem) are README documentation items, not v1 requirements.
+
+### Pending Todos
+
+- Add a README section documenting Pi-specific deployment steps: EGLFS backend selection (eglfs_kms for Pi 4/5), Mesa V3D, gpu_mem setting, mDNS hostname resolution for `weatherlinklive.local.cisien.com` (unusual `.local.cisien.com` pattern — verify Avahi resolves on Pi OS Bookworm, may need fallback to IP).
+
+### Blockers/Concerns
+
+- [Phase 2]: QML Canvas rendering performance for anti-aliased arc gauges at 2.5s refresh is unvalidated on all targets — benchmark both QML Canvas and QOpenGLWidget at start of Phase 2 before committing to one approach.
+
+## Session Continuity
+
+Last session: 2026-03-01
+Stopped at: Roadmap revised per user feedback — ready to plan Phase 1
+Resume file: None
