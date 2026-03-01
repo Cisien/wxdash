@@ -4,6 +4,8 @@ qt_add_library(wxdash_lib STATIC
     models/WeatherDataModel.cpp
     network/JsonParser.h
     network/JsonParser.cpp
+    network/HttpPoller.h
+    network/HttpPoller.cpp
 )
 
 target_link_libraries(wxdash_lib PUBLIC Qt6::Core Qt6::Network)
