@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/icons">
+    <file alias="wxdash.svg">../assets/wxdash.svg</file>
+  </qresource>
+</RCC>

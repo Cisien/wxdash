@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=wxdash
+Comment=Weather dashboard for WeatherLink Live
+Exec=/home/cisien/src/wxdash/build/src/wxdash
+Icon=/home/cisien/src/wxdash/assets/wxdash.svg
+Terminal=false
+Categories=Utility;Monitor;
+StartupWMClass=wxdash

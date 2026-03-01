@@ -51,6 +51,10 @@ Progress: [██████████] 100% of planned plans (Phase 2 comple
 
 ## Accumulated Context
 
+### Roadmap Evolution
+
+- Phase 5 added: CMake install-kiosk target for Raspberry Pi deployment
+
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.

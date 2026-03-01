@@ -9,12 +9,14 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QThread>
+#include <QIcon>
 #include <QUrl>
 #include <QUrlQuery>
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
+    app.setWindowIcon(QIcon(QStringLiteral(":/icons/wxdash.svg")));
 
     QCommandLineParser parser;
     parser.addHelpOption();
