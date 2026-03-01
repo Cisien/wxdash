@@ -37,3 +37,25 @@ qt_add_qml_module(wxdash
 )
 
 target_link_libraries(wxdash PRIVATE wxdash_lib Qt6::Quick Qt6::Svg)
+
+# --- Install rules ---
+include(GNUInstallDirs)
+
+# Install the wxdash executable
+install(TARGETS wxdash
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    COMPONENT kiosk
+)
+
+# Install the wxdash QML module (Main.qml, ArcGauge.qml, etc.)
+# Manually install from the build output directory to avoid qt_generate_deploy_qml_app_script
+# RPATH-patching failures on Linux desktop development systems (kimg_ani.so lacks RPATH entry).
+# On the Pi the Qt packages provide their own runtime libraries; only the user QML module is needed.
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/qml/wxdash/
+    DESTINATION ${CMAKE_INSTALL_BINDIR}/../qml/wxdash
+    COMPONENT kiosk
+    FILES_MATCHING
+        PATTERN "*.qml"
+        PATTERN "qmldir"
+        PATTERN "*.qmltypes"
+)

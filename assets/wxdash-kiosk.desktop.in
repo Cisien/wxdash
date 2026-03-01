@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=wxdash (Kiosk)
+Comment=Weather dashboard for WeatherLink Live — fullscreen kiosk mode
+Exec=@CMAKE_INSTALL_PREFIX@/bin/wxdash --kiosk
+Icon=wxdash
+Terminal=false
+Categories=Utility;Monitor;
+StartupWMClass=wxdash

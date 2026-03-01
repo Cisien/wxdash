@@ -1,0 +1,27 @@
+[Unit]
+Description=wxdash Weather Kiosk
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+SupplementaryGroups=render video input
+WorkingDirectory=@CMAKE_INSTALL_PREFIX@/bin
+ExecStart=@CMAKE_INSTALL_PREFIX@/bin/wxdash --kiosk
+
+# EGLFS/KMS environment for Pi 4/5 with Mesa V3D
+Environment=QT_QPA_PLATFORM=eglfs
+Environment=QT_QPA_EGLFS_INTEGRATION=eglfs_kms
+Environment=QT_QPA_EGLFS_KMS_CONFIG=@CMAKE_INSTALL_PREFIX@/share/wxdash/eglfs.json
+
+# QML import path for user-installed wxdash QML module
+Environment=QML_IMPORT_PATH=@CMAKE_INSTALL_PREFIX@/qml
+
+# Restart on crash (KIOSK-05)
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
