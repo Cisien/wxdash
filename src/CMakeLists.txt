@@ -8,6 +8,8 @@ qt_add_library(wxdash_lib STATIC
     network/HttpPoller.cpp
     network/UdpReceiver.h
     network/UdpReceiver.cpp
+    network/PurpleAirPoller.h
+    network/PurpleAirPoller.cpp
 )
 
 target_link_libraries(wxdash_lib PUBLIC Qt6::Core Qt6::Network)

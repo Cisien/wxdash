@@ -46,9 +46,18 @@ struct UdpReading {
     int rainSize = 1;           // raw rain_size from API (1–4)
 };
 
+struct PurpleAirReading {
+    double pm25_a  = 0.0;  // pm2_5_atm Channel A (ug/m3)
+    double pm25_b  = 0.0;  // pm2_5_atm_b Channel B (ug/m3)
+    double pm25avg = 0.0;  // averaged (A+B)/2
+    double pm10    = 0.0;  // pm10_0_atm (ug/m3)
+    double aqi     = 0.0;  // calculated from pm25avg via EPA 2024 breakpoints
+};
+
 // Required for cross-thread queued connections
 #include <QMetaType>
 Q_DECLARE_METATYPE(IssReading)
 Q_DECLARE_METATYPE(BarReading)
 Q_DECLARE_METATYPE(IndoorReading)
 Q_DECLARE_METATYPE(UdpReading)
+Q_DECLARE_METATYPE(PurpleAirReading)

@@ -7,3 +7,7 @@ add_test(NAME tst_JsonParser COMMAND tst_JsonParser)
 qt_add_executable(tst_WeatherDataModel tst_WeatherDataModel.cpp)
 target_link_libraries(tst_WeatherDataModel PRIVATE wxdash_lib Qt6::Test)
 add_test(NAME tst_WeatherDataModel COMMAND tst_WeatherDataModel)
+
+qt_add_executable(tst_PurpleAirParser tst_PurpleAirParser.cpp)
+target_link_libraries(tst_PurpleAirParser PRIVATE wxdash_lib Qt6::Test)
+add_test(NAME tst_PurpleAirParser COMMAND tst_PurpleAirParser)

@@ -145,4 +145,45 @@ std::optional<UdpReading> parseUdpDatagram(const QByteArray &data)
     return std::nullopt; // no type-1 entry found
 }
 
+
+int calculateAqi(double pm25) {
+    if (pm25 < 0.0) return 0;
+
+    struct Breakpoint { double concLo, concHi; int aqiLo, aqiHi; };
+    static constexpr Breakpoint kPm25Breakpoints[] = {
+        {  0.0,   9.0,   0,  50 },   // Good (2024: was 12.0)
+        {  9.1,  35.4,  51, 100 },   // Moderate
+        { 35.5,  55.4, 101, 150 },   // Unhealthy for Sensitive Groups
+        { 55.5, 150.4, 151, 200 },   // Unhealthy (2024: was 125.4)
+        {150.5, 250.4, 201, 300 },   // Very Unhealthy (2024: was 225.4)
+        {250.5, 500.4, 301, 500 },   // Hazardous (2024: was 325.4)
+    };
+
+    for (const auto& bp : kPm25Breakpoints) {
+        if (pm25 >= bp.concLo && pm25 <= bp.concHi) {
+            return qRound(
+                ((pm25 - bp.concLo) / (bp.concHi - bp.concLo))
+                * (bp.aqiHi - bp.aqiLo) + bp.aqiLo
+            );
+        }
+    }
+    // Above 500.4 — clamp to 500
+    return (pm25 > 500.4) ? 500 : 0;
+}
+
+PurpleAirReading parsePurpleAirJson(const QByteArray &data) {
+    PurpleAirReading result;
+    QJsonParseError err;
+    auto doc = QJsonDocument::fromJson(data, &err);
+    if (err.error != QJsonParseError::NoError || !doc.isObject()) return result;
+
+    auto root = doc.object();
+    result.pm25_a  = root.value("pm2_5_atm").toDouble(0.0);
+    result.pm25_b  = root.value("pm2_5_atm_b").toDouble(0.0);
+    result.pm10    = root.value("pm10_0_atm").toDouble(0.0);
+    result.pm25avg = (result.pm25_a + result.pm25_b) / 2.0;
+    result.aqi     = calculateAqi(result.pm25avg);
+    return result;
+}
+
 } // namespace JsonParser
