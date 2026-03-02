@@ -99,3 +99,21 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 Plans:
 - [ ] 05-01-PLAN.md — CMake install() rules, systemd service template, eglfs.json, desktop entry template
 - [ ] 05-02-PLAN.md — README deployment documentation and human verification
+
+### Phase 6: 3-day forecast panel with weather icons, high/low temps, and precipitation chance
+
+**Goal:** Users see a 3-day weather forecast (today, tomorrow, day after) in the dashboard with weather icons, high/low temperatures, and precipitation chance — sourced from the free NWS API
+**Requirements**: None (new feature, no pre-existing requirement IDs)
+**Depends on:** Phase 5
+**Success Criteria** (what must be TRUE):
+  1. The app polls the NWS forecast API every 30 minutes and displays forecast data in Cell 12
+  2. Each of the 3 day columns shows a weather icon, high/low temperature, and precipitation chance
+  3. Weather icons are monochrome gold SVGs matching the dashboard aesthetic
+  4. High temps display in subdued red, low temps in subdued blue
+  5. An afternoon fetch correctly shows "--" for today's high when daytime period has passed
+  6. On NWS API failure, the last successfully fetched forecast is retained
+**Plans**: 2 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — NWS poller, forecast parser, model properties, SVG icon assets, unit tests
+- [ ] 06-02-PLAN.md — ForecastPanel QML component, DashboardGrid wiring, human verification
