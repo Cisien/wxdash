@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Cloud -->
+  <ellipse cx="32" cy="26" rx="16" ry="11" fill="#C8A000"/>
+  <ellipse cx="20" cy="31" rx="10" ry="8" fill="#C8A000"/>
+  <ellipse cx="46" cy="31" rx="9" ry="7" fill="#C8A000"/>
+  <ellipse cx="30" cy="18" rx="10" ry="8" fill="#C8A000"/>
+  <rect x="10" y="26" width="44" height="12" fill="#C8A000"/>
+  <!-- 3 small dots below cloud (lighter than rain) -->
+  <circle cx="21" cy="46" r="2.5" fill="#C8A000"/>
+  <circle cx="32" cy="46" r="2.5" fill="#C8A000"/>
+  <circle cx="43" cy="46" r="2.5" fill="#C8A000"/>
+  <!-- Second row of dots (drizzle pattern) -->
+  <circle cx="26" cy="54" r="2.5" fill="#C8A000"/>
+  <circle cx="37" cy="54" r="2.5" fill="#C8A000"/>
+</svg>

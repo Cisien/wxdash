@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Sun partially behind cloud, top-left -->
+  <circle cx="18" cy="20" r="10" fill="#C8A000"/>
+  <!-- Sun rays -->
+  <rect x="16" y="6" width="4" height="7" fill="#C8A000"/>
+  <rect x="28" y="18" width="7" height="4" fill="#C8A000"/>
+  <rect x="24.4" y="8.4" width="4" height="7" fill="#C8A000" transform="rotate(45 26.4 11.9)"/>
+  <!-- Larger cloud in foreground -->
+  <ellipse cx="40" cy="42" rx="16" ry="11" fill="#C8A000"/>
+  <ellipse cx="26" cy="46" rx="11" ry="9" fill="#C8A000"/>
+  <ellipse cx="52" cy="46" rx="9" ry="8" fill="#C8A000"/>
+  <rect x="15" y="42" width="43" height="12" fill="#C8A000"/>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 3 horizontal lines representing fog/haze, slightly offset -->
+  <rect x="8" y="16" width="48" height="6" rx="3" fill="#C8A000"/>
+  <rect x="12" y="29" width="40" height="6" rx="3" fill="#C8A000"/>
+  <rect x="8" y="42" width="44" height="6" rx="3" fill="#C8A000"/>
+</svg>

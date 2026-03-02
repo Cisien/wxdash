@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Cloud -->
+  <ellipse cx="32" cy="24" rx="16" ry="11" fill="#C8A000"/>
+  <ellipse cx="20" cy="29" rx="10" ry="8" fill="#C8A000"/>
+  <ellipse cx="46" cy="29" rx="9" ry="7" fill="#C8A000"/>
+  <ellipse cx="30" cy="16" rx="10" ry="8" fill="#C8A000"/>
+  <rect x="10" y="24" width="44" height="12" fill="#C8A000"/>
+  <!-- Angled rain lines (slanted to distinguish from steady rain) -->
+  <rect x="18" y="40" width="3" height="12" rx="1" fill="#C8A000" transform="rotate(-20 19.5 46)"/>
+  <rect x="29" y="40" width="3" height="12" rx="1" fill="#C8A000" transform="rotate(-20 30.5 46)"/>
+  <rect x="40" y="40" width="3" height="12" rx="1" fill="#C8A000" transform="rotate(-20 41.5 46)"/>
+</svg>

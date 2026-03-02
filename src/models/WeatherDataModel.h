@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
+#include <QVector>
 #include <functional>
 
 /**
@@ -63,6 +64,8 @@ class WeatherDataModel : public QObject {
     Q_PROPERTY(bool purpleAirStale READ purpleAirStale NOTIFY purpleAirStaleChanged)
     Q_PROPERTY(QVariantList aqiHistory READ aqiHistory NOTIFY aqiHistoryChanged)
 
+    Q_PROPERTY(QVariantList forecastData READ forecastData NOTIFY forecastDataChanged)
+
 public:
     // Sparkline capacity: 24h at 10s cadence
     static constexpr int kSparklineCapacity = 8640;
@@ -110,6 +113,9 @@ public:
     bool purpleAirStale() const { return m_purpleAirStale; }
     QVariantList aqiHistory() const;
 
+    // Forecast accessor
+    QVariantList forecastData() const;
+
     void saveSparklineData(const QString& path) const;
     void loadSparklineData(const QString& path);
 
@@ -119,6 +125,7 @@ public slots:
     void applyIndoorUpdate(const IndoorReading& r);
     void applyUdpUpdate(const UdpReading& r);
     void applyPurpleAirUpdate(const PurpleAirReading& r);
+    void applyForecastUpdate(const QVector<ForecastDay>& forecast);
     void checkStaleness();
 
 signals:
@@ -159,6 +166,9 @@ signals:
     void pm10Changed(double value);
     void purpleAirStaleChanged(bool stale);
     void aqiHistoryChanged();
+
+    // Forecast signal
+    void forecastDataChanged();
 
 private:
     void clearAllValues();
@@ -246,6 +256,9 @@ private:
     bool m_purpleAirStale = false;
     bool m_hasPurpleAirUpdate = false;
     qint64 m_lastPurpleAirElapsed = 0;
+
+    // Forecast data (retained until next successful fetch — no staleness clearing)
+    QVector<ForecastDay> m_forecast;
 
     // AQI sparkline ring buffer (24h at 30s PurpleAir cadence)
     static constexpr int kAqiSparklineCapacity = 2880;

@@ -1,6 +1,7 @@
 #include "models/WeatherDataModel.h"
 #include "models/WeatherReadings.h"
 #include "network/HttpPoller.h"
+#include "network/NwsPoller.h"
 #include "network/PurpleAirPoller.h"
 #include "network/UdpReceiver.h"
 
@@ -34,6 +35,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<IndoorReading>();
     qRegisterMetaType<UdpReading>();
     qRegisterMetaType<PurpleAirReading>();
+    qRegisterMetaType<QVector<ForecastDay>>("QVector<ForecastDay>");
 
     // WeatherDataModel lives on the main thread.
     // QML gauges bind to its Q_PROPERTY NOTIFY signals from the same thread.
@@ -86,6 +88,20 @@ int main(int argc, char *argv[])
                      purpleAirPoller, &PurpleAirPoller::start);
     QObject::connect(networkThread, &QThread::finished,
                      purpleAirPoller, &QObject::deleteLater);
+
+    // NWS forecast polling — shares the network thread
+    // Grid point SEW/137,72 = Duvall, WA (zip 98019), hardcoded per user decision
+    const QUrl nwsUrl(QStringLiteral(
+        "https://api.weather.gov/gridpoints/SEW/137,72/forecast"));
+    auto *nwsPoller = new NwsPoller(nwsUrl);
+    nwsPoller->moveToThread(networkThread);
+
+    QObject::connect(nwsPoller, &NwsPoller::forecastReceived,
+                     model, &WeatherDataModel::applyForecastUpdate);
+    QObject::connect(networkThread, &QThread::started,
+                     nwsPoller, &NwsPoller::start);
+    QObject::connect(networkThread, &QThread::finished,
+                     nwsPoller, &QObject::deleteLater);
 
     // Thread lifecycle: start workers when thread starts, delete them when thread finishes.
     QObject::connect(networkThread, &QThread::started, httpPoller, &HttpPoller::start);

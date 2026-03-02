@@ -4,6 +4,8 @@
 #include <QFile>
 #include <QTimer>
 
+#include <cstring>
+
 WeatherDataModel::WeatherDataModel(QObject* parent, std::function<qint64()> elapsedProvider)
     : QObject(parent), m_elapsedProvider(std::move(elapsedProvider)) {
     m_stalenessTimer = new QTimer(this);
@@ -137,7 +139,7 @@ QVariantList WeatherDataModel::solarRadHistory() const {
 // ---------------------------------------------------------------------------
 
 static constexpr quint32 kSparklineMagic = 0x57584448; // "WXDH"
-static constexpr quint32 kSparklineVersion = 1;
+static constexpr quint32 kSparklineVersion = 2;
 
 void WeatherDataModel::saveSparklineData(const QString& path) const {
     QFile file(path);
@@ -170,6 +172,13 @@ void WeatherDataModel::saveSparklineData(const QString& path) const {
 
     // AQI sparkline (kAqiSparklineCapacity)
     saveRing(m_aqiSparkline, m_aqiSparklineHead, m_aqiSparklineCount, kAqiSparklineCapacity);
+
+    // Wind rose ring buffer (version 2+)
+    out << qint32(m_windRingCount);
+    for (int i = 0; i < m_windRingCount; i++) {
+        int idx = (m_windRingHead - m_windRingCount + i + kMaxWindSamples) % kMaxWindSamples;
+        out << qint32(m_windRing[idx].bin) << m_windRing[idx].speed;
+    }
 }
 
 void WeatherDataModel::loadSparklineData(const QString& path) {
@@ -182,7 +191,7 @@ void WeatherDataModel::loadSparklineData(const QString& path) {
 
     quint32 magic, version;
     in >> magic >> version;
-    if (magic != kSparklineMagic || version != kSparklineVersion)
+    if (magic != kSparklineMagic || version < 1 || version > kSparklineVersion)
         return;
 
     // Helper: load chronological sequence into ring buffer
@@ -217,7 +226,32 @@ void WeatherDataModel::loadSparklineData(const QString& path) {
     // AQI sparkline
     loadRing(m_aqiSparkline, m_aqiSparklineHead, m_aqiSparklineCount, kAqiSparklineCapacity);
 
+    // Wind rose ring buffer (version 2+)
+    if (version >= 2) {
+        qint32 windCount;
+        in >> windCount;
+        if (in.status() == QDataStream::Ok && windCount > 0) {
+            windCount = qMin(windCount, qint32(kMaxWindSamples));
+            memset(m_windBinCount, 0, sizeof(m_windBinCount));
+            memset(m_windBinTotalSpeed, 0, sizeof(m_windBinTotalSpeed));
+            for (int i = 0; i < windCount; i++) {
+                qint32 bin;
+                double speed;
+                in >> bin >> speed;
+                if (in.status() != QDataStream::Ok)
+                    break;
+                bin = qBound(0, int(bin), kWindBins - 1);
+                m_windRing[i] = {int(bin), speed};
+                m_windBinCount[bin]++;
+                m_windBinTotalSpeed[bin] += speed;
+            }
+            m_windRingHead = windCount % kMaxWindSamples;
+            m_windRingCount = windCount;
+        }
+    }
+
     // Notify QML that all histories are available
+    emit windRoseDataChanged();
     emit temperatureHistoryChanged();
     emit feelsLikeHistoryChanged();
     emit humidityHistoryChanged();
@@ -482,6 +516,28 @@ QVariantList WeatherDataModel::aqiHistory() const {
         list.append(m_aqiSparkline[idx]);
     }
     return list;
+}
+
+// ---------------------------------------------------------------------------
+// Forecast methods
+// ---------------------------------------------------------------------------
+
+QVariantList WeatherDataModel::forecastData() const {
+    QVariantList list;
+    for (const auto& day : m_forecast) {
+        QVariantMap map;
+        map[QStringLiteral("high")]     = day.high;
+        map[QStringLiteral("low")]      = day.low;
+        map[QStringLiteral("precip")]   = day.precip;
+        map[QStringLiteral("iconCode")] = day.iconCode;
+        list.append(map);
+    }
+    return list;
+}
+
+void WeatherDataModel::applyForecastUpdate(const QVector<ForecastDay>& forecast) {
+    m_forecast = forecast;
+    emit forecastDataChanged();
 }
 
 void WeatherDataModel::clearPurpleAirValues() {

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Cloud -->
+  <ellipse cx="32" cy="26" rx="16" ry="11" fill="#C8A000"/>
+  <ellipse cx="20" cy="31" rx="10" ry="8" fill="#C8A000"/>
+  <ellipse cx="46" cy="31" rx="9" ry="7" fill="#C8A000"/>
+  <ellipse cx="30" cy="18" rx="10" ry="8" fill="#C8A000"/>
+  <rect x="10" y="26" width="44" height="12" fill="#C8A000"/>
+  <!-- One rain drop (left) -->
+  <rect x="20" y="42" width="3" height="11" rx="1" fill="#C8A000"/>
+  <!-- One snowflake (right) -->
+  <rect x="40" y="40" width="2" height="12" fill="#C8A000"/>
+  <rect x="35" y="45" width="12" height="2" fill="#C8A000"/>
+  <circle cx="41" cy="46" r="2" fill="#C8A000"/>
+</svg>
