@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Cloud -->
-  <ellipse cx="32" cy="22" rx="16" ry="11" fill="#C8A000"/>
-  <ellipse cx="20" cy="27" rx="10" ry="8" fill="#C8A000"/>
-  <ellipse cx="46" cy="27" rx="9" ry="7" fill="#C8A000"/>
-  <ellipse cx="30" cy="14" rx="10" ry="8" fill="#C8A000"/>
-  <rect x="10" y="22" width="44" height="12" fill="#C8A000"/>
-  <!-- Lightning bolt below cloud -->
-  <polygon points="36,34 28,48 34,48 27,62 42,44 35,44" fill="#C8A000"/>
+  <!-- Compact cloud -->
+  <ellipse cx="32" cy="18" rx="14" ry="9" fill="#C8A000"/>
+  <ellipse cx="21" cy="22" rx="9" ry="7" fill="#C8A000"/>
+  <ellipse cx="44" cy="22" rx="8" ry="6" fill="#C8A000"/>
+  <ellipse cx="28" cy="11" rx="8" ry="6" fill="#C8A000"/>
+  <rect x="12" y="18" width="38" height="10" rx="2" fill="#C8A000"/>
+  <!-- Lightning bolt -->
+  <polygon points="35,28 27,42 33,42 26,58 40,38 34,38" fill="#C8A000"/>
 </svg>

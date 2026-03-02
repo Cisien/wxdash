@@ -1,12 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 
-Rectangle {
+Item {
     id: root
-    color: "#222222"
-    radius: 4
-    border.color: "#2A2A2A"
-    border.width: 1
 
     property var forecastData: []   // QVariantList of QVariantMaps from weatherModel
 
@@ -44,7 +40,12 @@ Rectangle {
             "wind_bkn": "windy", "wind_ovc": "windy",
             "fg": "fog", "nfg": "fog",
             "hz": "fog", "du": "fog", "ndu": "fog",
-            "fu": "fog", "nfu": "fog"
+            "fu": "fog", "nfu": "fog",
+            // Full-word NWS icon codes (newer API format)
+            "rain": "rain", "rain_likely": "rain",
+            "snow": "snow", "fog": "fog",
+            "thunderstorm": "thunderstorm",
+            "rain_showers_likely": "rain_showers"
         };
         var name = map[code] || "unknown";
         return "qrc:/icons/weather/" + name + ".svg";

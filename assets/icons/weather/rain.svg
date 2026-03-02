@@ -1,12 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Cloud -->
-  <ellipse cx="32" cy="26" rx="16" ry="11" fill="#C8A000"/>
-  <ellipse cx="20" cy="31" rx="10" ry="8" fill="#C8A000"/>
-  <ellipse cx="46" cy="31" rx="9" ry="7" fill="#C8A000"/>
-  <ellipse cx="30" cy="18" rx="10" ry="8" fill="#C8A000"/>
-  <rect x="10" y="26" width="44" height="12" fill="#C8A000"/>
-  <!-- 3 vertical rain lines below cloud -->
-  <rect x="20" y="42" width="3" height="12" rx="1" fill="#C8A000"/>
-  <rect x="31" y="42" width="3" height="12" rx="1" fill="#C8A000"/>
-  <rect x="42" y="42" width="3" height="12" rx="1" fill="#C8A000"/>
+  <!-- Compact cloud -->
+  <ellipse cx="32" cy="22" rx="14" ry="9" fill="#C8A000"/>
+  <ellipse cx="21" cy="26" rx="9" ry="7" fill="#C8A000"/>
+  <ellipse cx="44" cy="26" rx="8" ry="6" fill="#C8A000"/>
+  <ellipse cx="28" cy="15" rx="8" ry="6" fill="#C8A000"/>
+  <rect x="12" y="22" width="38" height="10" rx="2" fill="#C8A000"/>
+  <!-- Water droplets -->
+  <path d="M20 38 L18 43 A3 3 0 1 0 22 43 Z" fill="#C8A000"/>
+  <path d="M32 36 L30 41 A3 3 0 1 0 34 41 Z" fill="#C8A000"/>
+  <path d="M44 38 L42 43 A3 3 0 1 0 46 43 Z" fill="#C8A000"/>
+  <path d="M26 48 L24 53 A3 3 0 1 0 28 53 Z" fill="#C8A000"/>
+  <path d="M38 48 L36 53 A3 3 0 1 0 40 53 Z" fill="#C8A000"/>
 </svg>
