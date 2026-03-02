@@ -28,8 +28,7 @@ Display live weather conditions from the WeatherLink Live with real-time updates
 
 ### Active
 
-- [ ] Indoor temperature and humidity panel (GAUG-13, deferred from v1.0)
-- [ ] Connection/staleness status indicator per data source (KIOSK-04)
+(None — v1.0 complete)
 
 ### Out of Scope
 

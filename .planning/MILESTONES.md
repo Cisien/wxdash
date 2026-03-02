@@ -14,10 +14,10 @@
 - CMake install-kiosk target for one-command Pi deployment with systemd
 - NWS 3-day forecast panel with weather icons, color-coded temps, precipitation
 
-### Known Gaps
-- **GAUG-13**: Indoor temperature and humidity panel (deferred per user decision)
-- **KIOSK-03**: Last-updated timestamp (dropped per user decision)
-- **KIOSK-04**: Connection/staleness status indicator (not implemented)
+### Cancelled Requirements
+- **GAUG-13**: Indoor temperature and humidity panel — cancelled
+- **KIOSK-03**: Last-updated timestamp — cancelled
+- **KIOSK-04**: Connection/staleness status indicator — cancelled
 
 ---
 
