@@ -59,6 +59,7 @@ qt_add_qml_module(wxdash
         qml/CompassRose.qml
         qml/ReservedCell.qml
         qml/AqiGauge.qml
+        qml/ForecastPanel.qml
 )
 
 target_link_libraries(wxdash PRIVATE wxdash_lib Qt6::Quick Qt6::Svg)

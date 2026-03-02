@@ -236,8 +236,9 @@ Item {
             Layout.fillHeight: true
         }
 
-        // Cell 12: Reserved (Future)
-        ReservedCell {
+        // Cell 12: 3-Day Forecast
+        ForecastPanel {
+            forecastData: weatherModel.forecastData
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
