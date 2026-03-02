@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <QString>
 
 /**
  * Plain C++ structs for cross-thread data transfer between network worker thread
@@ -54,6 +55,13 @@ struct PurpleAirReading {
     double aqi     = 0.0;  // calculated from pm25avg via EPA 2024 breakpoints
 };
 
+struct ForecastDay {
+    int high    = -999;   // degF daytime high; -999 means "no data" (tonight-only edge case)
+    int low     = -999;   // degF nighttime low; -999 means "no data"
+    int precip  = 0;      // % precipitation chance (0-100), max of day/night
+    QString iconCode;     // NWS icon code: "skc", "tsra", "sn", etc.
+};
+
 // Required for cross-thread queued connections
 #include <QMetaType>
 Q_DECLARE_METATYPE(IssReading)
@@ -61,3 +69,4 @@ Q_DECLARE_METATYPE(BarReading)
 Q_DECLARE_METATYPE(IndoorReading)
 Q_DECLARE_METATYPE(UdpReading)
 Q_DECLARE_METATYPE(PurpleAirReading)
+Q_DECLARE_METATYPE(ForecastDay)

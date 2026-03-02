@@ -1,5 +1,9 @@
 #include "network/JsonParser.h"
 
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 #include <QtTest/QtTest>
 #include <cmath>
 
@@ -455,6 +459,181 @@ private slots:
         QVERIFY(result.has_value());
         QCOMPARE(result->rainRateLast, 2000.0 * 0.001);   // 2.0 in/hr
         QCOMPARE(result->rainfallDaily, 1000.0 * 0.001);  // 1.0 inches
+    }
+
+    // -----------------------------------------------------------------------
+    // parseForecast helpers
+    // -----------------------------------------------------------------------
+
+    static QByteArray makeNwsForecastJson(const QJsonArray &periods) {
+        QJsonObject props;
+        props["periods"] = periods;
+        QJsonObject root;
+        root["properties"] = props;
+        return QJsonDocument(root).toJson();
+    }
+
+    static QJsonObject makePeriod(bool isDaytime, int temp, int precip, const QString &iconUrl) {
+        QJsonObject precipObj;
+        precipObj["unitCode"] = "wmoUnit:percent";
+        precipObj["value"] = precip;
+        QJsonObject obj;
+        obj["isDaytime"] = isDaytime;
+        obj["temperature"] = temp;
+        obj["probabilityOfPrecipitation"] = precipObj;
+        obj["icon"] = iconUrl;
+        return obj;
+    }
+
+    static QJsonObject makePeriodNullPrecip(bool isDaytime, int temp, const QString &iconUrl) {
+        QJsonObject precipObj;
+        precipObj["unitCode"] = "wmoUnit:percent";
+        precipObj["value"] = QJsonValue(); // null
+        QJsonObject obj;
+        obj["isDaytime"] = isDaytime;
+        obj["temperature"] = temp;
+        obj["probabilityOfPrecipitation"] = precipObj;
+        obj["icon"] = iconUrl;
+        return obj;
+    }
+
+    // -----------------------------------------------------------------------
+    // parseForecast tests
+    // -----------------------------------------------------------------------
+
+    void parseForecast_morningFetch_returnsThreeDays()
+    {
+        // 6 periods: day0, night0, day1, night1, day2, night2 — standard morning fetch
+        QJsonArray periods;
+        periods.append(makePeriod(true,  55, 10, "https://api.weather.gov/icons/land/day/skc?size=medium"));
+        periods.append(makePeriod(false, 40,  5, "https://api.weather.gov/icons/land/night/nskc?size=medium"));
+        periods.append(makePeriod(true,  60, 20, "https://api.weather.gov/icons/land/day/bkn?size=medium"));
+        periods.append(makePeriod(false, 45, 30, "https://api.weather.gov/icons/land/night/rain_showers,40?size=medium"));
+        periods.append(makePeriod(true,  65, 15, "https://api.weather.gov/icons/land/day/tsra_hi,40?size=medium"));
+        periods.append(makePeriod(false, 50, 25, "https://api.weather.gov/icons/land/night/sn?size=medium"));
+
+        auto result = JsonParser::parseForecast(makeNwsForecastJson(periods));
+
+        QCOMPARE(result.size(), 3);
+
+        // Day 0: high=55, low=40, precip=max(10,5)=10, iconCode="skc"
+        QCOMPARE(result[0].high, 55);
+        QCOMPARE(result[0].low, 40);
+        QCOMPARE(result[0].precip, 10);
+        QCOMPARE(result[0].iconCode, QStringLiteral("skc"));
+
+        // Day 1: high=60, low=45, precip=max(20,30)=30, iconCode="bkn"
+        QCOMPARE(result[1].high, 60);
+        QCOMPARE(result[1].low, 45);
+        QCOMPARE(result[1].precip, 30);
+        QCOMPARE(result[1].iconCode, QStringLiteral("bkn"));
+
+        // Day 2: high=65, low=50, precip=max(15,25)=25, iconCode="tsra_hi"
+        QCOMPARE(result[2].high, 65);
+        QCOMPARE(result[2].low, 50);
+        QCOMPARE(result[2].precip, 25);
+        QCOMPARE(result[2].iconCode, QStringLiteral("tsra_hi"));
+    }
+
+    void parseForecast_afternoonFetch_firstPeriodNight_highIsSentinel()
+    {
+        // First period is nighttime (afternoon fetch edge case)
+        // Result[0] should have high=-999, valid low, nighttime icon
+        QJsonArray periods;
+        periods.append(makePeriod(false, 38,  5, "https://api.weather.gov/icons/land/night/nskc?size=medium"));
+        periods.append(makePeriod(true,  58, 20, "https://api.weather.gov/icons/land/day/bkn?size=medium"));
+        periods.append(makePeriod(false, 43, 30, "https://api.weather.gov/icons/land/night/rain_showers?size=medium"));
+        periods.append(makePeriod(true,  62, 15, "https://api.weather.gov/icons/land/day/tsra?size=medium"));
+        periods.append(makePeriod(false, 48, 10, "https://api.weather.gov/icons/land/night/sn?size=medium"));
+
+        auto result = JsonParser::parseForecast(makeNwsForecastJson(periods));
+
+        QCOMPARE(result.size(), 3);
+
+        // Day 0: tonight only — high sentinel, valid low, nighttime icon
+        QCOMPARE(result[0].high, -999);
+        QCOMPARE(result[0].low, 38);
+        QCOMPARE(result[0].precip, 5);
+        QCOMPARE(result[0].iconCode, QStringLiteral("nskc"));
+
+        // Day 1: full day — high=58, low=43, precip=max(20,30)=30
+        QCOMPARE(result[1].high, 58);
+        QCOMPARE(result[1].low, 43);
+        QCOMPARE(result[1].precip, 30);
+        QCOMPARE(result[1].iconCode, QStringLiteral("bkn"));
+
+        // Day 2: full day — high=62, low=48, precip=max(15,10)=15
+        QCOMPARE(result[2].high, 62);
+        QCOMPARE(result[2].low, 48);
+        QCOMPARE(result[2].precip, 15);
+        QCOMPARE(result[2].iconCode, QStringLiteral("tsra"));
+    }
+
+    void parseForecast_nullPrecip_treatedAsZero()
+    {
+        // probabilityOfPrecipitation.value = null -> treated as 0
+        QJsonArray periods;
+        periods.append(makePeriodNullPrecip(true,  55, "https://api.weather.gov/icons/land/day/skc?size=medium"));
+        periods.append(makePeriodNullPrecip(false, 40, "https://api.weather.gov/icons/land/night/nskc?size=medium"));
+
+        auto result = JsonParser::parseForecast(makeNwsForecastJson(periods));
+
+        QCOMPARE(result.size(), 1);
+        QCOMPARE(result[0].precip, 0); // null treated as 0
+    }
+
+    void parseForecast_emptyOrMalformed_returnsEmpty()
+    {
+        // Empty string
+        QVERIFY(JsonParser::parseForecast(QByteArray()).isEmpty());
+        // Invalid JSON
+        QVERIFY(JsonParser::parseForecast("{ not json").isEmpty());
+        // Missing properties
+        QVERIFY(JsonParser::parseForecast("{}").isEmpty());
+        // Empty periods array
+        QJsonArray emptyPeriods;
+        QVERIFY(JsonParser::parseForecast(makeNwsForecastJson(emptyPeriods)).isEmpty());
+    }
+
+    void parseForecast_precipMax_usesMaxOfDayAndNight()
+    {
+        // Day precip=10, night precip=40 -> result precip=40
+        QJsonArray periods;
+        periods.append(makePeriod(true,  55, 10, "https://api.weather.gov/icons/land/day/skc?size=medium"));
+        periods.append(makePeriod(false, 40, 40, "https://api.weather.gov/icons/land/night/rain_showers?size=medium"));
+
+        auto result = JsonParser::parseForecast(makeNwsForecastJson(periods));
+
+        QCOMPARE(result.size(), 1);
+        QCOMPARE(result[0].precip, 40);
+    }
+
+    void parseForecast_partialData_fourPeriods_returnsTwoDays()
+    {
+        // Only 4 periods (2 full days) — returns 2 items, not 3
+        QJsonArray periods;
+        periods.append(makePeriod(true,  55, 10, "https://api.weather.gov/icons/land/day/skc?size=medium"));
+        periods.append(makePeriod(false, 40,  5, "https://api.weather.gov/icons/land/night/nskc?size=medium"));
+        periods.append(makePeriod(true,  60, 20, "https://api.weather.gov/icons/land/day/bkn?size=medium"));
+        periods.append(makePeriod(false, 45, 30, "https://api.weather.gov/icons/land/night/rain_showers?size=medium"));
+
+        auto result = JsonParser::parseForecast(makeNwsForecastJson(periods));
+
+        QCOMPARE(result.size(), 2);
+    }
+
+    void parseForecast_iconCodeExtraction_stripsProb_andQueryString()
+    {
+        // URL with probability suffix ,40 AND query string ?size=medium
+        // "https://api.weather.gov/icons/land/night/rain_showers,40?size=medium" -> "rain_showers"
+        QJsonArray periods;
+        periods.append(makePeriod(true,  55, 10, "https://api.weather.gov/icons/land/day/tsra_hi,40?size=medium"));
+        periods.append(makePeriod(false, 40, 20, "https://api.weather.gov/icons/land/night/rain_showers,60?size=medium"));
+
+        auto result = JsonParser::parseForecast(makeNwsForecastJson(periods));
+
+        QCOMPARE(result.size(), 1);
+        QCOMPARE(result[0].iconCode, QStringLiteral("tsra_hi"));
     }
 };
 

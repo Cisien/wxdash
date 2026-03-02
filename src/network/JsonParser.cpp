@@ -3,6 +3,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QUrl>
 
 namespace JsonParser {
 
@@ -183,6 +184,72 @@ PurpleAirReading parsePurpleAirJson(const QByteArray &data) {
     result.pm10    = root.value("pm10_0_atm").toDouble(0.0);
     result.pm25avg = (result.pm25_a + result.pm25_b) / 2.0;
     result.aqi     = calculateAqi(result.pm25avg);
+    return result;
+}
+
+// ---------------------------------------------------------------------------
+// NWS forecast parsing
+// ---------------------------------------------------------------------------
+
+static QString extractIconCode(const QString &iconUrl) {
+    // "https://api.weather.gov/icons/land/day/tsra_hi,40?size=medium" -> "tsra_hi"
+    QUrl url(iconUrl);
+    QString last = url.path().section('/', -1);  // "tsra_hi,40"
+    return last.section(',', 0, 0);               // "tsra_hi"
+}
+
+QVector<ForecastDay> parseForecast(const QByteArray &data) {
+    QVector<ForecastDay> result;
+
+    QJsonParseError err;
+    auto doc = QJsonDocument::fromJson(data, &err);
+    if (err.error != QJsonParseError::NoError || !doc.isObject()) return result;
+
+    auto periods = doc.object()["properties"].toObject()["periods"].toArray();
+    if (periods.isEmpty()) return result;
+
+    ForecastDay current;
+    bool hasHigh = false;
+
+    for (const auto &val : periods) {
+        if (result.size() >= 3) break;
+        auto obj = val.toObject();
+        bool isDaytime = obj["isDaytime"].toBool();
+        int temp = obj["temperature"].toInt();
+        // probabilityOfPrecipitation.value may be null — toInt(0) handles null as 0
+        int precip = obj["probabilityOfPrecipitation"].toObject()["value"].toInt(0);
+        QString iconCode = extractIconCode(obj["icon"].toString());
+
+        if (isDaytime) {
+            // Start of a new day — if we had an incomplete day, push it
+            if (hasHigh) {
+                result.append(current);
+                current = ForecastDay{};
+                hasHigh = false;
+                if (result.size() >= 3) break;
+            }
+            current.high = temp;
+            current.precip = precip;
+            current.iconCode = iconCode;
+            hasHigh = true;
+        } else {
+            // Nighttime period
+            if (!hasHigh) {
+                // Tonight only — no daytime period seen yet (afternoon fetch)
+                current.high = -999;
+                current.iconCode = iconCode;  // Use nighttime icon
+            }
+            current.low = temp;
+            // Use max of day and night precip
+            if (precip > current.precip) current.precip = precip;
+            result.append(current);
+            current = ForecastDay{};
+            hasHigh = false;
+        }
+    }
+    // If last period was daytime with no following night, append anyway
+    if (hasHigh && result.size() < 3) result.append(current);
+
     return result;
 }
 

@@ -3,6 +3,7 @@
 #include "models/WeatherReadings.h"
 
 #include <QByteArray>
+#include <QVector>
 #include <optional>
 
 /**
@@ -90,5 +91,19 @@ int calculateAqi(double pm25);
  * Malformed JSON returns a default PurpleAirReading (all zeros).
  */
 PurpleAirReading parsePurpleAirJson(const QByteArray &data);
+
+/**
+ * Parse an NWS forecast API response (https://api.weather.gov/gridpoints/.../forecast).
+ *
+ * Extracts up to 3 days of forecast data from alternating day/night periods.
+ * Day periods provide high temp and icon; night periods provide low temp.
+ * Precipitation chance per day is the max of daytime and nighttime values.
+ *
+ * Edge case: if first period is nighttime (afternoon fetch), first ForecastDay
+ * has high=-999 (display "--") with a valid low temp.
+ *
+ * Returns empty vector on malformed JSON or missing periods.
+ */
+QVector<ForecastDay> parseForecast(const QByteArray &data);
 
 } // namespace JsonParser
