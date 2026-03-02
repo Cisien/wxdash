@@ -1,0 +1,21 @@
+# Build
+build/
+CMakeFiles/
+
+# Qt Creator
+*.user
+*.autosave
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# Compiled
+*.o
+*.a
+*.so
+*.dylib
+moc_*
+qrc_*
