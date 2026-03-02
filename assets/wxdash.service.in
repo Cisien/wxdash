@@ -17,6 +17,7 @@ Environment=QT_QPA_EGLFS_KMS_CONFIG=@CMAKE_INSTALL_PREFIX@/share/wxdash/eglfs.js
 
 # QML import path for user-installed wxdash QML module
 Environment=QML_IMPORT_PATH=@CMAKE_INSTALL_PREFIX@/qml
+Environment=QT_QPA_EGLFS_HIDECURSOR=1
 
 # Restart on crash (KIOSK-05)
 Restart=always
