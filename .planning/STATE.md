@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T23:18:50.063Z"
+last_updated: "2026-03-02T00:24:37.796Z"
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 12
+  completed_plans: 11
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Display live weather conditions from the WeatherLink Live with real-time updates — always-on, always-current, at a glance.
-**Current focus:** Phase 5 complete — CMake kiosk install infrastructure and Pi deployment documentation delivered
+**Current focus:** Phase 6 in progress — 3-day forecast backend complete (Plan 06-01), QML ForecastPanel pending (Plan 06-02)
 
 ## Current Position
 
-Phase: 5 of 5 (CMake Install and Kiosk Target for Raspberry Pi Deployment) — COMPLETE
-Plan: 2 of 2 in phase (05-01 and 05-02 complete)
-Status: Plan 05-02 complete — README.md with full Pi deployment guide; SERVICE_USER CMake variable replacing hardcoded 'pi' in service template
-Last activity: 2026-03-01 — Completed Plan 05-02: README and Pi deployment documentation
+Phase: 6 of 6 (3-day Forecast Panel with Weather Icons, High/Low Temps, and Precipitation Chance) — IN PROGRESS
+Plan: 1 of 2 complete (06-01 complete, 06-02 pending)
+Status: Plan 06-01 complete — NwsPoller, parseForecast, forecastData Q_PROPERTY, 17 SVG weather icons bundled
+Last activity: 2026-03-01 — Completed Plan 06-01: NWS forecast backend
 
-Progress: [██████████] 100% of Phase 5 plans complete (2 of 2)
+Progress: [█░░░░░░░░░] 50% of Phase 6 plans complete (1 of 2)
 
 ## Performance Metrics
 
@@ -52,12 +52,14 @@ Progress: [██████████] 100% of Phase 5 plans complete (2 of 
 | Phase 03 P03 | 4 | 1 tasks | 3 files |
 | Phase 05 P01 | 3 | 2 tasks | 5 files |
 | Phase 05 P02 | 12 | 2 tasks | 3 files |
+| Phase 06 P01 | 5 | 2 tasks | 21 files |
 
 ## Accumulated Context
 
 ### Roadmap Evolution
 
 - Phase 5 added: CMake install-kiosk target for Raspberry Pi deployment
+- Phase 6 added: 3-day forecast panel with weather icons, high/low temps, and precipitation chance
 
 ### Decisions
 
@@ -100,10 +102,13 @@ Recent decisions affecting current work:
 - [Phase 05-01]: COMPONENT kiosk on all install() rules — enables selective `cmake --install build --component kiosk` without Qt system library bundling
 - [Phase 05]: SERVICE_USER defaults to $ENV{USER} at CMake configure time — correct for any Pi deployment user, not hardcoded to pi; overridable with -DSERVICE_USER=<name>
 - [Phase 05]: Dropped Group= from systemd service template — SupplementaryGroups covers all required DRM/input group memberships; explicit Group= is redundant and potentially confusing
+- [Phase 06-01]: NwsPoller shares existing networkThread (no new thread) — same pattern as PurpleAirPoller
+- [Phase 06-01]: Forecast retained on API failure with no staleness clearing — forecast ages gracefully unlike real-time readings
+- [Phase 06-01]: ForecastDay.high=-999 sentinel for tonight-only edge case (afternoon fetch) — QML checks for this to display '--'
 
 ### Pending Todos
 
-None — all planned work complete. Pi deployment README section delivered in Phase 5 Plan 02.
+Phase 6 Plan 02 — ForecastPanel QML component consuming weatherModel.forecastData and /icons/weather/ SVG resources
 
 ### Blockers/Concerns
 
@@ -112,5 +117,5 @@ None — all planned work complete. Pi deployment README section delivered in Ph
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 05-02-PLAN.md — README and Pi deployment documentation complete; all Phase 5 plans done
+Stopped at: Completed 06-01-PLAN.md — NWS forecast backend with NwsPoller, parseForecast, forecastData model property, and 17 SVG weather icons
 Resume file: None
