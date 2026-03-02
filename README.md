@@ -62,6 +62,24 @@ cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/l
 cmake --build build
 ```
 
+**Pi Zero 2 W note:** The Pi Zero 2 W only has 512 MB of RAM, which is not enough to compile Qt 6 C++ without swap. Add a swap file and limit build parallelism:
+
+```bash
+sudo fallocate -l 1G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+cmake --build build -j1
+```
+
+To make the swap permanent, add this line to `/etc/fstab`:
+
+```
+/swapfile none swap sw 0 0
+```
+
+The build will be slow (~30-60 min) but should complete without the OOM killer rebooting the Pi.
+
 Install the kiosk component (binary, QML module, systemd service, EGLFS config, desktop entry, icon):
 
 ```bash
