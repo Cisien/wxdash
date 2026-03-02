@@ -12,20 +12,24 @@ Display live weather conditions from the WeatherLink Live with real-time updates
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Connect to WeatherLink Live HTTP API for initial current conditions — v1.0
+- ✓ Start and maintain UDP real-time broadcast (2.5s wind/rain updates) — v1.0
+- ✓ Poll HTTP current_conditions every ~10s for temp, humidity, pressure, solar, UV — v1.0
+- ✓ Gauge displays for temperature, humidity, barometric pressure, solar radiation, UV index, wind speed, rain rate/amount — v1.0
+- ✓ Compass rose for wind direction — v1.0
+- ✓ Sparkline mini-trend graphs showing recent hours of data — v1.0
+- ✓ Color threshold indicators on gauges for extreme/concerning conditions — v1.0
+- ✓ Full-screen kiosk mode (no window chrome) — v1.0
+- ✓ 720p target resolution with responsive scaling to larger displays — v1.0
+- ✓ Smart layout prioritizing weather data by importance — v1.0
+- ✓ PurpleAir AQI integration with EPA color zones — v1.0
+- ✓ CMake install-kiosk one-command Pi deployment — v1.0
+- ✓ NWS 3-day forecast panel with weather icons — v1.0
 
 ### Active
 
-- [ ] Connect to WeatherLink Live HTTP API for initial current conditions
-- [ ] Start and maintain UDP real-time broadcast (2.5s wind/rain updates)
-- [ ] Poll HTTP current_conditions every ~10s for temp, humidity, pressure, solar, UV
-- [ ] Gauge displays for temperature, humidity, barometric pressure, solar radiation, UV index, wind speed, rain rate/amount
-- [ ] Compass rose for wind direction
-- [ ] Sparkline mini-trend graphs showing recent hours of data
-- [ ] Color threshold indicators on gauges for extreme/concerning conditions
-- [ ] Full-screen kiosk mode (no window chrome)
-- [ ] 720p target resolution with responsive scaling to larger displays
-- [ ] Smart layout prioritizing weather data by importance
+- [ ] Indoor temperature and humidity panel (GAUG-13, deferred from v1.0)
+- [ ] Connection/staleness status indicator per data source (KIOSK-04)
 
 ### Out of Scope
 
@@ -88,4 +92,9 @@ Display live weather conditions from the WeatherLink Live with real-time updates
 | Mixed update cadence | UDP for fast wind/rain, HTTP poll for everything else — matches API design | — Pending |
 
 ---
-*Last updated: 2026-03-01 after initialization*
+## Current State
+
+Shipped v1.0 with 2,955 LOC (C++/QML). Tech stack: Qt 6, C++17, QML, CMake/Ninja.
+12-cell dashboard with real-time weather gauges, sparkline trends, AQI integration, NWS forecast, and Pi kiosk deployment.
+
+*Last updated: 2026-03-02 after v1.0 milestone*
