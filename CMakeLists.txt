@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
+cmake_policy(SET CMP0177 NEW)
 project(wxdash LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -10,6 +11,15 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Network Test Quick Qml Svg)
 qt_standard_project_setup()
+
+# Distro-packaged Qt6 (Debian/Ubuntu) ships shared QML plugins but doesn't
+# export static CMake targets. Create empty stubs so qt6_import_qml_plugins
+# doesn't warn. The plugins load dynamically at runtime; stubs are never linked.
+foreach(_plugin qtquick2plugin qmlplugin modelsplugin workerscriptplugin qmlshapesplugin qquicklayoutsplugin)
+    if(NOT TARGET Qt6::${_plugin})
+        add_library(Qt6::${_plugin} INTERFACE IMPORTED)
+    endif()
+endforeach()
 
 enable_testing()
 

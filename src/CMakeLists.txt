@@ -48,6 +48,7 @@ qt_add_resources(wxdash "weather_icons"
         "${CMAKE_CURRENT_SOURCE_DIR}/../assets/icons/weather/unknown.svg"
 )
 
+qt_policy(SET QTP0004 NEW)
 qt_add_qml_module(wxdash
     URI wxdash
     RESOURCE_PREFIX /qt/qml
