@@ -28,7 +28,11 @@ Display live weather conditions from the WeatherLink Live with real-time updates
 
 ### Active
 
-(None — v1.0 complete)
+- [ ] Calm wind indicator replaces direction needle when wind is idle
+- [ ] Idle/calm samples tracked in rolling window but render no bars
+- [ ] Bar color reflects recent ~60s average speed per direction bin
+- [ ] Wind speed color thresholds consistent between CompassRose and ArcGauge
+- [ ] Forecast weather icons scaled to 95% of cell (up from 60%)
 
 ### Out of Scope
 
@@ -91,9 +95,20 @@ Display live weather conditions from the WeatherLink Live with real-time updates
 | Mixed update cadence | UDP for fast wind/rain, HTTP poll for everything else — matches API design | — Pending |
 
 ---
+## Current Milestone: v1.1 Wind Rose Refinement
+
+**Goal:** Refine the wind rose to handle calm conditions gracefully, use recent-average coloring, and track idle samples in the rolling window.
+
+**Target features:**
+- Calm wind indicator (circle/neutral) replacing the direction needle when wind is idle
+- Idle sample tracking in rolling window (participate in eviction, no bars rendered)
+- Bar color based on recent ~60-second average speed per direction bin
+- Color consistency maintained between CompassRose and ArcGauge
+- Forecast weather icons scaled to 95% of cell
+
 ## Current State
 
 Shipped v1.0 with 2,955 LOC (C++/QML). Tech stack: Qt 6, C++17, QML, CMake/Ninja.
 12-cell dashboard with real-time weather gauges, sparkline trends, AQI integration, NWS forecast, and Pi kiosk deployment.
 
-*Last updated: 2026-03-02 after v1.0 milestone*
+*Last updated: 2026-03-02 after v1.1 milestone started*
