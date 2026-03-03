@@ -101,7 +101,11 @@ Plans:
   2. Idle/calm readings (zero wind speed) occupy slots in the 720-entry rolling window and evict old samples normally, but no bar appears in any direction bin for those samples
   3. Each direction bar's color reflects the average wind speed from that bin's samples in the last ~60 seconds (not the lifetime average of the entire rolling window)
   4. Wind speed color thresholds in CompassRose produce the same colors as the ArcGauge windSpeedColor function for any given speed value
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 07-01-PLAN.md -- Calm sample tracking in wind ring buffer, recent-average speed per bin (TDD)
+- [ ] 07-02-PLAN.md -- CompassRose calm dot, recent-average bar colors, color function unification, visual verification
 
 ### Phase 8: Forecast Icon Scaling
 **Goal**: Forecast weather icons fill their cells for better visibility on the kiosk display
@@ -125,5 +129,5 @@ Phases execute in numeric order: 7 -> 8
 | 4. Kiosk Hardening and Deployment | v1.0 | 0/0 | Complete | 2026-03-01 |
 | 5. CMake install-kiosk target | v1.0 | 2/2 | Complete | 2026-03-01 |
 | 6. 3-Day Forecast Panel | v1.0 | 2/2 | Complete | 2026-03-02 |
-| 7. Wind Rose Calm and Color | v1.1 | 0/TBD | Not started | - |
+| 7. Wind Rose Calm and Color | v1.1 | 0/2 | Not started | - |
 | 8. Forecast Icon Scaling | v1.1 | 0/TBD | Not started | - |
