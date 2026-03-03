@@ -44,8 +44,8 @@ This section documents how to deploy wxdash as a kiosk on a Raspberry Pi 4 or 5.
 - Qt 6 development packages:
 
 ```bash
-sudo apt install qt6-base-dev qt6-declarative-dev qt6-svg-dev \
-    libqt6quick6 libqt6qml6 cmake ninja-build
+sudo apt install qt6-base-dev qt6-declarative-dev qt6-svg-dev qt6-shadertools-dev \
+    libqt6quick6 libqt6qml6 libxkbcommon-dev cmake ninja-build
 ```
 
 - Mesa V3D driver — this is the default on Pi OS Bookworm; no additional configuration is needed.
