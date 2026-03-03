@@ -72,7 +72,7 @@ Item {
                     // Weather icon
                     Image {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        width: Math.min(parent.parent.width, parent.parent.height) * 0.6
+                        width: Math.min(parent.parent.width, parent.parent.height) * 0.95
                         height: width
                         source: root.iconPath(day.iconCode || "")
                         sourceSize.width: 64

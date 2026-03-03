@@ -37,17 +37,20 @@ void WeatherDataModel::markUpdated() {
 }
 
 void WeatherDataModel::recordWindSample(int dir, double speed) {
-    // WeatherLink API reports dir=0, speed=0 when calm — not a real north reading
+    // WeatherLink API reports dir=0, speed=0 when calm — use bin=-1 sentinel
+    int bin;
     if (dir == 0 && qFuzzyCompare(speed + 1.0, 1.0))
-        return;
-
-    int bin = qBound(0, qRound(dir / 22.5) % kWindBins, kWindBins - 1);
+        bin = -1; // calm/idle — occupies ring slot but no directional bin
+    else
+        bin = qBound(0, qRound(dir / 22.5) % kWindBins, kWindBins - 1);
 
     // Evict oldest sample if ring buffer is full
     if (m_windRingCount >= kMaxWindSamples) {
         const auto& old = m_windRing[m_windRingHead];
-        m_windBinCount[old.bin]--;
-        m_windBinTotalSpeed[old.bin] -= old.speed;
+        if (old.bin >= 0) {
+            m_windBinCount[old.bin]--;
+            m_windBinTotalSpeed[old.bin] -= old.speed;
+        }
     }
 
     // Write new sample into ring buffer
@@ -56,13 +59,30 @@ void WeatherDataModel::recordWindSample(int dir, double speed) {
     if (m_windRingCount < kMaxWindSamples)
         m_windRingCount++;
 
-    // Update bin totals
-    m_windBinCount[bin]++;
-    m_windBinTotalSpeed[bin] += speed;
+    // Update bin totals (skip calm samples)
+    if (bin >= 0) {
+        m_windBinCount[bin]++;
+        m_windBinTotalSpeed[bin] += speed;
+    }
     emit windRoseDataChanged();
 }
 
 QVariantList WeatherDataModel::windRoseData() const {
+    // Compute recent average speed per bin by walking the ring buffer backwards
+    // collecting the last kRecentSpeedSamples speeds for each directional bin
+    double recentSum[kWindBins] = {};
+    int recentCount[kWindBins] = {};
+
+    for (int i = 0; i < m_windRingCount; i++) {
+        // Walk from newest to oldest
+        int idx = (m_windRingHead - 1 - i + kMaxWindSamples) % kMaxWindSamples;
+        const auto& sample = m_windRing[idx];
+        if (sample.bin >= 0 && recentCount[sample.bin] < kRecentSpeedSamples) {
+            recentSum[sample.bin] += sample.speed;
+            recentCount[sample.bin]++;
+        }
+    }
+
     QVariantList list;
     list.reserve(kWindBins);
     for (int i = 0; i < kWindBins; i++) {
@@ -70,6 +90,8 @@ QVariantList WeatherDataModel::windRoseData() const {
         bin[QStringLiteral("count")] = m_windBinCount[i];
         bin[QStringLiteral("avgSpeed")] =
             m_windBinCount[i] > 0 ? m_windBinTotalSpeed[i] / m_windBinCount[i] : 0.0;
+        bin[QStringLiteral("recentAvgSpeed")] =
+            recentCount[i] > 0 ? recentSum[i] / recentCount[i] : 0.0;
         list.append(bin);
     }
     return list;
@@ -240,10 +262,14 @@ void WeatherDataModel::loadSparklineData(const QString& path) {
                 in >> bin >> speed;
                 if (in.status() != QDataStream::Ok)
                     break;
-                bin = qBound(0, int(bin), kWindBins - 1);
+                if (bin >= 0)
+                    bin = qBound(0, int(bin), kWindBins - 1);
+                // bin < 0 means calm sample (sentinel -1) — keep as-is
                 m_windRing[i] = {int(bin), speed};
-                m_windBinCount[bin]++;
-                m_windBinTotalSpeed[bin] += speed;
+                if (bin >= 0) {
+                    m_windBinCount[bin]++;
+                    m_windBinTotalSpeed[bin] += speed;
+                }
             }
             m_windRingHead = windCount % kMaxWindSamples;
             m_windRingCount = windCount;

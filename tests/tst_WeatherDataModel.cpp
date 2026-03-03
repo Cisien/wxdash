@@ -493,6 +493,231 @@ private slots:
         QCOMPARE(hist[0].toDouble(), 30.10);
         QCOMPARE(hist[1].toDouble(), 30.15);
     }
+
+    // -----------------------------------------------------------------------
+    // Wind rose: calm sample tracking (WIND-02)
+    // -----------------------------------------------------------------------
+
+    void windRose_calmSamplesNoBinCount()
+    {
+        // Calm readings (dir=0, speed=0) should not appear in any directional bin
+        qint64 fakeMs = 0;
+        WeatherDataModel model(nullptr, makeClock(&fakeMs));
+
+        // Feed 50 calm readings
+        UdpReading calm;
+        calm.windSpeedLast = 0.0;
+        calm.windDirLast = 0;
+        calm.windSpeedHi10 = 0.0;
+        calm.rainRateLast = 0.0;
+        calm.rainfallDaily = 0.0;
+        calm.rainSize = 1;
+        for (int i = 0; i < 50; i++)
+            model.applyUdpUpdate(calm);
+
+        QCOMPARE(model.windRoseMaxCount(), 0);
+        QVariantList data = model.windRoseData();
+        QCOMPARE(data.size(), 16);
+        for (int i = 0; i < 16; i++) {
+            QVariantMap bin = data[i].toMap();
+            QCOMPARE(bin[QStringLiteral("count")].toInt(), 0);
+        }
+    }
+
+    void windRose_calmSamplesOccupyRingSlots()
+    {
+        // Calm samples occupy ring buffer slots and participate in eviction.
+        // Verify indirectly: fill 710 calm + 10 directional = 720 (full).
+        // Then feed 1 more calm => oldest calm evicted.
+        // Then feed 1 more directional => next-oldest calm evicted (not a directional one).
+        // All 10+1=11 directional samples should remain in bin counts.
+        qint64 fakeMs = 0;
+        WeatherDataModel model(nullptr, makeClock(&fakeMs));
+
+        UdpReading calm;
+        calm.windSpeedLast = 0.0;
+        calm.windDirLast = 0;
+        calm.windSpeedHi10 = 0.0;
+        calm.rainRateLast = 0.0;
+        calm.rainfallDaily = 0.0;
+        calm.rainSize = 1;
+
+        // 710 calm readings
+        for (int i = 0; i < 710; i++)
+            model.applyUdpUpdate(calm);
+
+        // 10 directional readings (East = 90 degrees, bin 4)
+        UdpReading east;
+        east.windSpeedLast = 5.0;
+        east.windDirLast = 90;
+        east.windSpeedHi10 = 5.0;
+        east.rainRateLast = 0.0;
+        east.rainfallDaily = 0.0;
+        east.rainSize = 1;
+        for (int i = 0; i < 10; i++)
+            model.applyUdpUpdate(east);
+
+        // Buffer full at 720. Now feed 1 more calm => evicts oldest calm (slot 0)
+        model.applyUdpUpdate(calm);
+        // Feed 1 directional => evicts next-oldest calm (slot 1), NOT a directional
+        model.applyUdpUpdate(east);
+
+        // All 11 directional samples should remain (10 original + 1 new)
+        QVariantList data = model.windRoseData();
+        int eastBin = 4; // 90/22.5 = 4
+        QVariantMap eastData = data[eastBin].toMap();
+        QCOMPARE(eastData[QStringLiteral("count")].toInt(), 11);
+    }
+
+    void windRose_recentAvgSpeedField()
+    {
+        // windRoseData entries must have a recentAvgSpeed field
+        qint64 fakeMs = 0;
+        WeatherDataModel model(nullptr, makeClock(&fakeMs));
+
+        UdpReading udp;
+        udp.windSpeedLast = 10.0;
+        udp.windDirLast = 180; // South, bin 8
+        udp.windSpeedHi10 = 10.0;
+        udp.rainRateLast = 0.0;
+        udp.rainfallDaily = 0.0;
+        udp.rainSize = 1;
+        model.applyUdpUpdate(udp);
+
+        QVariantList data = model.windRoseData();
+        QVariantMap bin = data[8].toMap(); // 180/22.5 = 8
+        QVERIFY(bin.contains(QStringLiteral("recentAvgSpeed")));
+        QCOMPARE(bin[QStringLiteral("recentAvgSpeed")].toDouble(), 10.0);
+    }
+
+    void windRose_recentAvgSpeedUsesLast24Samples()
+    {
+        // Feed 30 samples into the same bin: first 20 at speed=5, then 10 at speed=20.
+        // recentAvgSpeed (last 24 samples) = (14*5 + 10*20)/24 = 11.25
+        // Full-window avgSpeed = (20*5 + 10*20)/30 = 10.0
+        qint64 fakeMs = 0;
+        WeatherDataModel model(nullptr, makeClock(&fakeMs));
+
+        UdpReading udp;
+        udp.windDirLast = 90; // East, bin 4
+        udp.windSpeedHi10 = 0.0;
+        udp.rainRateLast = 0.0;
+        udp.rainfallDaily = 0.0;
+        udp.rainSize = 1;
+
+        // First 20 at speed=5
+        udp.windSpeedLast = 5.0;
+        for (int i = 0; i < 20; i++)
+            model.applyUdpUpdate(udp);
+
+        // Then 10 at speed=20
+        udp.windSpeedLast = 20.0;
+        for (int i = 0; i < 10; i++)
+            model.applyUdpUpdate(udp);
+
+        QVariantList data = model.windRoseData();
+        QVariantMap bin = data[4].toMap(); // bin 4 = East
+
+        // Full-window average should be (20*5 + 10*20)/30 = 10.0
+        double fullAvg = bin[QStringLiteral("avgSpeed")].toDouble();
+        QVERIFY(qAbs(fullAvg - 10.0) < 0.01);
+
+        // Recent average (last 24): 14 samples at 5 + 10 samples at 20 = (70+200)/24 = 11.25
+        double recentAvg = bin[QStringLiteral("recentAvgSpeed")].toDouble();
+        QVERIFY(qAbs(recentAvg - 11.25) < 0.01);
+    }
+
+    void windRose_recentAvgSpeedFewerThan24()
+    {
+        // When a bin has fewer than 24 samples, recentAvgSpeed averages all samples
+        qint64 fakeMs = 0;
+        WeatherDataModel model(nullptr, makeClock(&fakeMs));
+
+        UdpReading udp;
+        udp.windDirLast = 270; // West, bin 12
+        udp.windSpeedLast = 10.0;
+        udp.windSpeedHi10 = 0.0;
+        udp.rainRateLast = 0.0;
+        udp.rainfallDaily = 0.0;
+        udp.rainSize = 1;
+
+        for (int i = 0; i < 5; i++)
+            model.applyUdpUpdate(udp);
+
+        QVariantList data = model.windRoseData();
+        QVariantMap bin = data[12].toMap();
+        QCOMPARE(bin[QStringLiteral("recentAvgSpeed")].toDouble(), 10.0);
+    }
+
+    void windRose_mixedCalmAndDirectional()
+    {
+        // Alternating calm and directional readings:
+        // calm samples occupy ring slots, only directional appear in bins
+        qint64 fakeMs = 0;
+        WeatherDataModel model(nullptr, makeClock(&fakeMs));
+
+        UdpReading calm;
+        calm.windSpeedLast = 0.0;
+        calm.windDirLast = 0;
+        calm.windSpeedHi10 = 0.0;
+        calm.rainRateLast = 0.0;
+        calm.rainfallDaily = 0.0;
+        calm.rainSize = 1;
+
+        UdpReading north;
+        north.windSpeedLast = 10.0;
+        north.windDirLast = 360; // True north wraps to bin 0 (360/22.5 = 16 % 16 = 0)
+        north.windSpeedHi10 = 10.0;
+        north.rainRateLast = 0.0;
+        north.rainfallDaily = 0.0;
+        north.rainSize = 1;
+
+        // Alternate: calm, north, calm, north, ... (20 each = 40 total)
+        for (int i = 0; i < 20; i++) {
+            model.applyUdpUpdate(calm);
+            model.applyUdpUpdate(north);
+        }
+
+        // 20 directional samples in bin 0 (North/360 degrees)
+        QVariantList data = model.windRoseData();
+        QVariantMap northBin = data[0].toMap();
+        QCOMPARE(northBin[QStringLiteral("count")].toInt(), 20);
+        QCOMPARE(northBin[QStringLiteral("avgSpeed")].toDouble(), 10.0);
+
+        // All other bins should be empty
+        for (int i = 1; i < 16; i++) {
+            QVariantMap bin = data[i].toMap();
+            QCOMPARE(bin[QStringLiteral("count")].toInt(), 0);
+        }
+
+        // windRoseMaxCount should reflect only directional samples
+        QCOMPARE(model.windRoseMaxCount(), 20);
+    }
+
+    void windRose_existingBehaviorPreserved()
+    {
+        // Non-calm samples still update directional bin counts and avgSpeed correctly
+        qint64 fakeMs = 0;
+        WeatherDataModel model(nullptr, makeClock(&fakeMs));
+
+        UdpReading udp;
+        udp.windDirLast = 45;  // NE, bin 2
+        udp.windSpeedLast = 8.0;
+        udp.windSpeedHi10 = 10.0;
+        udp.rainRateLast = 0.0;
+        udp.rainfallDaily = 0.0;
+        udp.rainSize = 1;
+        model.applyUdpUpdate(udp);
+
+        udp.windSpeedLast = 12.0;
+        model.applyUdpUpdate(udp);
+
+        QVariantList data = model.windRoseData();
+        QVariantMap neBin = data[2].toMap();
+        QCOMPARE(neBin[QStringLiteral("count")].toInt(), 2);
+        // avgSpeed = (8+12)/2 = 10.0
+        QVERIFY(qAbs(neBin[QStringLiteral("avgSpeed")].toDouble() - 10.0) < 0.01);
+    }
 };
 
 QTEST_MAIN(TstWeatherDataModel)

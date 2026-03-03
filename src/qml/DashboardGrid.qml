@@ -161,8 +161,10 @@ Item {
         // Cell 6: Compass Rose (GAUG-05)
         CompassRose {
             windDir: weatherModel.windDir
+            windSpeed: weatherModel.windSpeed
             windRoseData: weatherModel.windRoseData
             windRoseMaxCount: weatherModel.windRoseMaxCount
+            windSpeedColorFn: function(mph) { return dashboard.windSpeedColor(mph) }
             Layout.fillWidth: true
             Layout.fillHeight: true
         }

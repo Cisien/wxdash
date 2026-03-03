@@ -25,14 +25,15 @@ Display live weather conditions from the WeatherLink Live with real-time updates
 - ✓ PurpleAir AQI integration with EPA color zones — v1.0
 - ✓ CMake install-kiosk one-command Pi deployment — v1.0
 - ✓ NWS 3-day forecast panel with weather icons — v1.0
+- ✓ Calm wind center dot replaces direction needle during idle conditions — v1.1
+- ✓ Idle/calm samples tracked in rolling window (no false directional bars) — v1.1
+- ✓ Bar color reflects recent ~60s average speed per direction bin — v1.1
+- ✓ Wind speed color thresholds unified between CompassRose and ArcGauge — v1.1
+- ✓ Forecast weather icons scaled to 95% of cell size — v1.1
 
 ### Active
 
-- [ ] Calm wind indicator (small center dot) replaces direction needle when wind is idle
-- [ ] Idle/calm samples tracked in rolling window but render no bars
-- [ ] Bar color reflects recent ~60s average speed per direction bin
-- [ ] Wind speed color thresholds consistent between CompassRose and ArcGauge
-- [ ] Forecast weather icons scaled to 95% of cell (up from 60%)
+(None — next milestone requirements TBD)
 
 ### Out of Scope
 
@@ -87,28 +88,21 @@ Display live weather conditions from the WeatherLink Live with real-time updates
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| C++ over Python/PySide6 | Pi has limited resources; native C++ gives best gauge rendering performance | — Pending |
-| Imperial units only | API returns imperial; user doesn't need conversion | — Pending |
-| Sparklines over full charts | Keeps UI focused on current conditions; few hours of context is enough | — Pending |
-| Compass rose for wind | Traditional, intuitive for weather data | — Pending |
-| Color thresholds (no text alerts) | Subtle visual cues without cluttering the dashboard | — Pending |
-| Mixed update cadence | UDP for fast wind/rain, HTTP poll for everything else — matches API design | — Pending |
+| C++ over Python/PySide6 | Pi has limited resources; native C++ gives best gauge rendering performance | ✓ Good |
+| Imperial units only | API returns imperial; user doesn't need conversion | ✓ Good |
+| Sparklines over full charts | Keeps UI focused on current conditions; few hours of context is enough | ✓ Good |
+| Compass rose for wind | Traditional, intuitive for weather data | ✓ Good |
+| Color thresholds (no text alerts) | Subtle visual cues without cluttering the dashboard | ✓ Good |
+| Mixed update cadence | UDP for fast wind/rain, HTTP poll for everything else — matches API design | ✓ Good |
+| bin=-1 sentinel for calm samples | Keeps WindSample struct unchanged, consistent with existing bin usage | ✓ Good |
+| Function property injection (windSpeedColorFn) | Cleaner component decoupling than id references | ✓ Good |
+| 24-sample recent window (~60s) | Good responsiveness without being too jittery at 2.5s cadence | ✓ Good |
 
 ---
-## Current Milestone: v1.1 Wind Rose Refinement
-
-**Goal:** Refine the wind rose to handle calm conditions gracefully, use recent-average coloring, and track idle samples in the rolling window.
-
-**Target features:**
-- Calm wind indicator (circle/neutral) replacing the direction needle when wind is idle
-- Idle sample tracking in rolling window (participate in eviction, no bars rendered)
-- Bar color based on recent ~60-second average speed per direction bin
-- Color consistency maintained between CompassRose and ArcGauge
-- Forecast weather icons scaled to 95% of cell
 
 ## Current State
 
-Shipped v1.0 with 2,955 LOC (C++/QML). Tech stack: Qt 6, C++17, QML, CMake/Ninja.
-12-cell dashboard with real-time weather gauges, sparkline trends, AQI integration, NWS forecast, and Pi kiosk deployment.
+Shipped v1.1 with 2,996 LOC (C++/QML). Tech stack: Qt 6, C++17, QML, CMake/Ninja.
+12-cell dashboard with real-time weather gauges, sparkline trends, AQI integration, NWS forecast, wind rose calm handling, and Pi kiosk deployment.
 
-*Last updated: 2026-03-02 after v1.1 milestone started*
+*Last updated: 2026-03-03 after v1.1 milestone*

@@ -5,17 +5,14 @@ Item {
 
     // Wind direction in degrees (0=North, 90=East, 180=South, 270=West)
     property int windDir: 0
-    // Wind rose histogram: list of 16 objects {count, avgSpeed}, one per compass bin
+    // Current wind speed in mph (used for calm detection)
+    property real windSpeed: 0
+    // Wind rose histogram: list of 16 objects {count, avgSpeed, recentAvgSpeed}, one per compass bin
     property var windRoseData: []
     // Maximum sample count across all bins (for normalization)
     property int windRoseMaxCount: 0
-
-    function windSpeedColor(mph) {
-        if (mph < 5)   return "#5CA85C"
-        if (mph < 15)  return "#C8A000"
-        if (mph < 30)  return "#C87C2A"
-        return "#C84040"
-    }
+    // Wind speed color function — injected from parent dashboard (single source of truth)
+    property var windSpeedColorFn: function(mph) { return "#5CA85C" }
 
     Item {
         id: roseArea
@@ -123,7 +120,7 @@ Item {
 
                     var centerAngle = i * 22.5
                     var barLength = minBarR + (bin.count / maxC) * (maxBarR - minBarR)
-                    var color = root.windSpeedColor(bin.avgSpeed)
+                    var color = root.windSpeedColorFn(bin.recentAvgSpeed !== undefined ? bin.recentAvgSpeed : bin.avgSpeed)
 
                     // Draw wedge sector from center outward
                     var startRad = (centerAngle - wedgeHalfAngle - 90) * deg2rad
@@ -165,6 +162,10 @@ Item {
                 id: pointerCanvas
                 anchors.fill: parent
 
+                // Track windSpeed to repaint when calm state changes
+                property real currentWindSpeed: root.windSpeed
+                onCurrentWindSpeedChanged: requestPaint()
+
                 onWidthChanged: requestPaint()
                 onHeightChanged: requestPaint()
 
@@ -175,6 +176,17 @@ Item {
                     var cx = width / 2
                     var cy = height / 2
                     var outerR = Math.min(width, height) * 0.5 * 0.95
+
+                    if (root.windSpeed < 0.1) {
+                        // Calm: small center dot only
+                        ctx.beginPath()
+                        ctx.arc(cx, cy, outerR * 0.04, 0, 2 * Math.PI)
+                        ctx.fillStyle = "#C8A000"
+                        ctx.fill()
+                        return
+                    }
+
+                    // Non-calm: draw directional needle
 
                     // Needle line from center to near edge
                     var needleLen = outerR * 0.92
@@ -188,7 +200,7 @@ Item {
                     ctx.lineTo(cx + needleHalf * 0.5, cy)   // right base
                     ctx.lineTo(cx + needleHalf, cy - outerR * 0.15) // right shoulder
                     ctx.closePath()
-                    ctx.fillStyle = "#FFFFFF"
+                    ctx.fillStyle = gold
                     ctx.globalAlpha = 0.9
                     ctx.fill()
 
@@ -205,7 +217,7 @@ Item {
                     ctx.arc(cx, cy, outerR * 0.045, 0, 2 * Math.PI)
                     ctx.fillStyle = "#333333"
                     ctx.fill()
-                    ctx.strokeStyle = "#FFFFFF"
+                    ctx.strokeStyle = gold
                     ctx.lineWidth = 1.5
                     ctx.globalAlpha = 0.9
                     ctx.stroke()

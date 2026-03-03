@@ -1,5 +1,21 @@
 # Milestones
 
+## v1.1 Wind Rose Refinement (Shipped: 2026-03-03)
+
+**Phases completed:** 2 phases (7-8), 2 plans + 1 direct change
+**Files modified:** 12 (534 insertions, 52 deletions)
+**Lines of code:** 2,996 (C++/QML)
+**Timeline:** 2026-03-03
+
+**Key accomplishments:**
+- Calm wind samples tracked in ring buffer with bin=-1 sentinel (no false directional bars)
+- Gold center dot replaces directional needle during calm/idle conditions
+- Direction bars colored by recent ~60s average speed per bin (not lifetime average)
+- Wind speed color function unified to single source of truth via function property injection
+- Forecast icons scaled from 60% to 95% of cell size for kiosk visibility
+
+---
+
 ## v1.0 MVP (Shipped: 2026-03-02)
 
 **Phases completed:** 6 phases, 12 plans
