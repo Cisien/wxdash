@@ -1,7 +1,7 @@
 # Requirements: wxdash
 
 **Defined:** 2026-03-01
-**Core Value:** Display live weather and air quality conditions with real-time updates — always-on, always-current, at a glance.
+**Core Value:** Display live weather and air quality conditions with real-time updates -- always-on, always-current, at a glance.
 
 ## v1 Requirements
 
@@ -55,7 +55,7 @@ Requirements for Wind Rose Refinement milestone. Each maps to roadmap phases.
 
 ### Wind Rose
 
-- [ ] **WIND-01**: Direction needle becomes a neutral circle indicator when wind speed is zero (no directional bias)
+- [ ] **WIND-01**: Direction needle becomes a small center dot (smaller than minimum bar length) when wind speed is zero (no directional bias)
 - [ ] **WIND-02**: Idle/calm readings are tracked as samples in the 720-entry rolling window and participate in eviction, but render no bar in any direction bin
 - [ ] **WIND-03**: Bar color for each direction bin reflects the rolling average wind speed from the last ~60 seconds of samples in that bin (not the lifetime average)
 - [ ] **WIND-04**: Wind speed color thresholds in CompassRose match the ArcGauge windSpeedColor function (verify and maintain)
@@ -83,8 +83,7 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Feature | Reason |
 |---------|--------|
-| Metric unit conversion | Imperial only — API returns imperial, no conversion needed |
-| Weather forecast display | Requires external API, contradicts local-only design |
+| Metric unit conversion | Imperial only -- API returns imperial, no conversion needed |
 | Multi-station support | Single WeatherLink Live, done well |
 | Touch interaction | Display-only kiosk, touch introduces settings drift |
 | Cloud/remote API access | Local network only |
@@ -100,8 +99,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-01 | Phase 1 | Complete |
 | DATA-02 | Phase 1 | Complete |
 | DATA-03 | Phase 1 | Complete |
-| DATA-04 | Phase 1 | Complete (01-01) |
-| DATA-05 | Phase 1 | Complete (01-01) |
+| DATA-04 | Phase 1 | Complete |
+| DATA-05 | Phase 1 | Complete |
 | DATA-06 | Phase 3 | Complete |
 | DATA-07 | Phase 3 | Complete |
 | DATA-08 | Phase 1 | Complete |
@@ -118,15 +117,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GAUG-10 | Phase 2 | Complete |
 | GAUG-11 | Phase 3 | Complete |
 | GAUG-12 | Phase 3 | Complete |
-| GAUG-13 | Phase 3 | Pending |
+| GAUG-13 | Phase 3 | Cancelled |
 | GAUG-14 | Phase 2 | Complete |
 | TRND-01 | Phase 3 | Complete |
 | TRND-02 | Phase 3 | Complete |
 | KIOSK-01 | Phase 2 | Complete |
 | KIOSK-02 | Phase 2 | Complete |
 | KIOSK-03 | Phase 2 | Dropped |
-| KIOSK-04 | Phase 4 | Pending |
-| KIOSK-05 | Phase 4 | Complete |
+| KIOSK-04 | Phase 4 | Cancelled |
+| KIOSK-05 | Phase 5 | Complete |
+| WIND-01 | Phase 7 | Pending |
+| WIND-02 | Phase 7 | Pending |
+| WIND-03 | Phase 7 | Pending |
+| WIND-04 | Phase 7 | Pending |
+| FCST-01 | Phase 8 | Pending |
 
 **v1 Coverage:**
 - v1 requirements: 30 total
@@ -135,9 +139,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 **v1.1 Coverage:**
 - v1.1 requirements: 5 total
-- Mapped to phases: 0
-- Unmapped: 5 ⚠️
+- Mapped to phases: 5
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-02 — v1.1 Wind Rose Refinement requirements added*
+*Last updated: 2026-03-02 -- v1.1 roadmap created, all requirements mapped to phases*

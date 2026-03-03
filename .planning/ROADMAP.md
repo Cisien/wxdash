@@ -1,119 +1,129 @@
 # Roadmap: wxdash
 
-## Overview
+## Milestones
 
-Build a Qt 6 C++ weather dashboard for kiosk display in four phases. The app targets Linux broadly (developed and tested on a local Linux machine; Raspberry Pi is a supported deployment target). Phase 1 builds the network and data model layer that everything else depends on. Phase 2 delivers all core outdoor weather gauges, fullscreen layout, and responsive scaling. Phase 3 adds sparkline trends, indoor panel, and air quality display. Phase 4 hardens the app for unattended 24/7 kiosk operation.
-
-Pi-specific deployment notes (EGLFS, Mesa V3D, gpu_mem, eglfs_kms, native vs. cross-compilation) are documented in the project README, not tracked as build validation phases.
+- v1.0 MVP - Phases 1-6 (shipped 2026-03-02)
+- v1.1 Wind Rose Refinement - Phases 7-8 (in progress)
 
 ## Phases
 
 **Phase Numbering:**
-- Integer phases (1, 2, 3, 4): Planned milestone work
-- Decimal phases (1.1, 2.1): Urgent insertions (marked with INSERTED)
+- Integer phases (1, 2, 3...): Planned milestone work
+- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [x] **Phase 1: Data Model and Network Layer** - HTTP polling, UDP real-time feed, JSON parsing, and central WeatherDataModel
-- [x] **Phase 2: Core Gauges and Dashboard Layout** - All outdoor weather gauges, compass rose, fullscreen frameless window, and responsive layout (completed 2026-03-01)
-- [x] **Phase 3: Trends, Secondary Data, and Air Quality** - Sparklines, indoor panel, PurpleAir AQI gauges, and animated needles (completed 2026-03-01)
-- [ ] **Phase 4: Kiosk Hardening and Deployment** - systemd watchdog, staleness indicators, and 24-hour stability validation
+<details>
+<summary>v1.0 MVP (Phases 1-6) - SHIPPED 2026-03-02</summary>
 
-## Phase Details
+- [x] **Phase 1: Data Model and Network Layer** - HTTP polling, UDP real-time feed, JSON parsing, and central WeatherDataModel
+- [x] **Phase 2: Core Gauges and Dashboard Layout** - All outdoor weather gauges, compass rose, fullscreen frameless window, and responsive layout
+- [x] **Phase 3: Trends, Secondary Data, and Air Quality** - Sparklines, PurpleAir AQI gauges, and animated needles
+- [x] **Phase 4: Kiosk Hardening and Deployment** - systemd watchdog and staleness detection
+- [x] **Phase 5: CMake install-kiosk target** - One-command Pi deployment with systemd auto-start
+- [x] **Phase 6: 3-Day Forecast Panel** - NWS forecast with weather icons, high/low temps, precipitation
 
 ### Phase 1: Data Model and Network Layer
 **Goal**: Live weather data from WeatherLink Live HTTP and UDP feeds flows into a central in-memory model, correctly parsed and tested, ready for widgets to consume
 **Depends on**: Nothing (first phase)
 **Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, DATA-08, DATA-09
-**Success Criteria** (what must be TRUE):
-  1. The app polls `/v1/current_conditions` every 10s and receives outdoor ISS, barometer, and indoor sensor data
-  2. UDP real-time packets arrive at 2.5s intervals; the session auto-renews before expiry with no manual intervention
-  3. Rain counts are converted to inches correctly for all four rain_size values (verified by unit test against known counts)
-  4. Staleness is detected within 30s of a data source going silent and a stale signal is emitted
-  5. After a network disconnect, the app reconnects automatically without requiring a restart
 **Plans**: 3 plans
-  - [x] 01-01-PLAN.md — Project scaffolding, WeatherReadings structs, and JsonParser (TDD)
-  - [x] 01-02-PLAN.md — WeatherDataModel with staleness detection (TDD)
-  - [x] 01-03-PLAN.md — HttpPoller, UdpReceiver, and main.cpp integration wiring
+
+Plans:
+- [x] 01-01-PLAN.md -- Project scaffolding, WeatherReadings structs, and JsonParser (TDD)
+- [x] 01-02-PLAN.md -- WeatherDataModel with staleness detection (TDD)
+- [x] 01-03-PLAN.md -- HttpPoller, UdpReceiver, and main.cpp integration wiring
 
 ### Phase 2: Core Gauges and Dashboard Layout
-**Goal**: Users see all outdoor weather conditions at a glance on a full-screen, frameless, responsive dashboard with color-coded thresholds and real-time updates — running on any Linux system
+**Goal**: Users see all outdoor weather conditions at a glance on a full-screen, frameless, responsive dashboard with color-coded thresholds and real-time updates
 **Depends on**: Phase 1
 **Requirements**: GAUG-01, GAUG-02, GAUG-03, GAUG-04, GAUG-05, GAUG-06, GAUG-07, GAUG-08, GAUG-09, GAUG-10, GAUG-14, KIOSK-01, KIOSK-02, KIOSK-03
-**Success Criteria** (what must be TRUE):
-  1. Temperature, humidity, barometric pressure, wind speed, UV index, solar radiation, rain rate, dew point, and feels-like are all visible simultaneously on one screen
-  2. The app launches fullscreen and frameless with no window chrome on any Linux desktop or embedded target
-  3. The layout fills the display at 720p and scales correctly to larger resolutions without code changes
-  4. The compass rose shows current wind direction and updates within 2.5 seconds of a new UDP packet
-  5. UV Index gauge shows the correct EPA 5-zone color (green/yellow/orange/red/violet) for the current value
-  6. Barometric pressure gauge displays a trend arrow (rising/falling/steady) that matches the API pressure_trend field
-  7. A last-updated timestamp is visible and updates with each successful data refresh
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [x] 02-01-PLAN.md -- ArcGauge component and gauge cells
+- [x] 02-02-PLAN.md -- CompassRose, DashboardGrid layout, fullscreen wiring
 
 ### Phase 3: Trends, Secondary Data, and Air Quality
 **Goal**: Users see recent trend context via sparklines, indoor conditions, and air quality alongside the core weather display
 **Depends on**: Phase 2
 **Requirements**: DATA-06, DATA-07, GAUG-11, GAUG-12, GAUG-13, TRND-01, TRND-02
-**Success Criteria** (what must be TRUE):
-  1. Sparkline mini-graphs for key sensors (temperature, pressure, humidity, wind speed) display after a few minutes of data accumulation and update continuously
-  2. The AQI gauge shows the correct EPA 6-zone color (green/yellow/orange/red/purple/maroon) calculated from averaged PurpleAir A+B PM2.5 channels
-  3. Indoor temperature and humidity from the WeatherLink console are visible in a separate panel
-  4. PM2.5 gauge shows the averaged A+B channel value from PurpleAir
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [x] 03-01-PLAN.md -- Sparkline component and ring buffer history
+- [x] 03-02-PLAN.md -- PurpleAir poller, AQI calculation, gauge integration
+- [x] 03-03-PLAN.md -- Animated needle transitions
 
 ### Phase 4: Kiosk Hardening and Deployment
-**Goal**: The dashboard runs unattended and recovers automatically from crashes, with connection status visible so a viewer knows when data may be stale
+**Goal**: The dashboard runs unattended and recovers automatically from crashes
 **Depends on**: Phase 3
 **Requirements**: KIOSK-04, KIOSK-05
+**Plans**: 0 plans (cancelled -- KIOSK-04 dropped, KIOSK-05 moved to Phase 5)
+
+### Phase 5: CMake install-kiosk target
+**Goal**: One-command Pi kiosk deployment with systemd auto-start
+**Depends on**: Phase 4
+**Requirements**: KIOSK-05
+**Plans**: 2 plans
+
+Plans:
+- [x] 05-01-PLAN.md -- CMake install() rules, systemd service template, eglfs.json
+- [x] 05-02-PLAN.md -- README deployment documentation and human verification
+
+### Phase 6: 3-Day Forecast Panel
+**Goal**: Users see a 3-day weather forecast with weather icons, high/low temps, and precipitation chance
+**Depends on**: Phase 5
+**Requirements**: (new feature, no pre-existing requirement IDs)
+**Plans**: 2 plans
+
+Plans:
+- [x] 06-01-PLAN.md -- NWS poller, forecast parser, model properties, SVG icon assets, unit tests
+- [x] 06-02-PLAN.md -- ForecastPanel QML component, DashboardGrid wiring, human verification
+
+</details>
+
+### v1.1 Wind Rose Refinement (In Progress)
+
+**Milestone Goal:** Refine the wind rose to handle calm conditions gracefully, use recent-average coloring for direction bars, maintain color consistency with the wind speed gauge, and scale forecast icons to fill their cells.
+
+- [ ] **Phase 7: Wind Rose Calm and Color** - Calm indicator, idle sample tracking, recent-average bar coloring, and color threshold consistency
+- [ ] **Phase 8: Forecast Icon Scaling** - Scale forecast weather icons to 95% of cell size
+
+## Phase Details
+
+### Phase 7: Wind Rose Calm and Color
+**Goal**: The compass rose gracefully handles calm/idle wind conditions and colors direction bars by recent wind speed, consistent with the wind speed gauge
+**Depends on**: Phase 6
+**Requirements**: WIND-01, WIND-02, WIND-03, WIND-04
 **Success Criteria** (what must be TRUE):
-  1. A per-source connection/staleness indicator is visible on the dashboard and turns to a stale state when a data source has not updated for 30s
-  2. After an intentional app crash, systemd restarts the application within 10 seconds without human intervention
-  3. The app runs continuously for 24 hours with flat memory usage (no RSS growth) and CPU below 20%
+  1. When wind speed is zero, the compass rose displays a small center dot (smaller than the minimum bar length) instead of a directional needle (no false directional bias)
+  2. Idle/calm readings (zero wind speed) occupy slots in the 720-entry rolling window and evict old samples normally, but no bar appears in any direction bin for those samples
+  3. Each direction bar's color reflects the average wind speed from that bin's samples in the last ~60 seconds (not the lifetime average of the entire rolling window)
+  4. Wind speed color thresholds in CompassRose produce the same colors as the ArcGauge windSpeedColor function for any given speed value
+**Plans**: TBD
+
+### Phase 8: Forecast Icon Scaling
+**Goal**: Forecast weather icons fill their cells for better visibility on the kiosk display
+**Depends on**: Phase 6 (no dependency on Phase 7)
+**Requirements**: FCST-01
+**Success Criteria** (what must be TRUE):
+  1. Forecast weather icons render at 95% of their cell size (up from 60%)
+  2. Icons remain centered and do not clip or overflow their cell boundaries
 **Plans**: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 7 -> 8
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Data Model and Network Layer | 3/3 | Complete | 2026-03-01 |
-| 2. Core Gauges and Dashboard Layout | 2/2 | Complete   | 2026-03-01 |
-| 3. Trends, Secondary Data, and Air Quality | 3/3 | Complete   | 2026-03-01 |
-| 4. Kiosk Hardening and Deployment | 0/TBD | Not started | - |
-| 5. CMake install-kiosk target | 2/2 | Complete    | 2026-03-01 |
-
-### Phase 5: CMake install-kiosk target for Raspberry Pi deployment
-
-**Goal:** `cmake --install build --component kiosk` deploys the wxdash binary, QML module, systemd service, EGLFS config, and desktop files to FHS-compliant paths, enabling one-command Pi kiosk deployment with auto-start at boot
-**Requirements**: KIOSK-05
-**Depends on:** Phase 4
-**Success Criteria** (what must be TRUE):
-  1. `cmake --install build --component kiosk` places the binary, QML module, systemd service, eglfs.json, desktop files, and icon at correct FHS paths
-  2. The installed systemd service file has correct ExecStart path and EGLFS environment variables
-  3. A README documents the complete Pi deployment workflow from build through systemctl enable
-  4. The install-kiosk convenience target exists for one-command deploy + enable
-**Plans**: 2 plans
-
-Plans:
-- [ ] 05-01-PLAN.md — CMake install() rules, systemd service template, eglfs.json, desktop entry template
-- [ ] 05-02-PLAN.md — README deployment documentation and human verification
-
-### Phase 6: 3-day forecast panel with weather icons, high/low temps, and precipitation chance
-
-**Goal:** Users see a 3-day weather forecast (today, tomorrow, day after) in the dashboard with weather icons, high/low temperatures, and precipitation chance — sourced from the free NWS API
-**Requirements**: None (new feature, no pre-existing requirement IDs)
-**Depends on:** Phase 5
-**Success Criteria** (what must be TRUE):
-  1. The app polls the NWS forecast API every 30 minutes and displays forecast data in Cell 12
-  2. Each of the 3 day columns shows a weather icon, high/low temperature, and precipitation chance
-  3. Weather icons are monochrome gold SVGs matching the dashboard aesthetic
-  4. High temps display in subdued red, low temps in subdued blue
-  5. An afternoon fetch correctly shows "--" for today's high when daytime period has passed
-  6. On NWS API failure, the last successfully fetched forecast is retained
-**Plans**: 2 plans
-
-Plans:
-- [ ] 06-01-PLAN.md — NWS poller, forecast parser, model properties, SVG icon assets, unit tests
-- [ ] 06-02-PLAN.md — ForecastPanel QML component, DashboardGrid wiring, human verification
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Data Model and Network Layer | v1.0 | 3/3 | Complete | 2026-03-01 |
+| 2. Core Gauges and Dashboard Layout | v1.0 | 2/2 | Complete | 2026-03-01 |
+| 3. Trends, Secondary Data, and Air Quality | v1.0 | 3/3 | Complete | 2026-03-01 |
+| 4. Kiosk Hardening and Deployment | v1.0 | 0/0 | Complete | 2026-03-01 |
+| 5. CMake install-kiosk target | v1.0 | 2/2 | Complete | 2026-03-01 |
+| 6. 3-Day Forecast Panel | v1.0 | 2/2 | Complete | 2026-03-02 |
+| 7. Wind Rose Calm and Color | v1.1 | 0/TBD | Not started | - |
+| 8. Forecast Icon Scaling | v1.1 | 0/TBD | Not started | - |
