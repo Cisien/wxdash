@@ -238,6 +238,7 @@ private:
     // Wind rose histogram (16 compass bins, each 22.5°) with rolling window
     static constexpr int kWindBins = 16;
     static constexpr int kMaxWindSamples = 720; // ~30 min at 2.5s UDP rate
+    static constexpr int kRecentSpeedSamples = 24; // ~60s at 2.5s UDP rate
     int m_windBinCount[kWindBins] = {};
     double m_windBinTotalSpeed[kWindBins] = {};
 
