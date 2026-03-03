@@ -11,6 +11,8 @@ Item {
     property var windRoseData: []
     // Maximum sample count across all bins (for normalization)
     property int windRoseMaxCount: 0
+    // Fraction of samples that are directional (non-calm) — bars scale by this
+    property real windRoseDirectionalFraction: 1.0
     // Wind speed color function — injected from parent dashboard (single source of truth)
     property var windSpeedColorFn: function(mph) { return "#5CA85C" }
 
@@ -91,9 +93,11 @@ Item {
 
             property var roseData: root.windRoseData
             property int maxCount: root.windRoseMaxCount
+            property real dirFraction: root.windRoseDirectionalFraction
 
             onRoseDataChanged: requestPaint()
             onMaxCountChanged: requestPaint()
+            onDirFractionChanged: requestPaint()
             onWidthChanged: requestPaint()
             onHeightChanged: requestPaint()
 
@@ -119,7 +123,8 @@ Item {
                     if (!bin || bin.count <= 0) continue
 
                     var centerAngle = i * 22.5
-                    var barLength = minBarR + (bin.count / maxC) * (maxBarR - minBarR)
+                    var frac = dirFraction > 0 ? dirFraction : 1.0
+                    var barLength = frac * (minBarR + (bin.count / maxC) * (maxBarR - minBarR))
                     var color = root.windSpeedColorFn(bin.recentAvgSpeed !== undefined ? bin.recentAvgSpeed : bin.avgSpeed)
 
                     // Draw wedge sector from center outward

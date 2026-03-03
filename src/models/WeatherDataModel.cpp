@@ -104,6 +104,14 @@ int WeatherDataModel::windRoseMaxCount() const {
     return max;
 }
 
+double WeatherDataModel::windRoseDirectionalFraction() const {
+    if (m_windRingCount == 0) return 0.0;
+    int totalDirectional = 0;
+    for (int i = 0; i < kWindBins; i++)
+        totalDirectional += m_windBinCount[i];
+    return double(totalDirectional) / m_windRingCount;
+}
+
 void WeatherDataModel::recordSparklineSample(double* ring, int& head, int& count, double value) {
     ring[head] = value;
     head = (head + 1) % kSparklineCapacity;

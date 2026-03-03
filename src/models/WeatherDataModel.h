@@ -47,6 +47,7 @@ class WeatherDataModel : public QObject {
     Q_PROPERTY(bool sourceStale READ sourceStale NOTIFY sourceStaleChanged)
     Q_PROPERTY(QVariantList windRoseData READ windRoseData NOTIFY windRoseDataChanged)
     Q_PROPERTY(int windRoseMaxCount READ windRoseMaxCount NOTIFY windRoseDataChanged)
+    Q_PROPERTY(double windRoseDirectionalFraction READ windRoseDirectionalFraction NOTIFY windRoseDataChanged)
 
     Q_PROPERTY(QVariantList temperatureHistory READ temperatureHistory NOTIFY temperatureHistoryChanged)
     Q_PROPERTY(QVariantList feelsLikeHistory READ feelsLikeHistory NOTIFY feelsLikeHistoryChanged)
@@ -94,6 +95,7 @@ public:
     bool sourceStale() const { return m_sourceStale; }
     QVariantList windRoseData() const;
     int windRoseMaxCount() const;
+    double windRoseDirectionalFraction() const;
 
     // Sparkline history accessors (chronological, oldest first)
     QVariantList temperatureHistory() const;

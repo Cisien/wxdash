@@ -164,6 +164,7 @@ Item {
             windSpeed: weatherModel.windSpeed
             windRoseData: weatherModel.windRoseData
             windRoseMaxCount: weatherModel.windRoseMaxCount
+            windRoseDirectionalFraction: weatherModel.windRoseDirectionalFraction
             windSpeedColorFn: function(mph) { return dashboard.windSpeedColor(mph) }
             Layout.fillWidth: true
             Layout.fillHeight: true
