@@ -49,6 +49,21 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **KIOSK-04**: Connection/staleness status indicator per data source
 - [x] **KIOSK-05**: systemd watchdog with auto-restart on crash
 
+## v1.1 Requirements
+
+Requirements for Wind Rose Refinement milestone. Each maps to roadmap phases.
+
+### Wind Rose
+
+- [ ] **WIND-01**: Direction needle becomes a neutral circle indicator when wind speed is zero (no directional bias)
+- [ ] **WIND-02**: Idle/calm readings are tracked as samples in the 720-entry rolling window and participate in eviction, but render no bar in any direction bin
+- [ ] **WIND-03**: Bar color for each direction bin reflects the rolling average wind speed from the last ~60 seconds of samples in that bin (not the lifetime average)
+- [ ] **WIND-04**: Wind speed color thresholds in CompassRose match the ArcGauge windSpeedColor function (verify and maintain)
+
+### Forecast
+
+- [ ] **FCST-01**: Forecast weather icons scaled to 95% of cell size (up from current 60%)
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -113,11 +128,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | KIOSK-04 | Phase 4 | Pending |
 | KIOSK-05 | Phase 4 | Complete |
 
-**Coverage:**
+**v1 Coverage:**
 - v1 requirements: 30 total
 - Mapped to phases: 30
 - Unmapped: 0
 
+**v1.1 Coverage:**
+- v1.1 requirements: 5 total
+- Mapped to phases: 0
+- Unmapped: 5 ⚠️
+
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 — Phase 0 removed; KIOSK-01 and KIOSK-02 moved to Phase 2; Pi-specific wording broadened to Linux*
+*Last updated: 2026-03-02 — v1.1 Wind Rose Refinement requirements added*
