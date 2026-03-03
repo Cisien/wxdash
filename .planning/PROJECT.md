@@ -28,7 +28,7 @@ Display live weather conditions from the WeatherLink Live with real-time updates
 
 ### Active
 
-- [ ] Calm wind indicator replaces direction needle when wind is idle
+- [ ] Calm wind indicator (small center dot) replaces direction needle when wind is idle
 - [ ] Idle/calm samples tracked in rolling window but render no bars
 - [ ] Bar color reflects recent ~60s average speed per direction bin
 - [ ] Wind speed color thresholds consistent between CompassRose and ArcGauge
