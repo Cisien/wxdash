@@ -181,6 +181,7 @@ Item {
                     var cx = width / 2
                     var cy = height / 2
                     var outerR = Math.min(width, height) * 0.5 * 0.95
+                    var needleColor = root.windSpeedColorFn(root.windSpeed)
 
                     if (root.windSpeed < 0.1) {
                         // Calm: small center dot only
@@ -205,7 +206,7 @@ Item {
                     ctx.lineTo(cx + needleHalf * 0.5, cy)   // right base
                     ctx.lineTo(cx + needleHalf, cy - outerR * 0.15) // right shoulder
                     ctx.closePath()
-                    ctx.fillStyle = gold
+                    ctx.fillStyle = needleColor
                     ctx.globalAlpha = 0.9
                     ctx.fill()
 
@@ -222,7 +223,7 @@ Item {
                     ctx.arc(cx, cy, outerR * 0.045, 0, 2 * Math.PI)
                     ctx.fillStyle = "#333333"
                     ctx.fill()
-                    ctx.strokeStyle = gold
+                    ctx.strokeStyle = needleColor
                     ctx.lineWidth = 1.5
                     ctx.globalAlpha = 0.9
                     ctx.stroke()
