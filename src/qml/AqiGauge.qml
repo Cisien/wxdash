@@ -199,25 +199,7 @@ Item {
     Binding { target: pm25FillPath; property: "animatedSweep"; value: root.pm25TargetSweep }
     Binding { target: pm10FillPath; property: "animatedSweep"; value: root.pm10TargetSweep }
 
-    // Min/max from AQI sparkline (cache in local var to avoid repeated C++ getter calls)
-    readonly property real sparklineMin: {
-        var d = sparklineData
-        if (!d || d.length === 0) return aqiValue
-        var m = d[0]
-        for (var i = 1; i < d.length; i++)
-            if (d[i] < m) m = d[i]
-        return m
-    }
-    readonly property real sparklineMax: {
-        var d = sparklineData
-        if (!d || d.length === 0) return aqiValue
-        var m = d[0]
-        for (var i = 1; i < d.length; i++)
-            if (d[i] > m) m = d[i]
-        return m
-    }
-
-    // Min/max tick marks on outer (AQI) arc — drawn on top
+    // Min/max tick marks on outer (AQI) arc — computed inline to avoid extra sparklineToList calls
     Canvas {
         id: minMaxCanvas
         anchors.fill: parent
@@ -226,15 +208,20 @@ Item {
         onWidthChanged: requestPaint()
         onHeightChanged: requestPaint()
 
-        property real sMin: root.sparklineMin
-        property real sMax: root.sparklineMax
-        onSMinChanged: requestPaint()
-        onSMaxChanged: requestPaint()
+        property var histData: root.sparklineData
+        onHistDataChanged: requestPaint()
 
         onPaint: {
             var ctx = getContext("2d")
             ctx.clearRect(0, 0, width, height)
-            if (!root.sparklineData || root.sparklineData.length < 2) return
+            var d = histData
+            if (!d || d.length < 2) return
+
+            var sMin = d[0], sMax = d[0]
+            for (var i = 1; i < d.length; i++) {
+                if (d[i] < sMin) sMin = d[i]
+                if (d[i] > sMax) sMax = d[i]
+            }
 
             var cx = width / 2
             var cy = height / 2
@@ -247,7 +234,6 @@ Item {
                 var angleRad = angleDeg * Math.PI / 180
                 var cosA = Math.cos(angleRad)
                 var sinA = Math.sin(angleRad)
-
                 ctx.beginPath()
                 ctx.strokeStyle = color
                 ctx.lineWidth = 2
@@ -256,8 +242,8 @@ Item {
                 ctx.stroke()
             }
 
-            drawTick(sMin, "#5B8DD9")  // blue for min
-            drawTick(sMax, "#C84040")  // red for max
+            drawTick(sMin, "#5B8DD9")
+            drawTick(sMax, "#C84040")
         }
     }
 

@@ -28,76 +28,82 @@ Item {
         return arcSweepAngle * Math.max(0, Math.min(1, ratio))
     }
 
-    // Min/max computed from sparkline data.
-    // IMPORTANT: cache sparklineData in a local var — direct property access in a
-    // loop triggers the C++ getter (sparklineToList) on every iteration in AOT mode.
-    readonly property real sparklineMin: {
-        var d = sparklineData
-        if (!d || d.length === 0) return value
-        var m = d[0]
-        for (var i = 1; i < d.length; i++)
-            if (d[i] < m) m = d[i]
-        return m
-    }
-    readonly property real sparklineMax: {
-        var d = sparklineData
-        if (!d || d.length === 0) return value
-        var m = d[0]
-        for (var i = 1; i < d.length; i++)
-            if (d[i] > m) m = d[i]
-        return m
-    }
-
-    // Sparkline background overlay (renders behind gauge arc and text)
+    // Combined sparkline + min/max Canvas — single data read, painted behind arcs
     Canvas {
         id: sparklineCanvas
-        anchors {
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
-        height: parent.height / 3      // lower third of cell
-        z: -1                           // behind gauge arcs and text
+        anchors.fill: parent
+        z: -1
 
         onWidthChanged: requestPaint()
         onHeightChanged: requestPaint()
 
-        // Repaint when data changes
         property var data: root.sparklineData
         onDataChanged: requestPaint()
 
         onPaint: {
             var ctx = getContext("2d")
             ctx.clearRect(0, 0, width, height)
-            if (!data || data.length < 2) return
+            var d = data
+            if (!d || d.length < 2) return
 
-            var count = data.length
+            var count = d.length
 
-            // Decimation: stride through data to fit pixel width
+            // --- Sparkline in lower third ---
+            var slHeight = height / 3
+            var slTop = height - slHeight
             var stride = Math.max(1, Math.floor(count / width))
 
-            // Use gauge min/max as baseline, expand if data exceeds
-            var minV = root.minValue, maxV = root.maxValue
-            for (var i = 0; i < count; i++) {
-                if (data[i] < minV) minV = data[i]
-                if (data[i] > maxV) maxV = data[i]
+            var dataMin = d[0], dataMax = d[0]
+            for (var i = 1; i < count; i++) {
+                if (d[i] < dataMin) dataMin = d[i]
+                if (d[i] > dataMax) dataMax = d[i]
             }
+
+            // Sparkline Y range: gauge range expanded if data exceeds
+            var minV = root.minValue, maxV = root.maxValue
+            if (dataMin < minV) minV = dataMin
+            if (dataMax > maxV) maxV = dataMax
             var range = maxV - minV
-            if (range === 0) range = 1  // flat line — avoid div by zero
+            if (range === 0) range = 1
 
             ctx.beginPath()
-            ctx.strokeStyle = "#5A4500"   // dim gold
+            ctx.strokeStyle = "#5A4500"
             ctx.lineWidth = 1
             ctx.lineJoin = "round"
 
             var first = true
             for (var j = 0; j < count; j += stride) {
                 var x = (j / (count - 1)) * width
-                var y = height - ((data[j] - minV) / range) * height * 0.9
+                var y = slTop + slHeight - ((d[j] - minV) / range) * slHeight * 0.9
                 if (first) { ctx.moveTo(x, y); first = false }
                 else ctx.lineTo(x, y)
             }
             ctx.stroke()
+
+            // --- Min/max tick marks on the arc ---
+            if (root.maxValue === root.minValue) return
+
+            var cx = width / 2
+            var cy = height / 2
+            var r = (Math.min(width, height) / 2) - (root.strokeWidth / 2)
+            var halfStroke = root.strokeWidth / 2
+
+            function drawTick(val, color) {
+                var ratio = Math.max(0, Math.min(1, (val - root.minValue) / (root.maxValue - root.minValue)))
+                var angleDeg = root.arcStartAngle + root.arcSweepAngle * ratio
+                var angleRad = angleDeg * Math.PI / 180
+                var cosA = Math.cos(angleRad)
+                var sinA = Math.sin(angleRad)
+                ctx.beginPath()
+                ctx.strokeStyle = color
+                ctx.lineWidth = 2
+                ctx.moveTo(cx + (r - halfStroke - 2) * cosA, cy + (r - halfStroke - 2) * sinA)
+                ctx.lineTo(cx + (r + halfStroke + 2) * cosA, cy + (r + halfStroke + 2) * sinA)
+                ctx.stroke()
+            }
+
+            drawTick(dataMin, "#5B8DD9")
+            drawTick(dataMax, "#C84040")
         }
     }
 
@@ -155,68 +161,20 @@ Item {
         }
     }
 
-    // Drive animatedSweep from targetSweep via a binding on the root
     Binding {
         target: fillPath
         property: "animatedSweep"
         value: root.targetSweep
     }
 
-    // Min/max tick mark overlay — drawn on top of arcs
-    Canvas {
-        id: minMaxCanvas
-        anchors.fill: parent
-        z: 10
-
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
-
-        property real sMin: root.sparklineMin
-        property real sMax: root.sparklineMax
-        onSMinChanged: requestPaint()
-        onSMaxChanged: requestPaint()
-
-        onPaint: {
-            var ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            if (!root.sparklineData || root.sparklineData.length < 2) return
-            if (root.maxValue === root.minValue) return
-
-            var cx = width / 2
-            var cy = height / 2
-            var r = (Math.min(width, height) / 2) - (root.strokeWidth / 2)
-            var halfStroke = root.strokeWidth / 2
-
-            function drawTick(val, color) {
-                var ratio = Math.max(0, Math.min(1, (val - root.minValue) / (root.maxValue - root.minValue)))
-                var angleDeg = root.arcStartAngle + root.arcSweepAngle * ratio
-                var angleRad = angleDeg * Math.PI / 180
-                var cosA = Math.cos(angleRad)
-                var sinA = Math.sin(angleRad)
-
-                ctx.beginPath()
-                ctx.strokeStyle = color
-                ctx.lineWidth = 2
-                ctx.moveTo(cx + (r - halfStroke - 2) * cosA, cy + (r - halfStroke - 2) * sinA)
-                ctx.lineTo(cx + (r + halfStroke + 2) * cosA, cy + (r + halfStroke + 2) * sinA)
-                ctx.stroke()
-            }
-
-            drawTick(sMin, "#5B8DD9")  // blue for min
-            drawTick(sMax, "#C84040")  // red for max
-        }
-    }
-
     // Inner radius boundary for text sizing
     readonly property real innerRadius: (Math.min(width, height) / 2) - strokeWidth
 
-    // Vertical layout: all text stacked in a column, centered in the gauge
     Column {
         anchors.centerIn: parent
         width: root.innerRadius * 1.4
         spacing: 0
 
-        // Label text (gauge title)
         Text {
             width: parent.width
             text: root.label
@@ -228,7 +186,6 @@ Item {
             minimumPixelSize: 8
         }
 
-        // Value text (number only)
         Text {
             id: valueText
             width: parent.width
@@ -241,7 +198,6 @@ Item {
             minimumPixelSize: 10
         }
 
-        // Unit text (small, dimmer)
         Text {
             width: parent.width
             visible: root.unit !== ""
@@ -251,7 +207,6 @@ Item {
             horizontalAlignment: Text.AlignHCenter
         }
 
-        // Secondary text (optional)
         Text {
             width: parent.width
             visible: root.secondaryText !== ""
