@@ -199,19 +199,21 @@ Item {
     Binding { target: pm25FillPath; property: "animatedSweep"; value: root.pm25TargetSweep }
     Binding { target: pm10FillPath; property: "animatedSweep"; value: root.pm10TargetSweep }
 
-    // Min/max from AQI sparkline
+    // Min/max from AQI sparkline (cache in local var to avoid repeated C++ getter calls)
     readonly property real sparklineMin: {
-        if (!sparklineData || sparklineData.length === 0) return aqiValue
-        var m = sparklineData[0]
-        for (var i = 1; i < sparklineData.length; i++)
-            if (sparklineData[i] < m) m = sparklineData[i]
+        var d = sparklineData
+        if (!d || d.length === 0) return aqiValue
+        var m = d[0]
+        for (var i = 1; i < d.length; i++)
+            if (d[i] < m) m = d[i]
         return m
     }
     readonly property real sparklineMax: {
-        if (!sparklineData || sparklineData.length === 0) return aqiValue
-        var m = sparklineData[0]
-        for (var i = 1; i < sparklineData.length; i++)
-            if (sparklineData[i] > m) m = sparklineData[i]
+        var d = sparklineData
+        if (!d || d.length === 0) return aqiValue
+        var m = d[0]
+        for (var i = 1; i < d.length; i++)
+            if (d[i] > m) m = d[i]
         return m
     }
 

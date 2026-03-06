@@ -28,19 +28,23 @@ Item {
         return arcSweepAngle * Math.max(0, Math.min(1, ratio))
     }
 
-    // Min/max computed from sparkline data
+    // Min/max computed from sparkline data.
+    // IMPORTANT: cache sparklineData in a local var — direct property access in a
+    // loop triggers the C++ getter (sparklineToList) on every iteration in AOT mode.
     readonly property real sparklineMin: {
-        if (!sparklineData || sparklineData.length === 0) return value
-        var m = sparklineData[0]
-        for (var i = 1; i < sparklineData.length; i++)
-            if (sparklineData[i] < m) m = sparklineData[i]
+        var d = sparklineData
+        if (!d || d.length === 0) return value
+        var m = d[0]
+        for (var i = 1; i < d.length; i++)
+            if (d[i] < m) m = d[i]
         return m
     }
     readonly property real sparklineMax: {
-        if (!sparklineData || sparklineData.length === 0) return value
-        var m = sparklineData[0]
-        for (var i = 1; i < sparklineData.length; i++)
-            if (sparklineData[i] > m) m = sparklineData[i]
+        var d = sparklineData
+        if (!d || d.length === 0) return value
+        var m = d[0]
+        for (var i = 1; i < d.length; i++)
+            if (d[i] > m) m = d[i]
         return m
     }
 

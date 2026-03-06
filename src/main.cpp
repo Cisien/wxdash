@@ -130,7 +130,20 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("weatherModel", model);
     engine.rootContext()->setContextProperty("kioskMode", kioskMode);
+
+    // Abort early if QML module fails to load (e.g., missing type in qmldir).
+    // Without this check the app enters an empty event loop on EGLFS — no window,
+    // no log output, and no response to Ctrl+C.
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
+                     &app, []() { qCritical("QML module failed to load"); qApp->exit(1); },
+                     Qt::QueuedConnection);
+
     engine.loadFromModule("wxdash", "Main");
+
+    if (engine.rootObjects().isEmpty()) {
+        qCritical("wxdash: no root QML objects created — check QML_IMPORT_PATH and module install");
+        return 1;
+    }
 
     return app.exec();
 }

@@ -40,19 +40,21 @@ Item {
         return "#5CA85C"                   // green — trace/none
     }
 
-    // Min/max from sparkline
+    // Min/max from sparkline (cache in local var to avoid repeated C++ getter calls)
     readonly property real sparklineMin: {
-        if (!sparklineData || sparklineData.length === 0) return rainRate
-        var m = sparklineData[0]
-        for (var i = 1; i < sparklineData.length; i++)
-            if (sparklineData[i] < m) m = sparklineData[i]
+        var d = sparklineData
+        if (!d || d.length === 0) return rainRate
+        var m = d[0]
+        for (var i = 1; i < d.length; i++)
+            if (d[i] < m) m = d[i]
         return m
     }
     readonly property real sparklineMax: {
-        if (!sparklineData || sparklineData.length === 0) return rainRate
-        var m = sparklineData[0]
-        for (var i = 1; i < sparklineData.length; i++)
-            if (sparklineData[i] > m) m = sparklineData[i]
+        var d = sparklineData
+        if (!d || d.length === 0) return rainRate
+        var m = d[0]
+        for (var i = 1; i < d.length; i++)
+            if (d[i] > m) m = d[i]
         return m
     }
 
