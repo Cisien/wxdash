@@ -113,6 +113,8 @@ Item {
             unit: "\u00B0F"
             arcColor: temperatureColor(weatherModel.temperature)
             sparklineData: weatherModel.temperatureHistory
+            sparklineMin: weatherModel.temperatureMin
+            sparklineMax: weatherModel.temperatureMax
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -126,6 +128,8 @@ Item {
             unit: "\u00B0F"
             arcColor: feelsLikeColor
             sparklineData: weatherModel.feelsLikeHistory
+            sparklineMin: weatherModel.feelsLikeMin
+            sparklineMax: weatherModel.feelsLikeMax
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -140,6 +144,8 @@ Item {
             decimals: 0
             arcColor: humidityColor(weatherModel.humidity)
             sparklineData: weatherModel.humidityHistory
+            sparklineMin: weatherModel.humidityMin
+            sparklineMax: weatherModel.humidityMax
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -152,6 +158,8 @@ Item {
             label: "Dew Point"
             unit: "\u00B0F"
             sparklineData: weatherModel.dewPointHistory
+            sparklineMin: weatherModel.dewPointMin
+            sparklineMax: weatherModel.dewPointMax
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -169,6 +177,8 @@ Item {
             secondaryLabel: "Gust"
             secondaryText: weatherModel.windGust.toFixed(1) + " mph"
             sparklineData: weatherModel.windSpeedHistory
+            sparklineMin: weatherModel.windSpeedMin
+            sparklineMax: weatherModel.windSpeedMax
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -190,6 +200,8 @@ Item {
             rainRate: weatherModel.rainRate
             dailyTotal: weatherModel.rainfallDaily
             sparklineData: weatherModel.rainRateHistory
+            sparklineMin: weatherModel.rainRateMin
+            sparklineMax: weatherModel.rainRateMax
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -204,6 +216,8 @@ Item {
             decimals: 1
             secondaryText: pressureTrendArrow(weatherModel.pressureTrend)
             sparklineData: weatherModel.pressureHistoryMbar
+            sparklineMin: weatherModel.pressureMin * 33.8639
+            sparklineMax: weatherModel.pressureMax * 33.8639
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -220,6 +234,8 @@ Item {
             decimals: 1
             arcColor: uvColor(weatherModel.uvIndex)
             sparklineData: weatherModel.uvIndexHistory
+            sparklineMin: weatherModel.uvIndexMin
+            sparklineMax: weatherModel.uvIndexMax
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -233,6 +249,8 @@ Item {
             unit: "W/m\u00B2"
             decimals: 0
             sparklineData: weatherModel.solarRadHistory
+            sparklineMin: weatherModel.solarRadMin
+            sparklineMax: weatherModel.solarRadMax
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
@@ -244,6 +262,8 @@ Item {
             pm10Value: weatherModel.pm10
             aqiColor: dashboard.aqiColor(weatherModel.aqi)
             sparklineData: weatherModel.aqiHistory
+            sparklineMin: weatherModel.aqiMin
+            sparklineMax: weatherModel.aqiMax
             Layout.fillWidth: true
             Layout.fillHeight: true
         }

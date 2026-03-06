@@ -698,6 +698,129 @@ private slots:
         QCOMPARE(model.windRoseMaxCount(), 20);
     }
 
+    // -----------------------------------------------------------------------
+    // True min/max tracking tests
+    // -----------------------------------------------------------------------
+
+    void trueMinMax_initiallyZero()
+    {
+        WeatherDataModel model;
+        QCOMPARE(model.temperatureMin(), 0.0);
+        QCOMPARE(model.temperatureMax(), 0.0);
+        QCOMPARE(model.windSpeedMin(), 0.0);
+        QCOMPARE(model.windSpeedMax(), 0.0);
+    }
+
+    void trueMinMax_tracksExtremes()
+    {
+        WeatherDataModel model;
+        model.applyIssUpdate(makeIss(/*temp=*/72.0));
+        QCOMPARE(model.temperatureMin(), 72.0);
+        QCOMPARE(model.temperatureMax(), 72.0);
+
+        model.applyIssUpdate(makeIss(/*temp=*/65.0));
+        QCOMPARE(model.temperatureMin(), 65.0);
+        QCOMPARE(model.temperatureMax(), 72.0);
+
+        model.applyIssUpdate(makeIss(/*temp=*/80.0));
+        QCOMPARE(model.temperatureMin(), 65.0);
+        QCOMPARE(model.temperatureMax(), 80.0);
+    }
+
+    void trueMinMax_survivesDecimation()
+    {
+        // Fill buffer well past kMaxSparklinePoints so stride > 1.
+        // The true min/max must still reflect the exact extremes,
+        // not just the strided samples.
+        WeatherDataModel model;
+
+        // Insert 2000 values in the range [10..30]
+        for (int i = 0; i < 2000; i++) {
+            double temp = 20.0 + 10.0 * std::sin(i * 0.01);
+            model.applyIssUpdate(makeIss(temp));
+        }
+
+        // Insert one spike at 99.0 (must be captured as trueMax)
+        model.applyIssUpdate(makeIss(99.0));
+
+        // Insert one dip at -5.0 (must be captured as trueMin)
+        model.applyIssUpdate(makeIss(-5.0));
+
+        // Continue with normal values
+        for (int i = 0; i < 500; i++)
+            model.applyIssUpdate(makeIss(20.0));
+
+        // Verify the cache is decimated (stride > 1)
+        QVariantList hist = model.temperatureHistory();
+        QVERIFY(hist.size() < 2503);
+
+        // True min/max must capture the exact extremes
+        QCOMPARE(model.temperatureMin(), -5.0);
+        QCOMPARE(model.temperatureMax(), 99.0);
+    }
+
+    void trueMinMax_pressureInMbar()
+    {
+        WeatherDataModel model;
+
+        BarReading br;
+        br.pressureSeaLevel = 29.80;
+        model.applyBarUpdate(br);
+        br.pressureSeaLevel = 30.20;
+        model.applyBarUpdate(br);
+        br.pressureSeaLevel = 30.00;
+        model.applyBarUpdate(br);
+
+        // pressureMin/Max are in inHg (raw), DashboardGrid converts to mbar
+        QCOMPARE(model.pressureMin(), 29.80);
+        QCOMPARE(model.pressureMax(), 30.20);
+    }
+
+    void trueMinMax_windSpeedWithDecimation()
+    {
+        // Specific test for the reported bug: wind speed max marker drifting
+        WeatherDataModel model;
+
+        // Simulate 24h of mostly calm wind with one gust
+        for (int i = 0; i < 1000; i++)
+            model.applyIssUpdate(makeIss(70.0, 50.0, 0, 0, 0, /*windSpeed=*/2.0));
+
+        // One gust to 45 mph
+        model.applyIssUpdate(makeIss(70.0, 50.0, 0, 0, 0, /*windSpeed=*/45.0));
+
+        // Back to calm
+        for (int i = 0; i < 1000; i++)
+            model.applyIssUpdate(makeIss(70.0, 50.0, 0, 0, 0, /*windSpeed=*/3.0));
+
+        // True max must be 45.0, not a strided sample that misses it
+        QCOMPARE(model.windSpeedMax(), 45.0);
+        QCOMPARE(model.windSpeedMin(), 2.0);
+    }
+
+    void trueMinMax_aqiTracked()
+    {
+        qint64 fakeMs = 0;
+        WeatherDataModel model(nullptr, makeClock(&fakeMs));
+
+        PurpleAirReading r;
+        r.pm25avg = 10.0;
+        r.pm10 = 5.0;
+        r.aqi = 42.0;
+        model.applyPurpleAirUpdate(r);
+
+        r.aqi = 15.0;
+        model.applyPurpleAirUpdate(r);
+
+        r.aqi = 85.0;
+        model.applyPurpleAirUpdate(r);
+
+        r.aqi = 50.0;
+        model.applyPurpleAirUpdate(r);
+
+        QCOMPARE(model.aqiMin(), 15.0);
+        QCOMPARE(model.aqiMax(), 85.0);
+    }
+
     void windRose_existingBehaviorPreserved()
     {
         // Non-calm samples still update directional bin counts and avgSpeed correctly

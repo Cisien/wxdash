@@ -15,6 +15,8 @@ Item {
     property string secondaryText: ""
     property string secondaryLabel: ""
     property var sparklineData: []      // QVariantList from model
+    property real sparklineMin: NaN    // true min from model
+    property real sparklineMax: NaN    // true max from model
 
     // Arc geometry constants
     readonly property real arcStartAngle: 125
@@ -39,7 +41,8 @@ Item {
     MinMaxTicks {
         anchors.fill: parent
         z: 10
-        data: root.sparklineData
+        trueMin: root.sparklineMin
+        trueMax: root.sparklineMax
         rangeMin: root.minValue
         rangeMax: root.maxValue
         arcRadius: (Math.min(root.width, root.height) / 2) - (root.strokeWidth / 2)

@@ -50,21 +50,41 @@ class WeatherDataModel : public QObject {
     Q_PROPERTY(double windRoseDirectionalFraction READ windRoseDirectionalFraction NOTIFY windRoseDataChanged)
 
     Q_PROPERTY(QVariantList temperatureHistory READ temperatureHistory NOTIFY temperatureHistoryChanged)
+    Q_PROPERTY(double temperatureMin READ temperatureMin NOTIFY temperatureHistoryChanged)
+    Q_PROPERTY(double temperatureMax READ temperatureMax NOTIFY temperatureHistoryChanged)
     Q_PROPERTY(QVariantList feelsLikeHistory READ feelsLikeHistory NOTIFY feelsLikeHistoryChanged)
+    Q_PROPERTY(double feelsLikeMin READ feelsLikeMin NOTIFY feelsLikeHistoryChanged)
+    Q_PROPERTY(double feelsLikeMax READ feelsLikeMax NOTIFY feelsLikeHistoryChanged)
     Q_PROPERTY(QVariantList humidityHistory READ humidityHistory NOTIFY humidityHistoryChanged)
+    Q_PROPERTY(double humidityMin READ humidityMin NOTIFY humidityHistoryChanged)
+    Q_PROPERTY(double humidityMax READ humidityMax NOTIFY humidityHistoryChanged)
     Q_PROPERTY(QVariantList dewPointHistory READ dewPointHistory NOTIFY dewPointHistoryChanged)
+    Q_PROPERTY(double dewPointMin READ dewPointMin NOTIFY dewPointHistoryChanged)
+    Q_PROPERTY(double dewPointMax READ dewPointMax NOTIFY dewPointHistoryChanged)
     Q_PROPERTY(QVariantList windSpeedHistory READ windSpeedHistory NOTIFY windSpeedHistoryChanged)
+    Q_PROPERTY(double windSpeedMin READ windSpeedMin NOTIFY windSpeedHistoryChanged)
+    Q_PROPERTY(double windSpeedMax READ windSpeedMax NOTIFY windSpeedHistoryChanged)
     Q_PROPERTY(QVariantList rainRateHistory READ rainRateHistory NOTIFY rainRateHistoryChanged)
+    Q_PROPERTY(double rainRateMin READ rainRateMin NOTIFY rainRateHistoryChanged)
+    Q_PROPERTY(double rainRateMax READ rainRateMax NOTIFY rainRateHistoryChanged)
     Q_PROPERTY(QVariantList pressureHistory READ pressureHistory NOTIFY pressureHistoryChanged)
     Q_PROPERTY(QVariantList pressureHistoryMbar READ pressureHistoryMbar NOTIFY pressureHistoryChanged)
+    Q_PROPERTY(double pressureMin READ pressureMin NOTIFY pressureHistoryChanged)
+    Q_PROPERTY(double pressureMax READ pressureMax NOTIFY pressureHistoryChanged)
     Q_PROPERTY(QVariantList uvIndexHistory READ uvIndexHistory NOTIFY uvIndexHistoryChanged)
+    Q_PROPERTY(double uvIndexMin READ uvIndexMin NOTIFY uvIndexHistoryChanged)
+    Q_PROPERTY(double uvIndexMax READ uvIndexMax NOTIFY uvIndexHistoryChanged)
     Q_PROPERTY(QVariantList solarRadHistory READ solarRadHistory NOTIFY solarRadHistoryChanged)
+    Q_PROPERTY(double solarRadMin READ solarRadMin NOTIFY solarRadHistoryChanged)
+    Q_PROPERTY(double solarRadMax READ solarRadMax NOTIFY solarRadHistoryChanged)
 
     Q_PROPERTY(double aqi READ aqi NOTIFY aqiChanged)
     Q_PROPERTY(double pm25 READ pm25 NOTIFY pm25Changed)
     Q_PROPERTY(double pm10 READ pm10 NOTIFY pm10Changed)
     Q_PROPERTY(bool purpleAirStale READ purpleAirStale NOTIFY purpleAirStaleChanged)
     Q_PROPERTY(QVariantList aqiHistory READ aqiHistory NOTIFY aqiHistoryChanged)
+    Q_PROPERTY(double aqiMin READ aqiMin NOTIFY aqiHistoryChanged)
+    Q_PROPERTY(double aqiMax READ aqiMax NOTIFY aqiHistoryChanged)
 
     Q_PROPERTY(QVariantList forecastData READ forecastData NOTIFY forecastDataChanged)
 
@@ -119,12 +139,34 @@ public:
     QVariantList uvIndexHistory() const { return m_sparklines[SL_UvIndex].cache; }
     QVariantList solarRadHistory() const { return m_sparklines[SL_SolarRad].cache; }
 
+    // True min/max from full (non-decimated) ring buffer
+    double temperatureMin() const { return m_sparklines[SL_Temperature].trueMin; }
+    double temperatureMax() const { return m_sparklines[SL_Temperature].trueMax; }
+    double feelsLikeMin() const { return m_sparklines[SL_FeelsLike].trueMin; }
+    double feelsLikeMax() const { return m_sparklines[SL_FeelsLike].trueMax; }
+    double humidityMin() const { return m_sparklines[SL_Humidity].trueMin; }
+    double humidityMax() const { return m_sparklines[SL_Humidity].trueMax; }
+    double dewPointMin() const { return m_sparklines[SL_DewPoint].trueMin; }
+    double dewPointMax() const { return m_sparklines[SL_DewPoint].trueMax; }
+    double windSpeedMin() const { return m_sparklines[SL_WindSpeed].trueMin; }
+    double windSpeedMax() const { return m_sparklines[SL_WindSpeed].trueMax; }
+    double rainRateMin() const { return m_sparklines[SL_RainRate].trueMin; }
+    double rainRateMax() const { return m_sparklines[SL_RainRate].trueMax; }
+    double pressureMin() const { return m_sparklines[SL_Pressure].trueMin; }
+    double pressureMax() const { return m_sparklines[SL_Pressure].trueMax; }
+    double uvIndexMin() const { return m_sparklines[SL_UvIndex].trueMin; }
+    double uvIndexMax() const { return m_sparklines[SL_UvIndex].trueMax; }
+    double solarRadMin() const { return m_sparklines[SL_SolarRad].trueMin; }
+    double solarRadMax() const { return m_sparklines[SL_SolarRad].trueMax; }
+
     // PurpleAir accessors
     double aqi() const { return m_aqi; }
     double pm25() const { return m_pm25; }
     double pm10() const { return m_pm10; }
     bool purpleAirStale() const { return m_purpleAirStale; }
     QVariantList aqiHistory() const { return m_aqiHistoryCache; }
+    double aqiMin() const { return m_aqiTrueMin; }
+    double aqiMax() const { return m_aqiTrueMax; }
 
     // Forecast accessor
     QVariantList forecastData() const;
@@ -192,6 +234,7 @@ private:
     void rebuildCache(SparklineId id);
     void rebuildAllCaches();
     void rebuildPressureMbarCache();
+    void rebuildAqiCache();
 
     // Weather fields
     double m_temperature = 0.0;
@@ -219,6 +262,8 @@ private:
         int head = 0;
         int count = 0;
         QVariantList cache;   // pre-decimated, returned by QML getters
+        double trueMin = 0.0; // true min from full ring buffer
+        double trueMax = 0.0; // true max from full ring buffer
     };
     SparklineRing m_sparklines[SL_Count];
     QVariantList m_pressureMbarCache;  // pressure converted to mbar
@@ -255,6 +300,8 @@ private:
     double m_aqiSparkline[kAqiSparklineCapacity] = {};
     int m_aqiSparklineHead = 0;
     int m_aqiSparklineCount = 0;
+    double m_aqiTrueMin = 0.0;
+    double m_aqiTrueMax = 0.0;
 
     // Staleness tracking
     static constexpr int kStalenessMs = 30000;

@@ -3,7 +3,8 @@ import QtQuick
 Canvas {
     id: root
 
-    property var data: []
+    property real trueMin: NaN
+    property real trueMax: NaN
     property real rangeMin: 0
     property real rangeMax: 100
     property real arcRadius: 0
@@ -13,20 +14,14 @@ Canvas {
 
     onWidthChanged: requestPaint()
     onHeightChanged: requestPaint()
-    onDataChanged: requestPaint()
+    onTrueMinChanged: requestPaint()
+    onTrueMaxChanged: requestPaint()
 
     onPaint: {
         var ctx = getContext("2d")
         ctx.clearRect(0, 0, width, height)
-        var d = data
-        if (!d || d.length < 2) return
+        if (isNaN(trueMin) || isNaN(trueMax)) return
         if (rangeMax === rangeMin) return
-
-        var dataMin = d[0], dataMax = d[0]
-        for (var i = 1; i < d.length; i++) {
-            if (d[i] < dataMin) dataMin = d[i]
-            if (d[i] > dataMax) dataMax = d[i]
-        }
 
         var cx = width / 2
         var cy = height / 2
@@ -47,7 +42,7 @@ Canvas {
             ctx.stroke()
         }
 
-        drawTick(dataMin, "#5B8DD9")
-        drawTick(dataMax, "#C84040")
+        drawTick(trueMin, "#5B8DD9")
+        drawTick(trueMax, "#C84040")
     }
 }

@@ -123,7 +123,24 @@ void WeatherDataModel::recordSample(SparklineId id, double value) {
 void WeatherDataModel::rebuildCache(SparklineId id) {
     auto& sl = m_sparklines[id];
     sl.cache.clear();
-    if (sl.count == 0) return;
+    if (sl.count == 0) {
+        sl.trueMin = 0.0;
+        sl.trueMax = 0.0;
+        return;
+    }
+
+    // Scan full ring for true min/max (O(n), same cost as stride loop)
+    const int idx0 = (sl.head - sl.count + kSparklineCapacity) % kSparklineCapacity;
+    sl.trueMin = sl.data[idx0];
+    sl.trueMax = sl.data[idx0];
+    for (int i = 1; i < sl.count; i++) {
+        const int idx = (sl.head - sl.count + i + kSparklineCapacity) % kSparklineCapacity;
+        const double v = sl.data[idx];
+        if (v < sl.trueMin) sl.trueMin = v;
+        if (v > sl.trueMax) sl.trueMax = v;
+    }
+
+    // Stride-based decimation for sparkline rendering
     const int stride = qMax(1, sl.count / kMaxSparklinePoints);
     sl.cache.reserve(sl.count / stride + 1);
     for (int i = 0; i < sl.count; i += stride) {
@@ -140,20 +157,37 @@ void WeatherDataModel::rebuildPressureMbarCache() {
         m_pressureMbarCache.append(v.toDouble() * 33.8639);
 }
 
+void WeatherDataModel::rebuildAqiCache() {
+    m_aqiHistoryCache.clear();
+    if (m_aqiSparklineCount == 0) {
+        m_aqiTrueMin = 0.0;
+        m_aqiTrueMax = 0.0;
+        return;
+    }
+    // Scan full ring for true min/max
+    const int idx0 = (m_aqiSparklineHead - m_aqiSparklineCount + kAqiSparklineCapacity) % kAqiSparklineCapacity;
+    m_aqiTrueMin = m_aqiSparkline[idx0];
+    m_aqiTrueMax = m_aqiSparkline[idx0];
+    for (int i = 1; i < m_aqiSparklineCount; i++) {
+        const int idx = (m_aqiSparklineHead - m_aqiSparklineCount + i + kAqiSparklineCapacity) % kAqiSparklineCapacity;
+        const double v = m_aqiSparkline[idx];
+        if (v < m_aqiTrueMin) m_aqiTrueMin = v;
+        if (v > m_aqiTrueMax) m_aqiTrueMax = v;
+    }
+    // Stride-based decimation for sparkline rendering
+    const int stride = qMax(1, m_aqiSparklineCount / kMaxSparklinePoints);
+    m_aqiHistoryCache.reserve(m_aqiSparklineCount / stride + 1);
+    for (int i = 0; i < m_aqiSparklineCount; i += stride) {
+        const int idx = (m_aqiSparklineHead - m_aqiSparklineCount + i + kAqiSparklineCapacity) % kAqiSparklineCapacity;
+        m_aqiHistoryCache.append(m_aqiSparkline[idx]);
+    }
+}
+
 void WeatherDataModel::rebuildAllCaches() {
     for (int i = 0; i < SL_Count; i++)
         rebuildCache(static_cast<SparklineId>(i));
     rebuildPressureMbarCache();
-    // AQI has a different capacity — rebuild inline
-    m_aqiHistoryCache.clear();
-    if (m_aqiSparklineCount > 0) {
-        const int stride = qMax(1, m_aqiSparklineCount / kMaxSparklinePoints);
-        m_aqiHistoryCache.reserve(m_aqiSparklineCount / stride + 1);
-        for (int i = 0; i < m_aqiSparklineCount; i += stride) {
-            const int idx = (m_aqiSparklineHead - m_aqiSparklineCount + i + kAqiSparklineCapacity) % kAqiSparklineCapacity;
-            m_aqiHistoryCache.append(m_aqiSparkline[idx]);
-        }
-    }
+    rebuildAqiCache();
 }
 
 // ---------------------------------------------------------------------------
@@ -509,13 +543,7 @@ void WeatherDataModel::applyPurpleAirUpdate(const PurpleAirReading& r) {
     m_aqiSparkline[m_aqiSparklineHead] = m_aqi;
     m_aqiSparklineHead = (m_aqiSparklineHead + 1) % kAqiSparklineCapacity;
     if (m_aqiSparklineCount < kAqiSparklineCapacity) m_aqiSparklineCount++;
-    m_aqiHistoryCache.clear();
-    const int aqiStride = qMax(1, m_aqiSparklineCount / kMaxSparklinePoints);
-    m_aqiHistoryCache.reserve(m_aqiSparklineCount / aqiStride + 1);
-    for (int i = 0; i < m_aqiSparklineCount; i += aqiStride) {
-        const int idx = (m_aqiSparklineHead - m_aqiSparklineCount + i + kAqiSparklineCapacity) % kAqiSparklineCapacity;
-        m_aqiHistoryCache.append(m_aqiSparkline[idx]);
-    }
+    rebuildAqiCache();
     emit aqiHistoryChanged();
 }
 

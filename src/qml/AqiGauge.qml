@@ -10,6 +10,8 @@ Item {
     property real pm10Value: 0.0   // ug/m3
     property color aqiColor: "#5CA85C"  // EPA color, bound from DashboardGrid
     property var sparklineData: []      // QVariantList for AQI sparkline
+    property real sparklineMin: NaN
+    property real sparklineMax: NaN
 
     // Arc geometry constants — match ArcGauge proportions
     readonly property real arcStartAngle: 125
@@ -44,7 +46,8 @@ Item {
     MinMaxTicks {
         anchors.fill: parent
         z: 10
-        data: root.sparklineData
+        trueMin: root.sparklineMin
+        trueMax: root.sparklineMax
         rangeMin: 0
         rangeMax: 500
         arcRadius: root.outerRadius

@@ -7,6 +7,8 @@ Item {
     property real rainRate:     0.0
     property real dailyTotal:   0.0
     property var sparklineData: []
+    property real sparklineMin: NaN
+    property real sparklineMax: NaN
 
     readonly property real arcStartAngle: 125
     readonly property real arcSweepAngle: 290
@@ -38,7 +40,8 @@ Item {
     MinMaxTicks {
         anchors.fill: parent
         z: 10
-        data: root.sparklineData
+        trueMin: root.sparklineMin
+        trueMax: root.sparklineMax
         rangeMin: 0
         rangeMax: root.rateMax
         arcRadius: root.outerRadius
