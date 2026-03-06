@@ -100,17 +100,24 @@ public:
     int windRoseMaxCount() const;
     double windRoseDirectionalFraction() const;
 
+    // Sparkline identifiers for indexed access
+    enum SparklineId {
+        SL_Temperature, SL_FeelsLike, SL_Humidity, SL_DewPoint,
+        SL_WindSpeed, SL_RainRate, SL_Pressure, SL_UvIndex, SL_SolarRad,
+        SL_Count
+    };
+
     // Sparkline history accessors (chronological, oldest first, pre-decimated)
-    QVariantList temperatureHistory() const { return m_tempHistoryCache; }
-    QVariantList feelsLikeHistory() const { return m_feelsLikeHistoryCache; }
-    QVariantList humidityHistory() const { return m_humHistoryCache; }
-    QVariantList dewPointHistory() const { return m_dewPointHistoryCache; }
-    QVariantList windSpeedHistory() const { return m_windHistoryCache; }
-    QVariantList rainRateHistory() const { return m_rainRateHistoryCache; }
-    QVariantList pressureHistory() const { return m_pressureHistoryCache; }
-    QVariantList pressureHistoryMbar() const { return m_pressureMbarHistoryCache; }
-    QVariantList uvIndexHistory() const { return m_uvHistoryCache; }
-    QVariantList solarRadHistory() const { return m_solarRadHistoryCache; }
+    QVariantList temperatureHistory() const { return m_sparklines[SL_Temperature].cache; }
+    QVariantList feelsLikeHistory() const { return m_sparklines[SL_FeelsLike].cache; }
+    QVariantList humidityHistory() const { return m_sparklines[SL_Humidity].cache; }
+    QVariantList dewPointHistory() const { return m_sparklines[SL_DewPoint].cache; }
+    QVariantList windSpeedHistory() const { return m_sparklines[SL_WindSpeed].cache; }
+    QVariantList rainRateHistory() const { return m_sparklines[SL_RainRate].cache; }
+    QVariantList pressureHistory() const { return m_sparklines[SL_Pressure].cache; }
+    QVariantList pressureHistoryMbar() const { return m_pressureMbarCache; }
+    QVariantList uvIndexHistory() const { return m_sparklines[SL_UvIndex].cache; }
+    QVariantList solarRadHistory() const { return m_sparklines[SL_SolarRad].cache; }
 
     // PurpleAir accessors
     double aqi() const { return m_aqi; }
@@ -181,9 +188,10 @@ private:
     void clearPurpleAirValues();
     void markUpdated();
     void recordWindSample(int dir, double speed);
-    void recordSparklineSample(double* ring, int& head, int& count, double value);
-    void rebuildSparklineCache(const double* ring, int head, int count, int capacity, QVariantList& cache);
+    void recordSample(SparklineId id, double value);
+    void rebuildCache(SparklineId id);
     void rebuildAllCaches();
+    void rebuildPressureMbarCache();
 
     // Weather fields
     double m_temperature = 0.0;
@@ -205,54 +213,15 @@ private:
     double m_dewPointIn = 0.0;
     bool m_sourceStale = false;
 
-    // Sparkline ring buffers — one per outdoor sensor
-    double m_tempSparkline[kSparklineCapacity] = {};
-    int m_tempSparklineHead = 0;
-    int m_tempSparklineCount = 0;
-
-    double m_feelsLikeSparkline[kSparklineCapacity] = {};
-    int m_feelsLikeSparklineHead = 0;
-    int m_feelsLikeSparklineCount = 0;
-
-    double m_humSparkline[kSparklineCapacity] = {};
-    int m_humSparklineHead = 0;
-    int m_humSparklineCount = 0;
-
-    double m_dewPointSparkline[kSparklineCapacity] = {};
-    int m_dewPointSparklineHead = 0;
-    int m_dewPointSparklineCount = 0;
-
-    double m_windSparkline[kSparklineCapacity] = {};
-    int m_windSparklineHead = 0;
-    int m_windSparklineCount = 0;
-
-    double m_rainRateSparkline[kSparklineCapacity] = {};
-    int m_rainRateSparklineHead = 0;
-    int m_rainRateSparklineCount = 0;
-
-    double m_pressureSparkline[kSparklineCapacity] = {};
-    int m_pressureSparklineHead = 0;
-    int m_pressureSparklineCount = 0;
-
-    double m_uvSparkline[kSparklineCapacity] = {};
-    int m_uvSparklineHead = 0;
-    int m_uvSparklineCount = 0;
-
-    double m_solarRadSparkline[kSparklineCapacity] = {};
-    int m_solarRadSparklineHead = 0;
-    int m_solarRadSparklineCount = 0;
-
-    // Pre-decimated sparkline caches (rebuilt on each sample, returned by getters)
-    QVariantList m_tempHistoryCache;
-    QVariantList m_feelsLikeHistoryCache;
-    QVariantList m_humHistoryCache;
-    QVariantList m_dewPointHistoryCache;
-    QVariantList m_windHistoryCache;
-    QVariantList m_rainRateHistoryCache;
-    QVariantList m_pressureHistoryCache;
-    QVariantList m_pressureMbarHistoryCache;
-    QVariantList m_uvHistoryCache;
-    QVariantList m_solarRadHistoryCache;
+    // Sparkline ring buffer struct — one per sensor metric
+    struct SparklineRing {
+        double data[kSparklineCapacity] = {};
+        int head = 0;
+        int count = 0;
+        QVariantList cache;   // pre-decimated, returned by QML getters
+    };
+    SparklineRing m_sparklines[SL_Count];
+    QVariantList m_pressureMbarCache;  // pressure converted to mbar
     QVariantList m_aqiHistoryCache;
 
     // Wind rose histogram (16 compass bins, each 22.5°) with rolling window
