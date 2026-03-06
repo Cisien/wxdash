@@ -90,15 +90,6 @@ Item {
 
     property real pressureMbar: weatherModel.pressure * 33.8639
 
-    // Convert pressure history from inHg to mbar for sparkline
-    property var pressureHistoryMbar: {
-        var raw = weatherModel.pressureHistory
-        var converted = []
-        for (var i = 0; i < raw.length; i++)
-            converted.push(raw[i] * 33.8639)
-        return converted
-    }
-
     // --- 3x4 Grid layout ---
 
     GridLayout {
@@ -212,7 +203,7 @@ Item {
             unit: "mbar"
             decimals: 1
             secondaryText: pressureTrendArrow(weatherModel.pressureTrend)
-            sparklineData: pressureHistoryMbar
+            sparklineData: weatherModel.pressureHistoryMbar
             Layout.fillWidth: true
             Layout.fillHeight: true
         }

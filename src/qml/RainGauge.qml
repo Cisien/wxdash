@@ -75,7 +75,33 @@ Item {
             }
             ctx.stroke()
 
-            // Min/max tick marks on outer arc
+        }
+    }
+
+    // Min/max tick marks — separate Canvas above arcs
+    Canvas {
+        id: minMaxCanvas
+        anchors.fill: parent
+        z: 10
+
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
+
+        property var data: sparklineCanvas.data
+        onDataChanged: requestPaint()
+
+        onPaint: {
+            var ctx = getContext("2d")
+            ctx.clearRect(0, 0, width, height)
+            var d = data
+            if (!d || d.length < 2) return
+
+            var dataMin = d[0], dataMax = d[0]
+            for (var i = 1; i < d.length; i++) {
+                if (d[i] < dataMin) dataMin = d[i]
+                if (d[i] > dataMax) dataMax = d[i]
+            }
+
             var cx = width / 2
             var cy = height / 2
             var r = root.outerRadius

@@ -118,50 +118,44 @@ void WeatherDataModel::recordSparklineSample(double* ring, int& head, int& count
     if (count < kSparklineCapacity) count++;
 }
 
-QVariantList WeatherDataModel::sparklineToList(const double* ring, int head, int count) const {
-    QVariantList list;
-    list.reserve(count);
-    for (int i = 0; i < count; i++) {
-        int idx = (head - count + i + kSparklineCapacity) % kSparklineCapacity;
-        list.append(ring[idx]);
+void WeatherDataModel::rebuildSparklineCache(const double* ring, int head, int count,
+                                              int capacity, QVariantList& cache) {
+    cache.clear();
+    if (count == 0) return;
+    const int stride = qMax(1, count / kMaxSparklinePoints);
+    cache.reserve(count / stride + 1);
+    for (int i = 0; i < count; i += stride) {
+        const int idx = (head - count + i + capacity) % capacity;
+        cache.append(ring[idx]);
     }
-    return list;
 }
 
-QVariantList WeatherDataModel::temperatureHistory() const {
-    return sparklineToList(m_tempSparkline, m_tempSparklineHead, m_tempSparklineCount);
-}
-
-QVariantList WeatherDataModel::feelsLikeHistory() const {
-    return sparklineToList(m_feelsLikeSparkline, m_feelsLikeSparklineHead, m_feelsLikeSparklineCount);
-}
-
-QVariantList WeatherDataModel::humidityHistory() const {
-    return sparklineToList(m_humSparkline, m_humSparklineHead, m_humSparklineCount);
-}
-
-QVariantList WeatherDataModel::dewPointHistory() const {
-    return sparklineToList(m_dewPointSparkline, m_dewPointSparklineHead, m_dewPointSparklineCount);
-}
-
-QVariantList WeatherDataModel::windSpeedHistory() const {
-    return sparklineToList(m_windSparkline, m_windSparklineHead, m_windSparklineCount);
-}
-
-QVariantList WeatherDataModel::rainRateHistory() const {
-    return sparklineToList(m_rainRateSparkline, m_rainRateSparklineHead, m_rainRateSparklineCount);
-}
-
-QVariantList WeatherDataModel::pressureHistory() const {
-    return sparklineToList(m_pressureSparkline, m_pressureSparklineHead, m_pressureSparklineCount);
-}
-
-QVariantList WeatherDataModel::uvIndexHistory() const {
-    return sparklineToList(m_uvSparkline, m_uvSparklineHead, m_uvSparklineCount);
-}
-
-QVariantList WeatherDataModel::solarRadHistory() const {
-    return sparklineToList(m_solarRadSparkline, m_solarRadSparklineHead, m_solarRadSparklineCount);
+void WeatherDataModel::rebuildAllCaches() {
+    rebuildSparklineCache(m_tempSparkline, m_tempSparklineHead, m_tempSparklineCount,
+                          kSparklineCapacity, m_tempHistoryCache);
+    rebuildSparklineCache(m_feelsLikeSparkline, m_feelsLikeSparklineHead, m_feelsLikeSparklineCount,
+                          kSparklineCapacity, m_feelsLikeHistoryCache);
+    rebuildSparklineCache(m_humSparkline, m_humSparklineHead, m_humSparklineCount,
+                          kSparklineCapacity, m_humHistoryCache);
+    rebuildSparklineCache(m_dewPointSparkline, m_dewPointSparklineHead, m_dewPointSparklineCount,
+                          kSparklineCapacity, m_dewPointHistoryCache);
+    rebuildSparklineCache(m_windSparkline, m_windSparklineHead, m_windSparklineCount,
+                          kSparklineCapacity, m_windHistoryCache);
+    rebuildSparklineCache(m_rainRateSparkline, m_rainRateSparklineHead, m_rainRateSparklineCount,
+                          kSparklineCapacity, m_rainRateHistoryCache);
+    rebuildSparklineCache(m_pressureSparkline, m_pressureSparklineHead, m_pressureSparklineCount,
+                          kSparklineCapacity, m_pressureHistoryCache);
+    // Pressure mbar: rebuild from inHg cache with conversion
+    m_pressureMbarHistoryCache.clear();
+    m_pressureMbarHistoryCache.reserve(m_pressureHistoryCache.size());
+    for (const auto& v : m_pressureHistoryCache)
+        m_pressureMbarHistoryCache.append(v.toDouble() * 33.8639);
+    rebuildSparklineCache(m_uvSparkline, m_uvSparklineHead, m_uvSparklineCount,
+                          kSparklineCapacity, m_uvHistoryCache);
+    rebuildSparklineCache(m_solarRadSparkline, m_solarRadSparklineHead, m_solarRadSparklineCount,
+                          kSparklineCapacity, m_solarRadHistoryCache);
+    rebuildSparklineCache(m_aqiSparkline, m_aqiSparklineHead, m_aqiSparklineCount,
+                          kAqiSparklineCapacity, m_aqiHistoryCache);
 }
 
 // ---------------------------------------------------------------------------
@@ -284,6 +278,9 @@ void WeatherDataModel::loadSparklineData(const QString& path) {
         }
     }
 
+    // Rebuild all pre-decimated caches before notifying QML
+    rebuildAllCaches();
+
     // Notify QML that all histories are available
     emit windRoseDataChanged();
     emit temperatureHistoryChanged();
@@ -402,7 +399,10 @@ void WeatherDataModel::applyIssUpdate(const IssReading& r) {
     recordWindSample(r.windDirLast, r.windSpeedLast);
 
     // Record sparkline samples (at 10s ISS cadence — adequate resolution for 24h trends)
+    // Rebuild pre-decimated caches before emitting signals so QML reads the cache, not raw data.
     recordSparklineSample(m_tempSparkline, m_tempSparklineHead, m_tempSparklineCount, m_temperature);
+    rebuildSparklineCache(m_tempSparkline, m_tempSparklineHead, m_tempSparklineCount,
+                          kSparklineCapacity, m_tempHistoryCache);
     emit temperatureHistoryChanged();
 
     // Feels-like: use the same logic as DashboardGrid.qml
@@ -410,24 +410,38 @@ void WeatherDataModel::applyIssUpdate(const IssReading& r) {
     if (m_temperature >= 80.0 && m_humidity >= 40.0) feelsLike = m_heatIndex;
     else if (m_temperature <= 50.0 && m_windSpeed >= 3.0) feelsLike = m_windChill;
     recordSparklineSample(m_feelsLikeSparkline, m_feelsLikeSparklineHead, m_feelsLikeSparklineCount, feelsLike);
+    rebuildSparklineCache(m_feelsLikeSparkline, m_feelsLikeSparklineHead, m_feelsLikeSparklineCount,
+                          kSparklineCapacity, m_feelsLikeHistoryCache);
     emit feelsLikeHistoryChanged();
 
     recordSparklineSample(m_humSparkline, m_humSparklineHead, m_humSparklineCount, m_humidity);
+    rebuildSparklineCache(m_humSparkline, m_humSparklineHead, m_humSparklineCount,
+                          kSparklineCapacity, m_humHistoryCache);
     emit humidityHistoryChanged();
 
     recordSparklineSample(m_dewPointSparkline, m_dewPointSparklineHead, m_dewPointSparklineCount, m_dewPoint);
+    rebuildSparklineCache(m_dewPointSparkline, m_dewPointSparklineHead, m_dewPointSparklineCount,
+                          kSparklineCapacity, m_dewPointHistoryCache);
     emit dewPointHistoryChanged();
 
     recordSparklineSample(m_windSparkline, m_windSparklineHead, m_windSparklineCount, m_windSpeed);
+    rebuildSparklineCache(m_windSparkline, m_windSparklineHead, m_windSparklineCount,
+                          kSparklineCapacity, m_windHistoryCache);
     emit windSpeedHistoryChanged();
 
     recordSparklineSample(m_rainRateSparkline, m_rainRateSparklineHead, m_rainRateSparklineCount, m_rainRate);
+    rebuildSparklineCache(m_rainRateSparkline, m_rainRateSparklineHead, m_rainRateSparklineCount,
+                          kSparklineCapacity, m_rainRateHistoryCache);
     emit rainRateHistoryChanged();
 
     recordSparklineSample(m_uvSparkline, m_uvSparklineHead, m_uvSparklineCount, m_uvIndex);
+    rebuildSparklineCache(m_uvSparkline, m_uvSparklineHead, m_uvSparklineCount,
+                          kSparklineCapacity, m_uvHistoryCache);
     emit uvIndexHistoryChanged();
 
     recordSparklineSample(m_solarRadSparkline, m_solarRadSparklineHead, m_solarRadSparklineCount, m_solarRad);
+    rebuildSparklineCache(m_solarRadSparkline, m_solarRadSparklineHead, m_solarRadSparklineCount,
+                          kSparklineCapacity, m_solarRadHistoryCache);
     emit solarRadHistoryChanged();
 }
 
@@ -444,6 +458,13 @@ void WeatherDataModel::applyBarUpdate(const BarReading& r) {
     }
 
     recordSparklineSample(m_pressureSparkline, m_pressureSparklineHead, m_pressureSparklineCount, m_pressure);
+    rebuildSparklineCache(m_pressureSparkline, m_pressureSparklineHead, m_pressureSparklineCount,
+                          kSparklineCapacity, m_pressureHistoryCache);
+    // Rebuild mbar cache from the decimated inHg cache
+    m_pressureMbarHistoryCache.clear();
+    m_pressureMbarHistoryCache.reserve(m_pressureHistoryCache.size());
+    for (const auto& v : m_pressureHistoryCache)
+        m_pressureMbarHistoryCache.append(v.toDouble() * 33.8639);
     emit pressureHistoryChanged();
 }
 
@@ -539,18 +560,11 @@ void WeatherDataModel::applyPurpleAirUpdate(const PurpleAirReading& r) {
     m_aqiSparkline[m_aqiSparklineHead] = m_aqi;
     m_aqiSparklineHead = (m_aqiSparklineHead + 1) % kAqiSparklineCapacity;
     if (m_aqiSparklineCount < kAqiSparklineCapacity) m_aqiSparklineCount++;
+    rebuildSparklineCache(m_aqiSparkline, m_aqiSparklineHead, m_aqiSparklineCount,
+                          kAqiSparklineCapacity, m_aqiHistoryCache);
     emit aqiHistoryChanged();
 }
 
-QVariantList WeatherDataModel::aqiHistory() const {
-    QVariantList list;
-    list.reserve(m_aqiSparklineCount);
-    for (int i = 0; i < m_aqiSparklineCount; i++) {
-        int idx = (m_aqiSparklineHead - m_aqiSparklineCount + i + kAqiSparklineCapacity) % kAqiSparklineCapacity;
-        list.append(m_aqiSparkline[idx]);
-    }
-    return list;
-}
 
 // ---------------------------------------------------------------------------
 // Forecast methods

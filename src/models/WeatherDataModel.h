@@ -56,6 +56,7 @@ class WeatherDataModel : public QObject {
     Q_PROPERTY(QVariantList windSpeedHistory READ windSpeedHistory NOTIFY windSpeedHistoryChanged)
     Q_PROPERTY(QVariantList rainRateHistory READ rainRateHistory NOTIFY rainRateHistoryChanged)
     Q_PROPERTY(QVariantList pressureHistory READ pressureHistory NOTIFY pressureHistoryChanged)
+    Q_PROPERTY(QVariantList pressureHistoryMbar READ pressureHistoryMbar NOTIFY pressureHistoryChanged)
     Q_PROPERTY(QVariantList uvIndexHistory READ uvIndexHistory NOTIFY uvIndexHistoryChanged)
     Q_PROPERTY(QVariantList solarRadHistory READ solarRadHistory NOTIFY solarRadHistoryChanged)
 
@@ -70,6 +71,8 @@ class WeatherDataModel : public QObject {
 public:
     // Sparkline capacity: 24h at 10s cadence
     static constexpr int kSparklineCapacity = 8640;
+    // Max points returned to QML (pre-decimated for performance)
+    static constexpr int kMaxSparklinePoints = 500;
 
     explicit WeatherDataModel(QObject* parent = nullptr,
                               std::function<qint64()> elapsedProvider = {});
@@ -97,23 +100,24 @@ public:
     int windRoseMaxCount() const;
     double windRoseDirectionalFraction() const;
 
-    // Sparkline history accessors (chronological, oldest first)
-    QVariantList temperatureHistory() const;
-    QVariantList feelsLikeHistory() const;
-    QVariantList humidityHistory() const;
-    QVariantList dewPointHistory() const;
-    QVariantList windSpeedHistory() const;
-    QVariantList rainRateHistory() const;
-    QVariantList pressureHistory() const;
-    QVariantList uvIndexHistory() const;
-    QVariantList solarRadHistory() const;
+    // Sparkline history accessors (chronological, oldest first, pre-decimated)
+    QVariantList temperatureHistory() const { return m_tempHistoryCache; }
+    QVariantList feelsLikeHistory() const { return m_feelsLikeHistoryCache; }
+    QVariantList humidityHistory() const { return m_humHistoryCache; }
+    QVariantList dewPointHistory() const { return m_dewPointHistoryCache; }
+    QVariantList windSpeedHistory() const { return m_windHistoryCache; }
+    QVariantList rainRateHistory() const { return m_rainRateHistoryCache; }
+    QVariantList pressureHistory() const { return m_pressureHistoryCache; }
+    QVariantList pressureHistoryMbar() const { return m_pressureMbarHistoryCache; }
+    QVariantList uvIndexHistory() const { return m_uvHistoryCache; }
+    QVariantList solarRadHistory() const { return m_solarRadHistoryCache; }
 
     // PurpleAir accessors
     double aqi() const { return m_aqi; }
     double pm25() const { return m_pm25; }
     double pm10() const { return m_pm10; }
     bool purpleAirStale() const { return m_purpleAirStale; }
-    QVariantList aqiHistory() const;
+    QVariantList aqiHistory() const { return m_aqiHistoryCache; }
 
     // Forecast accessor
     QVariantList forecastData() const;
@@ -178,7 +182,8 @@ private:
     void markUpdated();
     void recordWindSample(int dir, double speed);
     void recordSparklineSample(double* ring, int& head, int& count, double value);
-    QVariantList sparklineToList(const double* ring, int head, int count) const;
+    void rebuildSparklineCache(const double* ring, int head, int count, int capacity, QVariantList& cache);
+    void rebuildAllCaches();
 
     // Weather fields
     double m_temperature = 0.0;
@@ -236,6 +241,19 @@ private:
     double m_solarRadSparkline[kSparklineCapacity] = {};
     int m_solarRadSparklineHead = 0;
     int m_solarRadSparklineCount = 0;
+
+    // Pre-decimated sparkline caches (rebuilt on each sample, returned by getters)
+    QVariantList m_tempHistoryCache;
+    QVariantList m_feelsLikeHistoryCache;
+    QVariantList m_humHistoryCache;
+    QVariantList m_dewPointHistoryCache;
+    QVariantList m_windHistoryCache;
+    QVariantList m_rainRateHistoryCache;
+    QVariantList m_pressureHistoryCache;
+    QVariantList m_pressureMbarHistoryCache;
+    QVariantList m_uvHistoryCache;
+    QVariantList m_solarRadHistoryCache;
+    QVariantList m_aqiHistoryCache;
 
     // Wind rose histogram (16 compass bins, each 22.5°) with rolling window
     static constexpr int kWindBins = 16;
