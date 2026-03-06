@@ -27,103 +27,24 @@ Item {
         return "#5CA85C"
     }
 
-    // Combined sparkline + min/max Canvas
-    Canvas {
-        id: sparklineCanvas
+    SparklineCanvas {
         anchors.fill: parent
         z: -1
-
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
-
-        property var data: root.sparklineData
-        onDataChanged: requestPaint()
-
-        onPaint: {
-            var ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            var d = data
-            if (!d || d.length < 2) return
-
-            var count = d.length
-            var slHeight = height / 3
-            var slTop = height - slHeight
-            var stride = Math.max(1, Math.floor(count / width))
-
-            var dataMin = d[0], dataMax = d[0]
-            for (var i = 1; i < count; i++) {
-                if (d[i] < dataMin) dataMin = d[i]
-                if (d[i] > dataMax) dataMax = d[i]
-            }
-
-            var minV = 0, maxV = root.rateMax
-            if (dataMax > maxV) maxV = dataMax
-            var range = maxV - minV
-            if (range === 0) range = 1
-
-            ctx.beginPath()
-            ctx.strokeStyle = "#5A4500"
-            ctx.lineWidth = 1
-            ctx.lineJoin = "round"
-
-            var first = true
-            for (var j = 0; j < count; j += stride) {
-                var x = (j / (count - 1)) * width
-                var y = slTop + slHeight - ((d[j] - minV) / range) * slHeight * 0.9
-                if (first) { ctx.moveTo(x, y); first = false }
-                else ctx.lineTo(x, y)
-            }
-            ctx.stroke()
-
-        }
+        data: root.sparklineData
+        rangeMin: 0
+        rangeMax: root.rateMax
     }
 
-    // Min/max tick marks — separate Canvas above arcs
-    Canvas {
-        id: minMaxCanvas
+    MinMaxTicks {
         anchors.fill: parent
         z: 10
-
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
-
-        property var data: sparklineCanvas.data
-        onDataChanged: requestPaint()
-
-        onPaint: {
-            var ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            var d = data
-            if (!d || d.length < 2) return
-
-            var dataMin = d[0], dataMax = d[0]
-            for (var i = 1; i < d.length; i++) {
-                if (d[i] < dataMin) dataMin = d[i]
-                if (d[i] > dataMax) dataMax = d[i]
-            }
-
-            var cx = width / 2
-            var cy = height / 2
-            var r = root.outerRadius
-            var halfStroke = root.rateStroke / 2
-
-            function drawTick(val, color) {
-                var ratio = Math.max(0, Math.min(1, val / root.rateMax))
-                var angleDeg = root.arcStartAngle + root.arcSweepAngle * ratio
-                var angleRad = angleDeg * Math.PI / 180
-                var cosA = Math.cos(angleRad)
-                var sinA = Math.sin(angleRad)
-                ctx.beginPath()
-                ctx.strokeStyle = color
-                ctx.lineWidth = 2
-                ctx.moveTo(cx + (r - halfStroke - 2) * cosA, cy + (r - halfStroke - 2) * sinA)
-                ctx.lineTo(cx + (r + halfStroke + 2) * cosA, cy + (r + halfStroke + 2) * sinA)
-                ctx.stroke()
-            }
-
-            drawTick(dataMin, "#5B8DD9")
-            drawTick(dataMax, "#C84040")
-        }
+        data: root.sparklineData
+        rangeMin: 0
+        rangeMax: root.rateMax
+        arcRadius: root.outerRadius
+        arcStrokeWidth: root.rateStroke
+        arcStartAngle: root.arcStartAngle
+        arcSweepAngle: root.arcSweepAngle
     }
 
     Shape {

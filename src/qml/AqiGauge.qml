@@ -29,65 +29,28 @@ Item {
     readonly property real innerRadius:  middleRadius - (pm25Stroke / 2) - (pm10Stroke / 2)
 
     // Sweep calculations (value to arc proportion)
-    // AQI: 0-500 range
     readonly property real aqiTargetSweep:  arcSweepAngle * Math.max(0, Math.min(1, aqiValue  / 500.0))
-    // PM2.5: 0-500 ug/m3 range
     readonly property real pm25TargetSweep: arcSweepAngle * Math.max(0, Math.min(1, pm25Value / 500.0))
-    // PM10: 0-500 ug/m3 range
     readonly property real pm10TargetSweep: arcSweepAngle * Math.max(0, Math.min(1, pm10Value / 500.0))
 
-    // Sparkline background overlay — AQI history rendered behind gauge arcs
-    Canvas {
-        id: sparklineCanvas
-        anchors {
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
-        height: parent.height / 3      // lower third of cell
-        z: -1                           // behind gauge arcs and text
+    SparklineCanvas {
+        anchors.fill: parent
+        z: -1
+        data: root.sparklineData
+        rangeMin: 0
+        rangeMax: 500
+    }
 
-        onWidthChanged:  requestPaint()
-        onHeightChanged: requestPaint()
-
-        // Repaint when data changes
-        property var data: root.sparklineData
-        onDataChanged: requestPaint()
-
-        onPaint: {
-            var ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            if (!data || data.length < 2) return
-
-            var count = data.length
-
-            // Decimation: stride through data to fit pixel width
-            var stride = Math.max(1, Math.floor(count / width))
-
-            // Use AQI 0-500 range as baseline, expand if data exceeds
-            var minV = 0, maxV = 500
-            for (var i = 0; i < count; i++) {
-                if (data[i] < minV) minV = data[i]
-                if (data[i] > maxV) maxV = data[i]
-            }
-            var range = maxV - minV
-            if (range === 0) range = 1  // flat line — avoid div by zero
-
-            ctx.beginPath()
-            ctx.strokeStyle = "#5A4500"   // dim yellow, subdued against #1A1A1A background
-            ctx.lineWidth = 1
-            ctx.lineJoin = "round"
-
-            var first = true
-            for (var j = 0; j < count; j += stride) {
-                var x = (j / (count - 1)) * width
-                // Y: 0 = top, height = bottom. Map data so max is at top (10% padding)
-                var y = height - ((data[j] - minV) / range) * height * 0.9
-                if (first) { ctx.moveTo(x, y); first = false }
-                else ctx.lineTo(x, y)
-            }
-            ctx.stroke()
-        }
+    MinMaxTicks {
+        anchors.fill: parent
+        z: 10
+        data: root.sparklineData
+        rangeMin: 0
+        rangeMax: 500
+        arcRadius: root.outerRadius
+        arcStrokeWidth: root.aqiStroke
+        arcStartAngle: root.arcStartAngle
+        arcSweepAngle: root.arcSweepAngle
     }
 
     // Single Shape with 6 ShapePaths (3 tracks + 3 fills)
@@ -194,58 +157,10 @@ Item {
         }
     }
 
-    // Bindings to drive animated sweeps (same pattern as ArcGauge)
+    // Bindings to drive animated sweeps
     Binding { target: aqiFillPath;  property: "animatedSweep"; value: root.aqiTargetSweep  }
     Binding { target: pm25FillPath; property: "animatedSweep"; value: root.pm25TargetSweep }
     Binding { target: pm10FillPath; property: "animatedSweep"; value: root.pm10TargetSweep }
-
-    // Min/max tick marks on outer (AQI) arc — computed inline to avoid extra sparklineToList calls
-    Canvas {
-        id: minMaxCanvas
-        anchors.fill: parent
-        z: 10
-
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
-
-        property var histData: root.sparklineData
-        onHistDataChanged: requestPaint()
-
-        onPaint: {
-            var ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
-            var d = histData
-            if (!d || d.length < 2) return
-
-            var sMin = d[0], sMax = d[0]
-            for (var i = 1; i < d.length; i++) {
-                if (d[i] < sMin) sMin = d[i]
-                if (d[i] > sMax) sMax = d[i]
-            }
-
-            var cx = width / 2
-            var cy = height / 2
-            var r = root.outerRadius
-            var halfStroke = root.aqiStroke / 2
-
-            function drawTick(val, color) {
-                var ratio = Math.max(0, Math.min(1, val / 500.0))
-                var angleDeg = root.arcStartAngle + root.arcSweepAngle * ratio
-                var angleRad = angleDeg * Math.PI / 180
-                var cosA = Math.cos(angleRad)
-                var sinA = Math.sin(angleRad)
-                ctx.beginPath()
-                ctx.strokeStyle = color
-                ctx.lineWidth = 2
-                ctx.moveTo(cx + (r - halfStroke - 2) * cosA, cy + (r - halfStroke - 2) * sinA)
-                ctx.lineTo(cx + (r + halfStroke + 2) * cosA, cy + (r + halfStroke + 2) * sinA)
-                ctx.stroke()
-            }
-
-            drawTick(sMin, "#5B8DD9")
-            drawTick(sMax, "#C84040")
-        }
-    }
 
     // Inner text layout — centered in gauge
     Column {
@@ -253,7 +168,6 @@ Item {
         width: root.innerRadius * 1.4
         spacing: 0
 
-        // Label
         Text {
             width: parent.width
             text: "AQI"
@@ -264,7 +178,6 @@ Item {
             minimumPixelSize: 8
         }
 
-        // AQI value (large, prominent)
         Text {
             width: parent.width
             text: Math.round(root.aqiValue).toString()

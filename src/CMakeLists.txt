@@ -10,6 +10,8 @@ qt_add_library(wxdash_lib STATIC
     network/UdpReceiver.cpp
     network/PurpleAirPoller.h
     network/PurpleAirPoller.cpp
+    network/JsonPoller.h
+    network/JsonPoller.cpp
     network/NwsPoller.h
     network/NwsPoller.cpp
 )
@@ -61,6 +63,8 @@ qt_add_qml_module(wxdash
         qml/ReservedCell.qml
         qml/AqiGauge.qml
         qml/RainGauge.qml
+        qml/SparklineCanvas.qml
+        qml/MinMaxTicks.qml
         qml/ForecastPanel.qml
 )
 
