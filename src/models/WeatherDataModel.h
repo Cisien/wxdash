@@ -38,7 +38,7 @@ class WeatherDataModel : public QObject {
     Q_PROPERTY(double rainRate READ rainRate NOTIFY rainRateChanged)
     Q_PROPERTY(double rainfallDaily READ rainfallDaily NOTIFY rainfallDailyChanged)
     Q_PROPERTY(double pressure READ pressure NOTIFY pressureChanged)
-    Q_PROPERTY(int pressureTrend READ pressureTrend NOTIFY pressureTrendChanged)
+    Q_PROPERTY(double pressureTrend READ pressureTrend NOTIFY pressureTrendChanged)
     Q_PROPERTY(double uvIndex READ uvIndex NOTIFY uvIndexChanged)
     Q_PROPERTY(double solarRad READ solarRad NOTIFY solarRadChanged)
     Q_PROPERTY(double tempIn READ tempIn NOTIFY tempInChanged)
@@ -86,7 +86,7 @@ public:
     double rainRate() const { return m_rainRate; }
     double rainfallDaily() const { return m_rainfallDaily; }
     double pressure() const { return m_pressure; }
-    int pressureTrend() const { return m_pressureTrend; }
+    double pressureTrend() const { return m_pressureTrend; }
     double uvIndex() const { return m_uvIndex; }
     double solarRad() const { return m_solarRad; }
     double tempIn() const { return m_tempIn; }
@@ -142,7 +142,7 @@ signals:
     void rainRateChanged(double value);
     void rainfallDailyChanged(double value);
     void pressureChanged(double value);
-    void pressureTrendChanged(int value);
+    void pressureTrendChanged(double value);
     void uvIndexChanged(double value);
     void solarRadChanged(double value);
     void tempInChanged(double value);
@@ -192,7 +192,7 @@ private:
     double m_rainRate = 0.0;
     double m_rainfallDaily = 0.0;
     double m_pressure = 0.0;
-    int m_pressureTrend = 0;
+    double m_pressureTrend = 0.0;
     double m_uvIndex = 0.0;
     double m_solarRad = 0.0;
     double m_tempIn = 0.0;

@@ -60,6 +60,7 @@ qt_add_qml_module(wxdash
         qml/CompassRose.qml
         qml/ReservedCell.qml
         qml/AqiGauge.qml
+        qml/RainGauge.qml
         qml/ForecastPanel.qml
 )
 

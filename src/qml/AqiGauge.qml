@@ -99,7 +99,7 @@ Item {
             strokeColor: "#2A2A2A"
             fillColor: "transparent"
             strokeWidth: root.aqiStroke
-            capStyle: ShapePath.RoundCap
+            capStyle: ShapePath.FlatCap
             PathAngleArc {
                 centerX: root.width / 2; centerY: root.height / 2
                 radiusX: root.outerRadius; radiusY: root.outerRadius
@@ -113,7 +113,7 @@ Item {
             strokeColor: root.aqiColor
             fillColor: "transparent"
             strokeWidth: root.aqiStroke
-            capStyle: ShapePath.RoundCap
+            capStyle: ShapePath.FlatCap
             property real animatedSweep: 0
             Behavior on animatedSweep {
                 SmoothedAnimation { velocity: 200 }
@@ -132,7 +132,7 @@ Item {
             strokeColor: "#2A2A2A"
             fillColor: "transparent"
             strokeWidth: root.pm25Stroke
-            capStyle: ShapePath.RoundCap
+            capStyle: ShapePath.FlatCap
             PathAngleArc {
                 centerX: root.width / 2; centerY: root.height / 2
                 radiusX: root.middleRadius; radiusY: root.middleRadius
@@ -146,7 +146,7 @@ Item {
             strokeColor: "#C8A000"
             fillColor: "transparent"
             strokeWidth: root.pm25Stroke
-            capStyle: ShapePath.RoundCap
+            capStyle: ShapePath.FlatCap
             property real animatedSweep: 0
             Behavior on animatedSweep {
                 SmoothedAnimation { velocity: 200 }
@@ -165,7 +165,7 @@ Item {
             strokeColor: "#2A2A2A"
             fillColor: "transparent"
             strokeWidth: root.pm10Stroke
-            capStyle: ShapePath.RoundCap
+            capStyle: ShapePath.FlatCap
             PathAngleArc {
                 centerX: root.width / 2; centerY: root.height / 2
                 radiusX: root.innerRadius; radiusY: root.innerRadius
@@ -179,7 +179,7 @@ Item {
             strokeColor: "#C8A000"
             fillColor: "transparent"
             strokeWidth: root.pm10Stroke
-            capStyle: ShapePath.RoundCap
+            capStyle: ShapePath.FlatCap
             property real animatedSweep: 0
             Behavior on animatedSweep {
                 SmoothedAnimation { velocity: 200 }
@@ -198,6 +198,66 @@ Item {
     Binding { target: aqiFillPath;  property: "animatedSweep"; value: root.aqiTargetSweep  }
     Binding { target: pm25FillPath; property: "animatedSweep"; value: root.pm25TargetSweep }
     Binding { target: pm10FillPath; property: "animatedSweep"; value: root.pm10TargetSweep }
+
+    // Min/max from AQI sparkline
+    readonly property real sparklineMin: {
+        if (!sparklineData || sparklineData.length === 0) return aqiValue
+        var m = sparklineData[0]
+        for (var i = 1; i < sparklineData.length; i++)
+            if (sparklineData[i] < m) m = sparklineData[i]
+        return m
+    }
+    readonly property real sparklineMax: {
+        if (!sparklineData || sparklineData.length === 0) return aqiValue
+        var m = sparklineData[0]
+        for (var i = 1; i < sparklineData.length; i++)
+            if (sparklineData[i] > m) m = sparklineData[i]
+        return m
+    }
+
+    // Min/max tick marks on outer (AQI) arc — drawn on top
+    Canvas {
+        id: minMaxCanvas
+        anchors.fill: parent
+        z: 10
+
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
+
+        property real sMin: root.sparklineMin
+        property real sMax: root.sparklineMax
+        onSMinChanged: requestPaint()
+        onSMaxChanged: requestPaint()
+
+        onPaint: {
+            var ctx = getContext("2d")
+            ctx.clearRect(0, 0, width, height)
+            if (!root.sparklineData || root.sparklineData.length < 2) return
+
+            var cx = width / 2
+            var cy = height / 2
+            var r = root.outerRadius
+            var halfStroke = root.aqiStroke / 2
+
+            function drawTick(val, color) {
+                var ratio = Math.max(0, Math.min(1, val / 500.0))
+                var angleDeg = root.arcStartAngle + root.arcSweepAngle * ratio
+                var angleRad = angleDeg * Math.PI / 180
+                var cosA = Math.cos(angleRad)
+                var sinA = Math.sin(angleRad)
+
+                ctx.beginPath()
+                ctx.strokeStyle = color
+                ctx.lineWidth = 2
+                ctx.moveTo(cx + (r - halfStroke - 2) * cosA, cy + (r - halfStroke - 2) * sinA)
+                ctx.lineTo(cx + (r + halfStroke + 2) * cosA, cy + (r + halfStroke + 2) * sinA)
+                ctx.stroke()
+            }
+
+            drawTick(sMin, "#5B8DD9")  // blue for min
+            drawTick(sMax, "#C84040")  // red for max
+        }
+    }
 
     // Inner text layout — centered in gauge
     Column {

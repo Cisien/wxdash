@@ -29,7 +29,7 @@ struct IssReading {
 
 struct BarReading {
     double pressureSeaLevel = 0.0; // inHg
-    int pressureTrend = 0;         // -1=falling, 0=steady, 1=rising
+    double pressureTrend = 0.0;    // inHg change (3-hour trend from API)
 };
 
 struct IndoorReading {

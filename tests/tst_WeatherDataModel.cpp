@@ -114,15 +114,15 @@ private slots:
 
         BarReading r;
         r.pressureSeaLevel = 29.92;
-        r.pressureTrend = 1;
+        r.pressureTrend = 0.034;
         model.applyBarUpdate(r);
 
         QCOMPARE(spyPressure.count(), 1);
         QCOMPARE(spyPressure.at(0).at(0).toDouble(), 29.92);
         QCOMPARE(spyTrend.count(), 1);
-        QCOMPARE(spyTrend.at(0).at(0).toInt(), 1);
+        QCOMPARE(spyTrend.at(0).at(0).toDouble(), 0.034);
         QCOMPARE(model.pressure(), 29.92);
-        QCOMPARE(model.pressureTrend(), 1);
+        QCOMPARE(model.pressureTrend(), 0.034);
     }
 
     void applyBarUpdate_sameValue_noSignal() {
@@ -131,7 +131,7 @@ private slots:
 
         BarReading r;
         r.pressureSeaLevel = 29.92;
-        r.pressureTrend = 0;
+        r.pressureTrend = 0.0;
         model.applyBarUpdate(r);
 
         QSignalSpy spy(&model, &WeatherDataModel::pressureChanged);
@@ -267,7 +267,7 @@ private slots:
 
         BarReading bar;
         bar.pressureSeaLevel = 29.92;
-        bar.pressureTrend = 1;
+        bar.pressureTrend = 0.034;
         model.applyBarUpdate(bar);
 
         IndoorReading indoor;
@@ -294,7 +294,7 @@ private slots:
         QCOMPARE(model.rainRate(), 0.0);
         QCOMPARE(model.rainfallDaily(), 0.0);
         QCOMPARE(model.pressure(), 0.0);
-        QCOMPARE(model.pressureTrend(), 0);
+        QCOMPARE(model.pressureTrend(), 0.0);
         QCOMPARE(model.tempIn(), 0.0);
         QCOMPARE(model.humIn(), 0.0);
         QCOMPARE(model.dewPointIn(), 0.0);

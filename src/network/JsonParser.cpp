@@ -49,7 +49,7 @@ static BarReading parseBarObject(const QJsonObject &obj)
 {
     BarReading r;
     r.pressureSeaLevel = obj["bar_sea_level"].toDouble();
-    r.pressureTrend = obj["bar_trend"].toInt();
+    r.pressureTrend = obj["bar_trend"].toDouble();
     return r;
 }
 

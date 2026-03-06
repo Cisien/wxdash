@@ -329,9 +329,9 @@ void WeatherDataModel::clearAllValues() {
         m_windDir = 0;
         emit windDirChanged(0);
     }
-    if (m_pressureTrend != 0) {
-        m_pressureTrend = 0;
-        emit pressureTrendChanged(0);
+    if (!qFuzzyIsNull(m_pressureTrend)) {
+        m_pressureTrend = 0.0;
+        emit pressureTrendChanged(0.0);
     }
 }
 
@@ -438,7 +438,7 @@ void WeatherDataModel::applyBarUpdate(const BarReading& r) {
         m_pressure = r.pressureSeaLevel;
         emit pressureChanged(m_pressure);
     }
-    if (m_pressureTrend != r.pressureTrend) {
+    if (!qFuzzyCompare(m_pressureTrend, r.pressureTrend)) {
         m_pressureTrend = r.pressureTrend;
         emit pressureTrendChanged(m_pressureTrend);
     }

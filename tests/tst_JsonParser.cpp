@@ -126,7 +126,7 @@ private slots:
         QCOMPARE(result.iss->temperature, 65.0);
         QCOMPARE(result.iss->windDirLast, 270);
         QCOMPARE(result.bar->pressureSeaLevel, 30.01);
-        QCOMPARE(result.bar->pressureTrend, 1);
+        QCOMPARE(result.bar->pressureTrend, 1.0);
     }
 
     void parseCurrentConditions_allThreeTypes()
@@ -172,7 +172,7 @@ private slots:
 
         QCOMPARE(result.iss->temperature, 70.0);
         QCOMPARE(result.bar->pressureSeaLevel, 29.95);
-        QCOMPARE(result.bar->pressureTrend, -1);
+        QCOMPARE(result.bar->pressureTrend, -1.0);
         QCOMPARE(result.indoor->tempIn, 68.0);
         QCOMPARE(result.indoor->humIn, 45.0);
         QCOMPARE(result.indoor->dewPointIn, 44.5);

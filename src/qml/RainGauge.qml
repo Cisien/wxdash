@@ -5,46 +5,58 @@ Item {
     id: root
 
     // Public API
-    property real value: 0.0
-    property real minValue: 0.0
-    property real maxValue: 100.0
-    property string label: ""
-    property string unit: ""
-    property int decimals: 1
-    property color arcColor: "#B8860B"
-    property string secondaryText: ""
-    property string secondaryLabel: ""
-    property var sparklineData: []      // QVariantList from model
+    property real rainRate:     0.0   // in/hr
+    property real dailyTotal:   0.0   // in
+    property var sparklineData: []    // QVariantList for rain rate history
 
-    // Arc geometry constants
+    // Arc geometry constants — match ArcGauge proportions
     readonly property real arcStartAngle: 125
     readonly property real arcSweepAngle: 290
-    readonly property real strokeWidth: Math.min(width, height) * 0.08
 
-    // Computed fill sweep based on value position in range
-    readonly property real targetSweep: {
-        if (maxValue === minValue) return 0
-        var ratio = (value - minValue) / (maxValue - minValue)
-        return arcSweepAngle * Math.max(0, Math.min(1, ratio))
+    // Total stroke width matches ArcGauge
+    readonly property real totalStrokeWidth: Math.min(width, height) * 0.08
+
+    // Partition: rain rate outer 60%, daily total inner 40%
+    readonly property real rateStroke:  totalStrokeWidth * 0.6
+    readonly property real dailyStroke: totalStrokeWidth * 0.4
+
+    // Center radius of each ring
+    readonly property real outerRadius: (Math.min(width, height) / 2) - (rateStroke / 2)
+    readonly property real innerRadius: outerRadius - (rateStroke / 2) - (dailyStroke / 2)
+
+    // Gauge ranges
+    readonly property real rateMax:  1.5  // in/hr
+    readonly property real dailyMax: 2.0  // in/day
+
+    // Sweep calculations
+    readonly property real rateTargetSweep:  arcSweepAngle * Math.max(0, Math.min(1, rainRate / rateMax))
+    readonly property real dailyTargetSweep: arcSweepAngle * Math.max(0, Math.min(1, dailyTotal / dailyMax))
+
+    // Rain rate arc color
+    function rateColor(rate) {
+        if (rate >= 1.0) return "#C84040"  // red — heavy
+        if (rate >= 0.3) return "#C87C2A"  // orange — moderate
+        if (rate >= 0.1) return "#C8A000"  // yellow — light
+        return "#5CA85C"                   // green — trace/none
     }
 
-    // Min/max computed from sparkline data
+    // Min/max from sparkline
     readonly property real sparklineMin: {
-        if (!sparklineData || sparklineData.length === 0) return value
+        if (!sparklineData || sparklineData.length === 0) return rainRate
         var m = sparklineData[0]
         for (var i = 1; i < sparklineData.length; i++)
             if (sparklineData[i] < m) m = sparklineData[i]
         return m
     }
     readonly property real sparklineMax: {
-        if (!sparklineData || sparklineData.length === 0) return value
+        if (!sparklineData || sparklineData.length === 0) return rainRate
         var m = sparklineData[0]
         for (var i = 1; i < sparklineData.length; i++)
             if (sparklineData[i] > m) m = sparklineData[i]
         return m
     }
 
-    // Sparkline background overlay (renders behind gauge arc and text)
+    // Sparkline background overlay — gold only
     Canvas {
         id: sparklineCanvas
         anchors {
@@ -52,13 +64,12 @@ Item {
             right: parent.right
             bottom: parent.bottom
         }
-        height: parent.height / 3      // lower third of cell
-        z: -1                           // behind gauge arcs and text
+        height: parent.height / 3
+        z: -1
 
-        onWidthChanged: requestPaint()
+        onWidthChanged:  requestPaint()
         onHeightChanged: requestPaint()
 
-        // Repaint when data changes
         property var data: root.sparklineData
         onDataChanged: requestPaint()
 
@@ -68,18 +79,14 @@ Item {
             if (!data || data.length < 2) return
 
             var count = data.length
-
-            // Decimation: stride through data to fit pixel width
             var stride = Math.max(1, Math.floor(count / width))
 
-            // Use gauge min/max as baseline, expand if data exceeds
-            var minV = root.minValue, maxV = root.maxValue
+            var minV = 0, maxV = root.rateMax
             for (var i = 0; i < count; i++) {
-                if (data[i] < minV) minV = data[i]
                 if (data[i] > maxV) maxV = data[i]
             }
             var range = maxV - minV
-            if (range === 0) range = 1  // flat line — avoid div by zero
+            if (range === 0) range = 1
 
             ctx.beginPath()
             ctx.strokeStyle = "#5A4500"   // dim gold
@@ -97,68 +104,82 @@ Item {
         }
     }
 
-    // Track arc (full 290-degree background)
+    // Shape with tracks and fills for both rings
     Shape {
         anchors.fill: parent
 
+        // 1. Rain rate track (outer)
         ShapePath {
             strokeColor: "#2A2A2A"
             fillColor: "transparent"
-            strokeWidth: root.strokeWidth
+            strokeWidth: root.rateStroke
             capStyle: ShapePath.FlatCap
-
             PathAngleArc {
-                centerX: root.width / 2
-                centerY: root.height / 2
-                radiusX: (Math.min(root.width, root.height) / 2) - (root.strokeWidth / 2)
-                radiusY: radiusX
-                startAngle: root.arcStartAngle
-                sweepAngle: root.arcSweepAngle
+                centerX: root.width / 2; centerY: root.height / 2
+                radiusX: root.outerRadius; radiusY: root.outerRadius
+                startAngle: root.arcStartAngle; sweepAngle: root.arcSweepAngle
             }
         }
-    }
 
-    // Fill arc (animated, colored, value-proportional)
-    Shape {
-        anchors.fill: parent
-
+        // 2. Rain rate fill (outer, color-coded)
         ShapePath {
-            id: fillPath
-            strokeColor: root.arcColor
+            id: rateFillPath
+            strokeColor: root.rateColor(root.rainRate)
             fillColor: "transparent"
-            strokeWidth: root.strokeWidth
+            strokeWidth: root.rateStroke
             capStyle: ShapePath.FlatCap
-
             property real animatedSweep: 0
-
             Behavior on animatedSweep {
-                SmoothedAnimation {
-                    velocity: 200
-                }
+                SmoothedAnimation { velocity: 200 }
             }
-
-            Component.onCompleted: animatedSweep = root.targetSweep
-            onAnimatedSweepChanged: {}
-
+            Component.onCompleted: animatedSweep = root.rateTargetSweep
             PathAngleArc {
-                centerX: root.width / 2
-                centerY: root.height / 2
-                radiusX: (Math.min(root.width, root.height) / 2) - (root.strokeWidth / 2)
-                radiusY: radiusX
+                centerX: root.width / 2; centerY: root.height / 2
+                radiusX: root.outerRadius; radiusY: root.outerRadius
                 startAngle: root.arcStartAngle
-                sweepAngle: fillPath.animatedSweep
+                sweepAngle: rateFillPath.animatedSweep
+            }
+        }
+
+        // 3. Daily total track (inner)
+        ShapePath {
+            strokeColor: "#2A2A2A"
+            fillColor: "transparent"
+            strokeWidth: root.dailyStroke
+            capStyle: ShapePath.FlatCap
+            PathAngleArc {
+                centerX: root.width / 2; centerY: root.height / 2
+                radiusX: root.innerRadius; radiusY: root.innerRadius
+                startAngle: root.arcStartAngle; sweepAngle: root.arcSweepAngle
+            }
+        }
+
+        // 4. Daily total fill (inner, neutral yellow)
+        ShapePath {
+            id: dailyFillPath
+            strokeColor: "#C8A000"
+            fillColor: "transparent"
+            strokeWidth: root.dailyStroke
+            capStyle: ShapePath.FlatCap
+            property real animatedSweep: 0
+            Behavior on animatedSweep {
+                SmoothedAnimation { velocity: 200 }
+            }
+            Component.onCompleted: animatedSweep = root.dailyTargetSweep
+            PathAngleArc {
+                centerX: root.width / 2; centerY: root.height / 2
+                radiusX: root.innerRadius; radiusY: root.innerRadius
+                startAngle: root.arcStartAngle
+                sweepAngle: dailyFillPath.animatedSweep
             }
         }
     }
 
-    // Drive animatedSweep from targetSweep via a binding on the root
-    Binding {
-        target: fillPath
-        property: "animatedSweep"
-        value: root.targetSweep
-    }
+    // Bindings to drive animated sweeps
+    Binding { target: rateFillPath;  property: "animatedSweep"; value: root.rateTargetSweep  }
+    Binding { target: dailyFillPath; property: "animatedSweep"; value: root.dailyTargetSweep }
 
-    // Min/max tick mark overlay — drawn on top of arcs
+    // Min/max tick marks on outer arc — drawn on top
     Canvas {
         id: minMaxCanvas
         anchors.fill: parent
@@ -176,15 +197,14 @@ Item {
             var ctx = getContext("2d")
             ctx.clearRect(0, 0, width, height)
             if (!root.sparklineData || root.sparklineData.length < 2) return
-            if (root.maxValue === root.minValue) return
 
             var cx = width / 2
             var cy = height / 2
-            var r = (Math.min(width, height) / 2) - (root.strokeWidth / 2)
-            var halfStroke = root.strokeWidth / 2
+            var r = root.outerRadius
+            var halfStroke = root.rateStroke / 2
 
             function drawTick(val, color) {
-                var ratio = Math.max(0, Math.min(1, (val - root.minValue) / (root.maxValue - root.minValue)))
+                var ratio = Math.max(0, Math.min(1, val / root.rateMax))
                 var angleDeg = root.arcStartAngle + root.arcSweepAngle * ratio
                 var angleRad = angleDeg * Math.PI / 180
                 var cosA = Math.cos(angleRad)
@@ -203,32 +223,25 @@ Item {
         }
     }
 
-    // Inner radius boundary for text sizing
-    readonly property real innerRadius: (Math.min(width, height) / 2) - strokeWidth
-
-    // Vertical layout: all text stacked in a column, centered in the gauge
+    // Inner text layout
     Column {
         anchors.centerIn: parent
         width: root.innerRadius * 1.4
         spacing: 0
 
-        // Label text (gauge title)
         Text {
             width: parent.width
-            text: root.label
+            text: "Rain Rate"
             color: "#C8A000"
             font.pixelSize: Math.min(root.width, root.height) * 0.09
-            font.bold: false
             horizontalAlignment: Text.AlignHCenter
             fontSizeMode: Text.HorizontalFit
             minimumPixelSize: 8
         }
 
-        // Value text (number only)
         Text {
-            id: valueText
             width: parent.width
-            text: root.value.toFixed(root.decimals)
+            text: root.rainRate.toFixed(2)
             color: "#C8A000"
             font.pixelSize: Math.min(root.width, root.height) * 0.18
             font.bold: true
@@ -237,21 +250,17 @@ Item {
             minimumPixelSize: 10
         }
 
-        // Unit text (small, dimmer)
         Text {
             width: parent.width
-            visible: root.unit !== ""
-            text: root.unit
+            text: "in/hr"
             color: "#8A7A00"
             font.pixelSize: Math.min(root.width, root.height) * 0.075
             horizontalAlignment: Text.AlignHCenter
         }
 
-        // Secondary text (optional)
         Text {
             width: parent.width
-            visible: root.secondaryText !== ""
-            text: root.secondaryLabel !== "" ? root.secondaryLabel + ": " + root.secondaryText : root.secondaryText
+            text: "Daily: " + root.dailyTotal.toFixed(2) + " in"
             color: "#C8A000"
             font.pixelSize: Math.min(root.width, root.height) * 0.065
             horizontalAlignment: Text.AlignHCenter

@@ -17,11 +17,14 @@ Item {
     }
 
     function humidityColor(hum) {
-        if (hum < 25)  return "#C84040"     // subdued red (too dry)
-        if (hum < 30)  return "#C87C2A"     // subdued orange
-        if (hum < 60)  return "#5CA85C"     // subdued green (comfortable)
-        if (hum < 70)  return "#C8A000"     // subdued yellow
-        return "#C84040"                    // subdued red (too humid)
+        if (hum < 20)  return "#C84040"     // subdued red (very dry)
+        if (hum < 30)  return "#C87C2A"     // subdued orange (dry)
+        if (hum < 40)  return "#C8A000"     // subdued yellow (slightly dry)
+        if (hum < 60)  return "#5CA85C"     // subdued green (ideal)
+        if (hum < 70)  return "#C8A000"     // subdued yellow (slightly humid)
+        if (hum < 80)  return "#C87C2A"     // subdued orange (humid)
+        if (hum < 90)  return "#C87C2A"     // subdued orange (very humid)
+        return "#C84040"                    // subdued red (excessive)
     }
 
     function windSpeedColor(mph) {
@@ -49,9 +52,12 @@ Item {
     }
 
     function pressureTrendArrow(trend) {
-        if (trend === 1)  return "\u2191"   // rising
-        if (trend === -1) return "\u2193"   // falling
-        return "\u2192"                      // steady
+        // trend is 3-hour pressure change in inHg
+        if (trend >= 0.06)  return "\u2191\u2191" // rising rapidly
+        if (trend >= 0.02)  return "\u2191"        // rising
+        if (trend <= -0.06) return "\u2193\u2193"  // falling rapidly
+        if (trend <= -0.02) return "\u2193"         // falling
+        return "\u2192"                             // steady
     }
 
     // --- Feels-like computed properties ---
@@ -72,9 +78,26 @@ Item {
         return "Feels Like"
     }
 
+    property color feelsLikeColor: {
+        if (weatherModel.temperature >= 80 && weatherModel.humidity >= 40)
+            return "#C84040"    // red — heat index active
+        if (weatherModel.temperature <= 50 && weatherModel.windSpeed >= 3)
+            return "#5B8DD9"    // blue — wind chill active
+        return "#C8A000"        // yellow — neutral feels like
+    }
+
     // --- Pressure in millibars ---
 
     property real pressureMbar: weatherModel.pressure * 33.8639
+
+    // Convert pressure history from inHg to mbar for sparkline
+    property var pressureHistoryMbar: {
+        var raw = weatherModel.pressureHistory
+        var converted = []
+        for (var i = 0; i < raw.length; i++)
+            converted.push(raw[i] * 33.8639)
+        return converted
+    }
 
     // --- 3x4 Grid layout ---
 
@@ -110,6 +133,7 @@ Item {
             maxValue: 120
             label: feelsLikeLabel
             unit: "\u00B0F"
+            arcColor: feelsLikeColor
             sparklineData: weatherModel.feelsLikeHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -170,16 +194,10 @@ Item {
             Layout.fillHeight: true
         }
 
-        // Cell 7: Rain Rate (GAUG-06)
-        ArcGauge {
-            value: weatherModel.rainRate
-            minValue: 0
-            maxValue: 4
-            label: "Rain Rate"
-            unit: "in/hr"
-            decimals: 2
-            secondaryLabel: "Daily"
-            secondaryText: weatherModel.rainfallDaily.toFixed(2) + " in"
+        // Cell 7: Rain Rate (GAUG-06) with daily total inner ring
+        RainGauge {
+            rainRate: weatherModel.rainRate
+            dailyTotal: weatherModel.rainfallDaily
             sparklineData: weatherModel.rainRateHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -194,7 +212,7 @@ Item {
             unit: "mbar"
             decimals: 1
             secondaryText: pressureTrendArrow(weatherModel.pressureTrend)
-            sparklineData: weatherModel.pressureHistory
+            sparklineData: pressureHistoryMbar
             Layout.fillWidth: true
             Layout.fillHeight: true
         }
