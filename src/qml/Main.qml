@@ -4,7 +4,7 @@ import QtQuick.Layouts
 Window {
     id: root
     width: 1280
-    height: 720
+    height: 800
     visible: true
     title: "wxdash"
     color: "#1A1A1A"

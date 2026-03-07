@@ -25,9 +25,12 @@ int main(int argc, char *argv[])
     QCommandLineParser parser;
     parser.addHelpOption();
     QCommandLineOption kioskOption("kiosk", "Launch fullscreen frameless");
+    QCommandLineOption verboseOption("verbose", "Log all HTTP requests/responses and UDP traffic");
     parser.addOption(kioskOption);
+    parser.addOption(verboseOption);
     parser.process(app);
     bool kioskMode = parser.isSet(kioskOption);
+    bool verbose = parser.isSet(verboseOption);
 
     // Register cross-thread data types so Qt queued connections can copy them.
     qRegisterMetaType<IssReading>();
@@ -62,7 +65,9 @@ int main(int argc, char *argv[])
 
     // Worker objects must be created WITHOUT parents before moveToThread.
     auto *httpPoller = new HttpPoller(httpUrl);
+    httpPoller->setVerbose(verbose);
     auto *udpReceiver = new UdpReceiver(realtimeUrl);
+    udpReceiver->setVerbose(verbose);
 
     // Move workers to the network thread.
     // QNAM, timers, and sockets are all created inside start() — after moveToThread —
@@ -80,6 +85,7 @@ int main(int argc, char *argv[])
     // PurpleAir local sensor polling — shares the network thread with HttpPoller and UdpReceiver
     const QUrl purpleAirUrl(QStringLiteral("http://10.1.255.41/json?live=false"));
     auto *purpleAirPoller = new PurpleAirPoller(purpleAirUrl);
+    purpleAirPoller->setVerbose(verbose);
     purpleAirPoller->moveToThread(networkThread);
 
     QObject::connect(purpleAirPoller, &PurpleAirPoller::purpleAirReceived,
@@ -94,6 +100,7 @@ int main(int argc, char *argv[])
     const QUrl nwsUrl(QStringLiteral(
         "https://api.weather.gov/gridpoints/SEW/137,72/forecast"));
     auto *nwsPoller = new NwsPoller(nwsUrl);
+    nwsPoller->setVerbose(verbose);
     nwsPoller->moveToThread(networkThread);
 
     QObject::connect(nwsPoller, &NwsPoller::forecastReceived,

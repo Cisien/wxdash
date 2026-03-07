@@ -15,11 +15,10 @@
  *
  * Session management:
  *   - Initial broadcast is started by issuing GET /v1/real_time?duration=86400.
- *   - A renewal timer fires every 3600s (1h) to re-issue the start request,
- *     even though we requested 86400s — belt and suspenders (DATA-03).
  *   - A health-check timer fires every 5s. If no packet has been received in
  *     the last 10s the broadcast is re-registered immediately (handles
  *     WeatherLink Live reboots that lose broadcast state).
+ *   - The 86400s duration covers a full 24h window; no periodic renewal needed.
  *
  * Own QNAM:
  *   UdpReceiver creates its own QNetworkAccessManager in start() for the
@@ -33,11 +32,14 @@ class UdpReceiver : public QObject {
     Q_OBJECT
 
 public:
-    static constexpr int kRenewalIntervalMs = 3600 * 1000; // 1h
     static constexpr int kHealthCheckMs = 5000;             // 5s health poll
     static constexpr int kSilenceThresholdMs = 10000;       // 10s silence → re-register
+    static constexpr int kReregistrationCooldownMs = 60000; // 60s between re-registrations
+    static constexpr int kNamResetThreshold = 5;            // 5 min silence → recycle QNAM
 
     explicit UdpReceiver(const QUrl &realtimeUrl, QObject *parent = nullptr);
+
+    void setVerbose(bool v) { m_verbose = v; }
 
 public slots:
     /** Bind UDP socket, create QNAM, start timers, issue initial broadcast. */
@@ -52,10 +54,14 @@ private slots:
     void checkUdpHealth();
 
 private:
+    void resetNam();
+
     QUrl m_realtimeUrl;
     QUdpSocket *m_socket = nullptr;
     QNetworkAccessManager *m_nam = nullptr;
-    QTimer *m_renewalTimer = nullptr;
     QTimer *m_healthTimer = nullptr;
     QElapsedTimer m_lastPacketTimer;
+    QElapsedTimer m_lastRegistrationTimer;
+    int m_consecutiveReregistrations = 0;
+    bool m_verbose = false;
 };

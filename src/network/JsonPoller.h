@@ -25,6 +25,10 @@ class JsonPoller : public QObject {
 public:
     explicit JsonPoller(const QUrl &url, int pollIntervalMs, QObject *parent = nullptr);
 
+    void setVerbose(bool v) { m_verbose = v; }
+
+    static constexpr int kMaxConsecutiveErrors = 5;
+
 public slots:
     void start();
 
@@ -39,9 +43,13 @@ private slots:
     void onReply();
 
 private:
+    void resetNam();
+
     QUrl m_url;
     int m_pollIntervalMs;
     QNetworkAccessManager *m_nam = nullptr;
     QTimer *m_pollTimer = nullptr;
     QNetworkReply *m_pendingReply = nullptr;
+    int m_consecutiveErrors = 0;
+    bool m_verbose = false;
 };
