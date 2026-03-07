@@ -25,6 +25,12 @@ void JsonPoller::start()
 
 void JsonPoller::poll()
 {
+    m_retryCount = 0;
+    sendRequest();
+}
+
+void JsonPoller::sendRequest()
+{
     // Disconnect and discard any in-flight reply.
     // Must disconnect before abort() because abort() emits finished()
     // synchronously, which would re-enter onReply() and null m_pendingReply.
@@ -40,11 +46,17 @@ void JsonPoller::poll()
     configureRequest(req);
 
     if (m_verbose)
-        qDebug("JsonPoller(%s): GET %s", qPrintable(m_url.host()),
-               qPrintable(m_url.toString()));
+        qDebug("JsonPoller(%s): GET %s (attempt %d/%d)", qPrintable(m_url.host()),
+               qPrintable(m_url.toString()), m_retryCount + 1, kMaxRetries + 1);
 
     m_pendingReply = m_nam->get(req);
     connect(m_pendingReply, &QNetworkReply::finished, this, &JsonPoller::onReply);
+}
+
+void JsonPoller::retry()
+{
+    ++m_retryCount;
+    sendRequest();
 }
 
 void JsonPoller::onReply()
@@ -56,6 +68,14 @@ void JsonPoller::onReply()
     reply->deleteLater();
 
     if (reply->error() != QNetworkReply::NoError) {
+        if (m_retryCount < kMaxRetries) {
+            if (m_verbose)
+                qDebug("JsonPoller(%s): error %d — %s, retrying in %dms",
+                       qPrintable(m_url.host()), reply->error(),
+                       qPrintable(reply->errorString()), kRetryDelayMs);
+            QTimer::singleShot(kRetryDelayMs, this, &JsonPoller::retry);
+            return;
+        }
         ++m_consecutiveErrors;
         qWarning("JsonPoller(%s): error %d — %s (consecutive: %d)",
                  qPrintable(m_url.host()), reply->error(),

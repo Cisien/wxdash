@@ -28,6 +28,8 @@ public:
     void setVerbose(bool v) { m_verbose = v; }
 
     static constexpr int kMaxConsecutiveErrors = 5;
+    static constexpr int kMaxRetries = 3;
+    static constexpr int kRetryDelayMs = 500;
 
 public slots:
     void start();
@@ -41,8 +43,10 @@ protected:
 private slots:
     void poll();
     void onReply();
+    void retry();
 
 private:
+    void sendRequest();
     void resetNam();
 
     QUrl m_url;
@@ -51,5 +55,6 @@ private:
     QTimer *m_pollTimer = nullptr;
     QNetworkReply *m_pendingReply = nullptr;
     int m_consecutiveErrors = 0;
+    int m_retryCount = 0;
     bool m_verbose = false;
 };
