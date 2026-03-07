@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Enable compile warnings
-add_compile_options(-Wall -Wextra -Wpedantic)
+# Enable compile warnings — treat as errors
+add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Network Test Quick Qml Svg)
 qt_standard_project_setup()

@@ -46,7 +46,7 @@ void UdpReceiver::onReadyRead()
         const QByteArray raw = datagram.data();
         if (m_verbose)
             qDebug("UdpReceiver: %d bytes from %s:%d\n%s",
-                   raw.size(),
+                   int(raw.size()),
                    qPrintable(datagram.senderAddress().toString()),
                    datagram.senderPort(),
                    raw.constData());
@@ -57,7 +57,7 @@ void UdpReceiver::onReadyRead()
             emit realtimeReceived(*result);
         } else {
             qWarning("UdpReceiver: unparseable %d-byte packet from %s:%d\n%s",
-                     raw.size(),
+                     int(raw.size()),
                      qPrintable(datagram.senderAddress().toString()),
                      datagram.senderPort(),
                      raw.constData());
@@ -81,7 +81,7 @@ void UdpReceiver::renewBroadcast()
             if (reply->error() == QNetworkReply::NoError) {
                 const QByteArray body = reply->readAll();
                 qDebug("UdpReceiver: registration OK — %d bytes\n%s",
-                       body.size(), body.constData());
+                       int(body.size()), body.constData());
             } else {
                 qDebug("UdpReceiver: registration failed — %s",
                        qPrintable(reply->errorString()));

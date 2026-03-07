@@ -70,7 +70,7 @@ void JsonPoller::onReply()
     const QByteArray data = reply->readAll();
     if (m_verbose)
         qDebug("JsonPoller(%s): %d bytes\n%s", qPrintable(m_url.host()),
-               data.size(), data.constData());
+               int(data.size()), data.constData());
     handleResponse(data);
 }
 
