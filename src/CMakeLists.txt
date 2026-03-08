@@ -66,6 +66,7 @@ qt_add_qml_module(wxdash
         qml/SparklineCanvas.qml
         qml/MinMaxTicks.qml
         qml/ForecastPanel.qml
+        qml/WindGauge.qml
 )
 
 target_link_libraries(wxdash PRIVATE wxdash_lib Qt6::Quick Qt6::Svg)

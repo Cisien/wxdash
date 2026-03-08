@@ -105,7 +105,8 @@ int WeatherDataModel::windRoseMaxCount() const {
 }
 
 double WeatherDataModel::windRoseDirectionalFraction() const {
-    if (m_windRingCount == 0) return 0.0;
+    if (m_windRingCount == 0)
+        return 0.0;
     int totalDirectional = 0;
     for (int i = 0; i < kWindBins; i++)
         totalDirectional += m_windBinCount[i];
@@ -116,7 +117,8 @@ void WeatherDataModel::recordSample(SparklineId id, double value) {
     auto& sl = m_sparklines[id];
     sl.data[sl.head] = value;
     sl.head = (sl.head + 1) % kSparklineCapacity;
-    if (sl.count < kSparklineCapacity) sl.count++;
+    if (sl.count < kSparklineCapacity)
+        sl.count++;
     rebuildCache(id);
 }
 
@@ -136,8 +138,10 @@ void WeatherDataModel::rebuildCache(SparklineId id) {
     for (int i = 1; i < sl.count; i++) {
         const int idx = (sl.head - sl.count + i + kSparklineCapacity) % kSparklineCapacity;
         const double v = sl.data[idx];
-        if (v < sl.trueMin) sl.trueMin = v;
-        if (v > sl.trueMax) sl.trueMax = v;
+        if (v < sl.trueMin)
+            sl.trueMin = v;
+        if (v > sl.trueMax)
+            sl.trueMax = v;
     }
 
     // Stride-based decimation for sparkline rendering
@@ -165,20 +169,25 @@ void WeatherDataModel::rebuildAqiCache() {
         return;
     }
     // Scan full ring for true min/max
-    const int idx0 = (m_aqiSparklineHead - m_aqiSparklineCount + kAqiSparklineCapacity) % kAqiSparklineCapacity;
+    const int idx0 =
+        (m_aqiSparklineHead - m_aqiSparklineCount + kAqiSparklineCapacity) % kAqiSparklineCapacity;
     m_aqiTrueMin = m_aqiSparkline[idx0];
     m_aqiTrueMax = m_aqiSparkline[idx0];
     for (int i = 1; i < m_aqiSparklineCount; i++) {
-        const int idx = (m_aqiSparklineHead - m_aqiSparklineCount + i + kAqiSparklineCapacity) % kAqiSparklineCapacity;
+        const int idx = (m_aqiSparklineHead - m_aqiSparklineCount + i + kAqiSparklineCapacity) %
+                        kAqiSparklineCapacity;
         const double v = m_aqiSparkline[idx];
-        if (v < m_aqiTrueMin) m_aqiTrueMin = v;
-        if (v > m_aqiTrueMax) m_aqiTrueMax = v;
+        if (v < m_aqiTrueMin)
+            m_aqiTrueMin = v;
+        if (v > m_aqiTrueMax)
+            m_aqiTrueMax = v;
     }
     // Stride-based decimation for sparkline rendering
     const int stride = qMax(1, m_aqiSparklineCount / kMaxSparklinePoints);
     m_aqiHistoryCache.reserve(m_aqiSparklineCount / stride + 1);
     for (int i = 0; i < m_aqiSparklineCount; i += stride) {
-        const int idx = (m_aqiSparklineHead - m_aqiSparklineCount + i + kAqiSparklineCapacity) % kAqiSparklineCapacity;
+        const int idx = (m_aqiSparklineHead - m_aqiSparklineCount + i + kAqiSparklineCapacity) %
+                        kAqiSparklineCapacity;
         m_aqiHistoryCache.append(m_aqiSparkline[idx]);
     }
 }
@@ -195,7 +204,7 @@ void WeatherDataModel::rebuildAllCaches() {
 // ---------------------------------------------------------------------------
 
 static constexpr quint32 kSparklineMagic = 0x57584448; // "WXDH"
-static constexpr quint32 kSparklineVersion = 2;
+static constexpr quint32 kSparklineVersion = 3;
 
 void WeatherDataModel::saveSparklineData(const QString& path) const {
     QFile file(path);
@@ -215,9 +224,10 @@ void WeatherDataModel::saveSparklineData(const QString& path) const {
         }
     };
 
-    // 9 weather sparklines
+    // 10 weather sparklines (v3+)
     for (int i = 0; i < SL_Count; i++)
-        saveRing(m_sparklines[i].data, m_sparklines[i].head, m_sparklines[i].count, kSparklineCapacity);
+        saveRing(m_sparklines[i].data, m_sparklines[i].head, m_sparklines[i].count,
+                 kSparklineCapacity);
 
     // AQI sparkline (different capacity)
     saveRing(m_aqiSparkline, m_aqiSparklineHead, m_aqiSparklineCount, kAqiSparklineCapacity);
@@ -261,9 +271,11 @@ void WeatherDataModel::loadSparklineData(const QString& path) {
         count = savedCount;
     };
 
-    // 9 weather sparklines
-    for (int i = 0; i < SL_Count; i++)
-        loadRing(m_sparklines[i].data, m_sparklines[i].head, m_sparklines[i].count, kSparklineCapacity);
+    // Load weather sparklines (9 for v1-v2, 10 for v3+)
+    const int sparklineCount = (version < 3) ? 9 : SL_Count;
+    for (int i = 0; i < sparklineCount; i++)
+        loadRing(m_sparklines[i].data, m_sparklines[i].head, m_sparklines[i].count,
+                 kSparklineCapacity);
 
     // AQI sparkline
     loadRing(m_aqiSparkline, m_aqiSparklineHead, m_aqiSparklineCount, kAqiSparklineCapacity);
@@ -306,6 +318,7 @@ void WeatherDataModel::loadSparklineData(const QString& path) {
     emit humidityHistoryChanged();
     emit dewPointHistoryChanged();
     emit windSpeedHistoryChanged();
+    emit windGustHistoryChanged();
     emit rainRateHistoryChanged();
     emit pressureHistoryChanged();
     emit uvIndexHistoryChanged();
@@ -388,8 +401,8 @@ void WeatherDataModel::applyIssUpdate(const IssReading& r) {
         emit windSpeedChanged(m_windSpeed);
     }
     // Skip bogus dir=0 when speed=0 (WeatherLink calm convention)
-    if (m_windDir != r.windDirLast
-        && !(r.windDirLast == 0 && qFuzzyCompare(r.windSpeedLast + 1.0, 1.0))) {
+    if (m_windDir != r.windDirLast &&
+        !(r.windDirLast == 0 && qFuzzyCompare(r.windSpeedLast + 1.0, 1.0))) {
         m_windDir = r.windDirLast;
         emit windDirChanged(m_windDir);
     }
@@ -421,17 +434,27 @@ void WeatherDataModel::applyIssUpdate(const IssReading& r) {
     emit temperatureHistoryChanged();
 
     double feelsLike = m_temperature;
-    if (m_temperature >= 80.0 && m_humidity >= 40.0) feelsLike = m_heatIndex;
-    else if (m_temperature <= 50.0 && m_windSpeed >= 3.0) feelsLike = m_windChill;
+    if (m_temperature >= 80.0 && m_humidity >= 40.0)
+        feelsLike = m_heatIndex;
+    else if (m_temperature <= 50.0 && m_windSpeed >= 3.0)
+        feelsLike = m_windChill;
     recordSample(SL_FeelsLike, feelsLike);
     emit feelsLikeHistoryChanged();
 
-    recordSample(SL_Humidity, m_humidity);       emit humidityHistoryChanged();
-    recordSample(SL_DewPoint, m_dewPoint);       emit dewPointHistoryChanged();
-    recordSample(SL_WindSpeed, m_windSpeed);     emit windSpeedHistoryChanged();
-    recordSample(SL_RainRate, m_rainRate);       emit rainRateHistoryChanged();
-    recordSample(SL_UvIndex, m_uvIndex);         emit uvIndexHistoryChanged();
-    recordSample(SL_SolarRad, m_solarRad);       emit solarRadHistoryChanged();
+    recordSample(SL_Humidity, m_humidity);
+    emit humidityHistoryChanged();
+    recordSample(SL_DewPoint, m_dewPoint);
+    emit dewPointHistoryChanged();
+    recordSample(SL_WindSpeed, m_windSpeed);
+    emit windSpeedHistoryChanged();
+    recordSample(SL_WindGust, m_windGust);
+    emit windGustHistoryChanged();
+    recordSample(SL_RainRate, m_rainRate);
+    emit rainRateHistoryChanged();
+    recordSample(SL_UvIndex, m_uvIndex);
+    emit uvIndexHistoryChanged();
+    recordSample(SL_SolarRad, m_solarRad);
+    emit solarRadHistoryChanged();
 }
 
 void WeatherDataModel::applyBarUpdate(const BarReading& r) {
@@ -483,8 +506,8 @@ void WeatherDataModel::applyUdpUpdate(const UdpReading& r) {
         emit windSpeedChanged(m_windSpeed);
     }
     // Skip bogus dir=0 when speed=0 (WeatherLink calm convention)
-    if (m_windDir != r.windDirLast
-        && !(r.windDirLast == 0 && qFuzzyCompare(r.windSpeedLast + 1.0, 1.0))) {
+    if (m_windDir != r.windDirLast &&
+        !(r.windDirLast == 0 && qFuzzyCompare(r.windSpeedLast + 1.0, 1.0))) {
         m_windDir = r.windDirLast;
         emit windDirChanged(m_windDir);
     }
@@ -519,7 +542,8 @@ void WeatherDataModel::applyPurpleAirUpdate(const PurpleAirReading& r) {
     if (m_elapsedProvider) {
         m_lastPurpleAirElapsed = m_elapsedProvider();
     } else {
-        if (!m_wallClock.isValid()) m_wallClock.start();
+        if (!m_wallClock.isValid())
+            m_wallClock.start();
         m_lastPurpleAirElapsed = m_wallClock.elapsed();
     }
     if (!m_hasPurpleAirUpdate) {
@@ -542,11 +566,11 @@ void WeatherDataModel::applyPurpleAirUpdate(const PurpleAirReading& r) {
     // Record AQI sparkline sample (different capacity than weather sparklines)
     m_aqiSparkline[m_aqiSparklineHead] = m_aqi;
     m_aqiSparklineHead = (m_aqiSparklineHead + 1) % kAqiSparklineCapacity;
-    if (m_aqiSparklineCount < kAqiSparklineCapacity) m_aqiSparklineCount++;
+    if (m_aqiSparklineCount < kAqiSparklineCapacity)
+        m_aqiSparklineCount++;
     rebuildAqiCache();
     emit aqiHistoryChanged();
 }
-
 
 // ---------------------------------------------------------------------------
 // Forecast methods
@@ -556,9 +580,9 @@ QVariantList WeatherDataModel::forecastData() const {
     QVariantList list;
     for (const auto& day : m_forecast) {
         QVariantMap map;
-        map[QStringLiteral("high")]     = day.high;
-        map[QStringLiteral("low")]      = day.low;
-        map[QStringLiteral("precip")]   = day.precip;
+        map[QStringLiteral("high")] = day.high;
+        map[QStringLiteral("low")] = day.low;
+        map[QStringLiteral("precip")] = day.precip;
         map[QStringLiteral("iconCode")] = day.iconCode;
         list.append(map);
     }

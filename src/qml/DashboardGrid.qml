@@ -167,18 +167,16 @@ Item {
         // Row 2
 
         // Cell 5: Wind Speed (GAUG-04)
-        ArcGauge {
-            value: weatherModel.windSpeed
-            minValue: 0
-            maxValue: 60
-            label: "Wind"
-            unit: "mph"
+        WindGauge {
+            windSpeed: weatherModel.windSpeed
+            windGust: weatherModel.windGust
             arcColor: windSpeedColor(weatherModel.windSpeed)
-            secondaryLabel: "Gust"
-            secondaryText: weatherModel.windGust.toFixed(1) + " mph"
             sparklineData: weatherModel.windSpeedHistory
             sparklineMin: weatherModel.windSpeedMin
             sparklineMax: weatherModel.windSpeedMax
+            gustSparklineData: weatherModel.windGustHistory
+            gustSparklineMin: weatherModel.windGustMin
+            gustSparklineMax: weatherModel.windGustMax
             Layout.fillWidth: true
             Layout.fillHeight: true
         }

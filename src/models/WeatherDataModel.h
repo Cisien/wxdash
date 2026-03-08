@@ -47,9 +47,11 @@ class WeatherDataModel : public QObject {
     Q_PROPERTY(bool sourceStale READ sourceStale NOTIFY sourceStaleChanged)
     Q_PROPERTY(QVariantList windRoseData READ windRoseData NOTIFY windRoseDataChanged)
     Q_PROPERTY(int windRoseMaxCount READ windRoseMaxCount NOTIFY windRoseDataChanged)
-    Q_PROPERTY(double windRoseDirectionalFraction READ windRoseDirectionalFraction NOTIFY windRoseDataChanged)
+    Q_PROPERTY(double windRoseDirectionalFraction READ windRoseDirectionalFraction NOTIFY
+                   windRoseDataChanged)
 
-    Q_PROPERTY(QVariantList temperatureHistory READ temperatureHistory NOTIFY temperatureHistoryChanged)
+    Q_PROPERTY(
+        QVariantList temperatureHistory READ temperatureHistory NOTIFY temperatureHistoryChanged)
     Q_PROPERTY(double temperatureMin READ temperatureMin NOTIFY temperatureHistoryChanged)
     Q_PROPERTY(double temperatureMax READ temperatureMax NOTIFY temperatureHistoryChanged)
     Q_PROPERTY(QVariantList feelsLikeHistory READ feelsLikeHistory NOTIFY feelsLikeHistoryChanged)
@@ -64,11 +66,15 @@ class WeatherDataModel : public QObject {
     Q_PROPERTY(QVariantList windSpeedHistory READ windSpeedHistory NOTIFY windSpeedHistoryChanged)
     Q_PROPERTY(double windSpeedMin READ windSpeedMin NOTIFY windSpeedHistoryChanged)
     Q_PROPERTY(double windSpeedMax READ windSpeedMax NOTIFY windSpeedHistoryChanged)
+    Q_PROPERTY(QVariantList windGustHistory READ windGustHistory NOTIFY windGustHistoryChanged)
+    Q_PROPERTY(double windGustMin READ windGustMin NOTIFY windGustHistoryChanged)
+    Q_PROPERTY(double windGustMax READ windGustMax NOTIFY windGustHistoryChanged)
     Q_PROPERTY(QVariantList rainRateHistory READ rainRateHistory NOTIFY rainRateHistoryChanged)
     Q_PROPERTY(double rainRateMin READ rainRateMin NOTIFY rainRateHistoryChanged)
     Q_PROPERTY(double rainRateMax READ rainRateMax NOTIFY rainRateHistoryChanged)
     Q_PROPERTY(QVariantList pressureHistory READ pressureHistory NOTIFY pressureHistoryChanged)
-    Q_PROPERTY(QVariantList pressureHistoryMbar READ pressureHistoryMbar NOTIFY pressureHistoryChanged)
+    Q_PROPERTY(
+        QVariantList pressureHistoryMbar READ pressureHistoryMbar NOTIFY pressureHistoryChanged)
     Q_PROPERTY(double pressureMin READ pressureMin NOTIFY pressureHistoryChanged)
     Q_PROPERTY(double pressureMax READ pressureMax NOTIFY pressureHistoryChanged)
     Q_PROPERTY(QVariantList uvIndexHistory READ uvIndexHistory NOTIFY uvIndexHistoryChanged)
@@ -122,8 +128,16 @@ public:
 
     // Sparkline identifiers for indexed access
     enum SparklineId {
-        SL_Temperature, SL_FeelsLike, SL_Humidity, SL_DewPoint,
-        SL_WindSpeed, SL_RainRate, SL_Pressure, SL_UvIndex, SL_SolarRad,
+        SL_Temperature,
+        SL_FeelsLike,
+        SL_Humidity,
+        SL_DewPoint,
+        SL_WindSpeed,
+        SL_RainRate,
+        SL_Pressure,
+        SL_UvIndex,
+        SL_SolarRad,
+        SL_WindGust,
         SL_Count
     };
 
@@ -133,6 +147,7 @@ public:
     QVariantList humidityHistory() const { return m_sparklines[SL_Humidity].cache; }
     QVariantList dewPointHistory() const { return m_sparklines[SL_DewPoint].cache; }
     QVariantList windSpeedHistory() const { return m_sparklines[SL_WindSpeed].cache; }
+    QVariantList windGustHistory() const { return m_sparklines[SL_WindGust].cache; }
     QVariantList rainRateHistory() const { return m_sparklines[SL_RainRate].cache; }
     QVariantList pressureHistory() const { return m_sparklines[SL_Pressure].cache; }
     QVariantList pressureHistoryMbar() const { return m_pressureMbarCache; }
@@ -150,6 +165,8 @@ public:
     double dewPointMax() const { return m_sparklines[SL_DewPoint].trueMax; }
     double windSpeedMin() const { return m_sparklines[SL_WindSpeed].trueMin; }
     double windSpeedMax() const { return m_sparklines[SL_WindSpeed].trueMax; }
+    double windGustMin() const { return m_sparklines[SL_WindGust].trueMin; }
+    double windGustMax() const { return m_sparklines[SL_WindGust].trueMax; }
     double rainRateMin() const { return m_sparklines[SL_RainRate].trueMin; }
     double rainRateMax() const { return m_sparklines[SL_RainRate].trueMax; }
     double pressureMin() const { return m_sparklines[SL_Pressure].trueMin; }
@@ -210,6 +227,7 @@ signals:
     void humidityHistoryChanged();
     void dewPointHistoryChanged();
     void windSpeedHistoryChanged();
+    void windGustHistoryChanged();
     void rainRateHistoryChanged();
     void pressureHistoryChanged();
     void uvIndexHistoryChanged();
@@ -266,18 +284,21 @@ private:
         double trueMax = 0.0; // true max from full ring buffer
     };
     SparklineRing m_sparklines[SL_Count];
-    QVariantList m_pressureMbarCache;  // pressure converted to mbar
+    QVariantList m_pressureMbarCache; // pressure converted to mbar
     QVariantList m_aqiHistoryCache;
 
     // Wind rose histogram (16 compass bins, each 22.5°) with rolling window
     static constexpr int kWindBins = 16;
-    static constexpr int kMaxWindSamples = 720; // ~30 min at 2.5s UDP rate
+    static constexpr int kMaxWindSamples = 720;    // ~30 min at 2.5s UDP rate
     static constexpr int kRecentSpeedSamples = 24; // ~60s at 2.5s UDP rate
     int m_windBinCount[kWindBins] = {};
     double m_windBinTotalSpeed[kWindBins] = {};
 
     // Ring buffer for rolling window eviction
-    struct WindSample { int bin; double speed; };
+    struct WindSample {
+        int bin;
+        double speed;
+    };
     WindSample m_windRing[kMaxWindSamples] = {};
     int m_windRingHead = 0;  // next write position
     int m_windRingCount = 0; // number of samples stored
